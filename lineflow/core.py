@@ -79,8 +79,15 @@ class MapDataset(Dataset):
 class CacheDataset(MapDataset):
 
     def __init__(self, dataset, cache):
-        super().__init__(dataset, lambda x: x)
+        if isinstance(dataset, MapDataset):
+            map_func_list = copy.deepcopy(dataset._map_func_list)
+        else:
+            map_func_list = []
+
+        self._map_func_list = map_func_list
         self._cache = cache
+
+        super(MapDataset, self).__init__(dataset)
 
     def __iter__(self):
         yield from self._cache

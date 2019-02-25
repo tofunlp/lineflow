@@ -70,11 +70,21 @@ class DatasetTestCase(TestCase):
         # mock file object
         open_mock.return_value.__enter__.return_value = enter_mock
 
-        filepath = '/path/to/dataset'
-        data = self.data.map(lambda x: x ** 2).save(filepath)
-        open_mock.assert_called_once_with(filepath, 'wb')
-        pickle_dump_mock.assert_called_once_with(
+        filepath1 = '/path/to/dataset1'
+        self.data.save(filepath1)
+        open_mock.assert_called_with(filepath1, 'wb')
+        pickle_dump_mock.assert_called_with(
+            self.data.all(), enter_mock)
+        self.assertEqual(open_mock.call_count, 1)
+        self.assertEqual(pickle_dump_mock.call_count, 1)
+
+        filepath2 = '/path/to/dataset2'
+        data = self.data.map(lambda x: x ** 2).save(filepath2)
+        open_mock.assert_called_with(filepath2, 'wb')
+        pickle_dump_mock.assert_called_with(
             data.all(), enter_mock)
+        self.assertEqual(open_mock.call_count, 2)
+        self.assertEqual(pickle_dump_mock.call_count, 2)
 
         expected = [x ** 2 for x in self.base]
         self.assertListEqual(data.all(), expected)
