@@ -5,8 +5,6 @@ from pathlib import Path
 from itertools import islice, count
 from collections import deque
 
-from lineflow import iterators
-
 
 class Dataset:
     def __init__(self, dataset):
@@ -23,9 +21,6 @@ class Dataset:
 
     def __len__(self):
         return len(self._dataset)
-
-    def get_prefetch_iterator(self, n_prefetch=1):
-        return iterators.PrefetchIterator(self, n_prefetch)
 
     def map(self, map_func):
         return MapDataset(self, map_func)
