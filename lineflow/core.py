@@ -1,3 +1,4 @@
+import os
 import pickle
 import linecache
 import copy
@@ -102,10 +103,11 @@ class TextDataset(Dataset):
     def __iter__(self):
         with self._filepath.open(encoding=self._encoding) as f:
             for line in f:
-                yield line.rstrip()
+                yield line.rstrip(os.linesep)
 
     def __getitem__(self, index):
-        return linecache.getline(str(self._filepath), index + 1).rstrip()
+        return linecache.getline(
+            str(self._filepath), index + 1).rstrip(os.linesep)
 
     def __len__(self):
         counter = count()
