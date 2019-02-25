@@ -2,7 +2,8 @@ import pickle
 import linecache
 import copy
 from pathlib import Path
-from itertools import islice
+from itertools import islice, count
+from collections import deque
 
 from lineflow import iterators
 
@@ -19,6 +20,9 @@ class Dataset:
 
     def __getitem__(self, index):
         return self._dataset[index]
+
+    def __len__(self):
+        return len(self._dataset)
 
     def get_prefetch_iterator(self, n_prefetch=1):
         return iterators.PrefetchIterator(self, n_prefetch)
@@ -88,6 +92,9 @@ class CacheDataset(MapDataset):
     def __getitem__(self, index):
         return self._cache[index]
 
+    def __len__(self):
+        return len(self._cache)
+
 
 class TextDataset(Dataset):
     def __init__(self, filepath, encoding='utf-8'):
@@ -104,6 +111,11 @@ class TextDataset(Dataset):
 
     def __getitem__(self, index):
         return linecache.getline(str(self._filepath), index + 1).rstrip()
+
+    def __len__(self):
+        counter = count()
+        deque(zip(self, counter), maxlen=0)
+        return next(counter)
 
     @property
     def _dataset(self):

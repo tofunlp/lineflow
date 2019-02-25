@@ -16,6 +16,9 @@ class DatasetTestCase(TestCase):
         for i, y in enumerate(self.base):
             self.assertEqual(self.data[i], y)
 
+    def test_len(self):
+        self.assertEqual(len(self.data), len(self.base))
+
     def test_map(self):
         def f(x):
             return x ** 2
@@ -129,6 +132,8 @@ class TextDatasetTestCase(TestCase):
             self.assertEqual(data[i], y)
             linecache_getline_mock.called_once_with(fp.name, i + 1)
         self.assertEqual(linecache_getline_mock.call_count, i + 1)
+
+        self.assertEqual(len(data), len(lines))
 
         self.assertEqual(data._dataset, data)
 
