@@ -2,27 +2,14 @@ import json
 import pickle
 import os.path as osp
 from collections import Counter
-from itertools import chain
 
 import spacy
 from lineflow import TextDataset
+from lineflow.reducers import FlatMap, Concat
 
 
 PREPROCESSED = ('train-v1.1.preprocessed', 'dev-v1.1.preprocessed')
 POSTPROCESSED = ('train-v1.1.postprocessed', 'dev-v1.1.postprocessed')
-
-
-class FlatMap:
-    def __init__(self, map_func):
-        self._map_func = map_func
-
-    def __call__(self, dataset):
-        return chain.from_iterable(map(self._map_func, dataset))
-
-
-class Concat:
-    def __call__(self, *dataset):
-        return chain(*dataset)
 
 
 def preprocess(nlp):
