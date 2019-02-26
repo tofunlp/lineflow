@@ -10,7 +10,7 @@ $ pip install lineflow
 
 ## Usage
 
-load a text dataset and peek items:
+Load a text dataset and peek items:
 
 ```py
 import lineflow as lf
