@@ -59,7 +59,7 @@ class TextSequence(Sequence):
 
     def __getitem__(self, index):
         return [self._dataset[i]]
-                for i in range(index * self._batch_size, (index + 1 ) * self._batch_size)
+                for i in range(index * self._batch_size, (index + 1) * self._batch_size)
 
 
 ds = lf.TextDataset('/path/to/dataset').map(tokenize)
