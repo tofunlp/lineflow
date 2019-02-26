@@ -2,9 +2,9 @@ import os
 import pickle
 import linecache
 import copy
+import mmap
 from pathlib import Path
-from itertools import islice, count
-from collections import deque
+from itertools import islice
 
 
 class Dataset:
@@ -117,9 +117,12 @@ class TextDataset(Dataset):
             str(self._filepath), index + 1).rstrip(os.linesep)
 
     def __len__(self):
-        counter = count()
-        deque(zip(self, counter), maxlen=0)
-        return next(counter)
+        count = 0
+        with self._filepath.open(mode='r+', encoding=self._encoding) as f:
+            buf = mmap.mmap(f.fileno(), 0)
+            while buf.readline():
+                count += 1
+        return count
 
     @property
     def _dataset(self):
