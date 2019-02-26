@@ -74,7 +74,9 @@ enqueuer.stop()
 Use lineflow with Chainer:
 
 ```py
-from chainer.iterators MultiprocessIterator
+import lineflow as lf
+from chainer.iterators import MultiprocessIterator
+
 
 ds = lf.TextSequence('/path/to/dataset').map(tokenize)
 it = MultiprocessIterator(ds, batch_size=3, shuffle=True, n_processes=4)
