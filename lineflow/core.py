@@ -106,6 +106,7 @@ class TextDataset(Dataset):
 
         self._filepath = filepath
         self._encoding = encoding
+        self._length = None
 
     def __iter__(self):
         with self._filepath.open(encoding=self._encoding) as f:
@@ -117,11 +118,14 @@ class TextDataset(Dataset):
             str(self._filepath), index + 1).rstrip(os.linesep)
 
     def __len__(self):
+        if self._length is not None:
+            return self._length
         count = 0
         with self._filepath.open(mode='r+', encoding=self._encoding) as f:
             buf = mmap.mmap(f.fileno(), 0)
             while buf.readline():
                 count += 1
+        self._length = count
         return count
 
     @property
