@@ -99,7 +99,7 @@ class CacheDataset(MapDataset):
         return len(self._cache)
 
 
-class TextDataset(Dataset):
+class SingleTextDataset(Dataset):
     def __init__(self, filepath, encoding='utf-8'):
         filepath = Path(filepath)
         assert filepath.is_file()
@@ -120,14 +120,47 @@ class TextDataset(Dataset):
     def __len__(self):
         if self._length is not None:
             return self._length
+        self._length = self._count_lines(self._filepath)
+        return self._length
+
+    def _count_lines(self, filepath):
         count = 0
-        with self._filepath.open(mode='r+', encoding=self._encoding) as f:
+        with filepath.open(mode='r+', encoding=self._encoding) as f:
             buf = mmap.mmap(f.fileno(), 0)
             while buf.readline():
                 count += 1
-        self._length = count
         return count
 
     @property
     def _dataset(self):
         return self
+
+
+class TextDataset(SingleTextDataset):
+    def __new__(cls, filepaths, encoding='utf-8'):
+        if isinstance(filepaths, str):
+            return SingleTextDataset(filepaths, encoding)
+        return super().__new__(cls)
+
+    def __init__(self, filepaths, encoding='utf-8'):
+        filepaths = [Path(p) for p in filepaths]
+        assert all(p.is_file() for p in filepaths)
+
+        self._filepaths = filepaths
+        self._encoding = encoding
+        self._length = None
+
+    def __iter__(self):
+        fps = [p.open(encoding=self._encoding) for p in self._filepaths]
+        for lines in zip(*fps):
+            yield tuple(l.rstrip(os.linesep) for l in lines)
+
+    def __getitem__(self, index):
+        return tuple(linecache.getline(str(p), index + 1).rstrip(os.linesep)
+                     for p in self._filepaths)
+
+    def __len__(self):
+        if self._length is not None:
+            return self._length
+        self._length = self._count_lines(self._filepaths[0])
+        return self._length
