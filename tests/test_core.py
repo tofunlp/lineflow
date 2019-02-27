@@ -138,6 +138,10 @@ class TextDatasetTestCase(TestCase):
             linecache_getline_mock.called_once_with(fp.name, i + 1)
         self.assertEqual(linecache_getline_mock.call_count, i + 1)
 
+        self.assertEqual(data._length, None)
+        self.assertEqual(len(data), len(lines))
+        self.assertEqual(data._length, len(lines))
+        # check if length is cached
         self.assertEqual(len(data), len(lines))
 
         self.assertEqual(data._dataset, data)
