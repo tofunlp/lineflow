@@ -129,6 +129,7 @@ class TextDatasetTestCase(TestCase):
             fp.write(f'{x}\n'.encode('utf-8'))
         fp.seek(0)
 
+        # single file
         data = TextDataset(fp.name)
         for x, y in zip(data, lines):
             self.assertEqual(x, y)
@@ -144,7 +145,7 @@ class TextDatasetTestCase(TestCase):
         # check if length is cached
         self.assertEqual(len(data), len(lines))
 
-        self.assertEqual(data._dataset, data)
+        self.assertIs(data._dataset, data)
 
         data = data.map(str.split)
 
@@ -152,5 +153,16 @@ class TextDatasetTestCase(TestCase):
             self.assertEqual(x, y.split())
 
         self.assertIsInstance(data, lineflow.core.MapDataset)
+
+        # multiple file
+        data = TextDataset([fp.name, fp.name])
+        for x, y in zip(data, lines):
+            self.assertTupleEqual(x, (y, y))
+        for j, y in enumerate(lines):
+            self.assertTupleEqual(data[j], (y, y))
+            linecache_getline_mock.called_once_with(fp.name, j + 1)
+        self.assertEqual(linecache_getline_mock.call_count,
+                         i + 1 + (j + 1) * len(lines))
+        self.assertEqual(len(data), len(lines))
 
         fp.close()
