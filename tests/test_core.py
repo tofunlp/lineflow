@@ -15,6 +15,7 @@ class DatasetTestCase(TestCase):
     def test_getitem(self):
         for i, y in enumerate(self.base):
             self.assertEqual(self.data[i], y)
+        self.assertEqual(self.data[10:20], list(self.base[10:20]))
 
     def test_len(self):
         self.assertEqual(len(self.data), len(self.base))
