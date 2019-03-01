@@ -18,10 +18,16 @@ class Dataset:
         yield from self._dataset
 
     def __getitem__(self, index):
-        return self._dataset[index]
+        if isinstance(index, slice):
+            start, stop, step = index.indices(len(self))
+            return [self.get_example(i) for i in range(start, stop, step)]
+        return self.get_example(index)
 
     def __len__(self):
         return len(self._dataset)
+
+    def get_example(self, i):
+        return self._dataset[i]
 
     def map(self, map_func):
         return MapDataset(self, map_func)
@@ -69,8 +75,8 @@ class MapDataset(Dataset):
                 x = map_func(x)
             yield x
 
-    def __getitem__(self, index):
-        x = self._dataset[index]
+    def get_example(self, i):
+        x = self._dataset[i]
         for map_func in self._map_func_list:
             x = map_func(x)
         return x
@@ -92,11 +98,11 @@ class CacheDataset(MapDataset):
     def __iter__(self):
         yield from self._cache
 
-    def __getitem__(self, index):
-        return self._cache[index]
-
     def __len__(self):
         return len(self._cache)
+
+    def get_example(self, index):
+        return self._cache[index]
 
 
 class SingleTextDataset(Dataset):
@@ -113,15 +119,15 @@ class SingleTextDataset(Dataset):
             for line in f:
                 yield line.rstrip(os.linesep)
 
-    def __getitem__(self, index):
-        return linecache.getline(
-            str(self._filepath), index + 1).rstrip(os.linesep)
-
     def __len__(self):
         if self._length is not None:
             return self._length
         self._length = self._count_lines(self._filepath)
         return self._length
+
+    def get_example(self, i):
+        return linecache.getline(
+            str(self._filepath), i + 1).rstrip(os.linesep)
 
     def _count_lines(self, filepath):
         count = 0
@@ -155,12 +161,12 @@ class TextDataset(SingleTextDataset):
         for lines in zip(*fps):
             yield tuple(l.rstrip(os.linesep) for l in lines)
 
-    def __getitem__(self, index):
-        return tuple(linecache.getline(str(p), index + 1).rstrip(os.linesep)
-                     for p in self._filepaths)
-
     def __len__(self):
         if self._length is not None:
             return self._length
         self._length = self._count_lines(self._filepaths[0])
         return self._length
+
+    def get_example(self, i):
+        return tuple(linecache.getline(str(p), i + 1).rstrip(os.linesep)
+                     for p in self._filepaths)
