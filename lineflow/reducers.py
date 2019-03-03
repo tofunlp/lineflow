@@ -37,13 +37,3 @@ class FlatMap(Reducer):
     def __call__(self, dataset):
         return Reduced(
             chain.from_iterable(map(self._map_func, dataset)))
-
-
-class Concat(Reducer):
-    def __call__(self, *dataset):
-        return Reduced(chain(*dataset))
-
-
-class Zip(Reducer):
-    def __call__(self, *dataset):
-        return Reduced(zip(*dataset))

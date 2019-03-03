@@ -30,21 +30,3 @@ class ReducersTestCase(TestCase):
         self.assertTrue(reduced._done)
         for x, y in zip(reduced, expected):
             self.assertEqual(x, y)
-
-    def test_concat(self):
-        reduced = reducers.Concat()(self.data, self.data)
-        expected = list(self.data) * 2
-        for x, y in zip(reduced, expected):
-            self.assertEqual(x, y)
-        self.assertTrue(reduced._done)
-        for x, y in zip(reduced, expected):
-            self.assertEqual(x, y)
-
-    def test_zip(self):
-        reduced = reducers.Zip()(self.data, self.data)
-        expected = list(zip(self.data, self.data))
-        for x, y in zip(reduced, expected):
-            self.assertEqual(x, y)
-        self.assertTrue(reduced._done)
-        for x, y in zip(reduced, expected):
-            self.assertEqual(x, y)

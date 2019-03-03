@@ -43,9 +43,6 @@ class Dataset:
     def map(self, map_func):
         return MapDataset(self, map_func)
 
-    def concat(self, *datasets):
-        return ConcatDataset(self, *datasets)
-
     def all(self):
         return list(self)
 
@@ -82,8 +79,31 @@ class ConcatDataset(Dataset):
             yield from d
 
     def get_example(self, i):
+        if i >= self._length:
+            raise IndexError('ConcatDataset object index out of range')
         j = bisect(self._lengths, i)
         return self._datasets[j][i - self._offsets[j]]
+
+    @property
+    def _dataset(self):
+        return self
+
+
+class ZipDataset(Dataset):
+    def __init__(self, *datasets):
+        assert all(isinstance(d, Dataset) for d in datasets)
+
+        self._datasets = datasets
+        self._length = min(len(d) for d in datasets)
+
+    def __iter__(self):
+        for x in zip(*self._datasets):
+            yield tuple(x)
+
+    def get_example(self, i):
+        if i >= self._length:
+            raise IndexError('ZipDataset object index out of range')
+        return tuple(d[i] for d in self._datasets)
 
     @property
     def _dataset(self):
@@ -196,3 +216,11 @@ class TextDataset(SingleTextDataset):
 
     def get_length(self):
         return self._count_lines(self._filepaths[0])
+
+
+def lineflow_concat(*datasets):
+    return ConcatDataset(*datasets)
+
+
+def lineflow_zip(*datasets):
+    return ZipDataset(*datasets)
