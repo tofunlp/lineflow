@@ -1,4 +1,5 @@
 # lineflow: Framework-Agnostic NLP Data Pipeline in Python
+[![Build Status](https://travis-ci.org/yasufumy/lineflow.svg?branch=master)](https://travis-ci.org/yasufumy/lineflow)
 
 ## Installation
 
@@ -58,8 +59,8 @@ class TextSequence(Sequence):
         return int(math.ceil(len(self._dataset)) / float(self._batch_size))
 
     def __getitem__(self, index):
-        return [self._dataset[i]]
-                for i in range(index * self._batch_size, (index + 1) * self._batch_size)
+        return self._dataset[index * self._batch_size:
+                             (index + 1) * self._batch_size]
 
 
 ds = lf.TextDataset('/path/to/dataset').map(tokenize)
