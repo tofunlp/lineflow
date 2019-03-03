@@ -26,7 +26,7 @@ print(ds[100])  # random access
 ds.map(tokenize)  # apply your own processing line by line (lazy evaluation)
 ```
 
-Use lineflow with PyTorch:
+Use lineflow with [PyTorch](https://pytorch.org/):
 
 ```py
 import lineflow as lf
@@ -41,7 +41,7 @@ print(next(it))
 del it
 ```
 
-Use lineflow with Keras:
+Use lineflow with [Keras](https://keras.io/):
 
 ```py
 import math
@@ -72,7 +72,7 @@ print(next(it))
 enqueuer.stop()
 ```
 
-Use lineflow with Chainer:
+Use lineflow with [Chainer](https://chainer.org/):
 
 ```py
 import lineflow as lf
