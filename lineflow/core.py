@@ -4,7 +4,7 @@ import linecache
 import copy
 import mmap
 from pathlib import Path
-from itertools import accumulate, islice
+from itertools import accumulate, chain, islice
 from bisect import bisect
 
 
@@ -224,3 +224,19 @@ def lineflow_concat(*datasets):
 
 def lineflow_zip(*datasets):
     return ZipDataset(*datasets)
+
+
+def lineflow_filter(predicate, dataset, lazy=False):
+    iterator = filter(predicate, dataset)
+    if lazy:
+        return iterator
+    else:
+        return list(iterator)
+
+
+def lineflow_flat_map(map_func, dataset, lazy=False):
+    iterator = chain.from_iterable(map(map_func, dataset))
+    if lazy:
+        return iterator
+    else:
+        return list(iterator)
