@@ -20,6 +20,28 @@ class DatasetTestCase(TestCase):
     def test_len(self):
         self.assertEqual(len(self.data), len(self.base))
 
+    def test_add(self):
+        data = self.data + self.data + self.data
+        expected = list(self.base) * 3
+        for i, (x, y) in enumerate(zip(data, expected)):
+            self.assertEqual(x, y)
+            self.assertEqual(data[i], y)
+
+    def test_concat(self):
+        data = self.data.concat(self.data)
+        expected = list(self.base) * 3
+        for i, (x, y) in enumerate(zip(data, expected)):
+            self.assertEqual(x, y)
+            self.assertEqual(data[i], y)
+
+        result = data.map(lambda x: x ** 2).map(lambda x: x)
+        expected = [y ** 2 for y in expected]
+        for i, (x, y) in enumerate(zip(result, expected)):
+            self.assertEqual(x, y)
+            self.assertEqual(result[i], y)
+
+        self.assertEqual(result._dataset, data)
+
     def test_map(self):
         def f(x):
             return x ** 2
