@@ -180,13 +180,15 @@ class TextDatasetTestCase(TestCase):
         fp.close()
 
 
-class ConcatTestCase(TestCase):
+class MiscTestCase(TestCase):
+
+    def setUp(self):
+        self.base = range(100)
+        self.data = Dataset(self.base)
 
     def test_concat(self):
-        base = range(100)
-        data = Dataset(base)
-        data = lineflow.concat(data, data)
-        expected = list(base) * 3
+        data = lineflow.concat(self.data, self.data)
+        expected = list(self.base) * 3
         for i, (x, y) in enumerate(zip(data, expected)):
             self.assertEqual(x, y)
             self.assertEqual(data[i], y)
@@ -199,17 +201,11 @@ class ConcatTestCase(TestCase):
         for i, (x, y) in enumerate(zip(result, expected)):
             self.assertEqual(x, y)
             self.assertEqual(result[i], y)
-
         self.assertEqual(result._dataset, data)
 
-
-class ZipTestCase(TestCase):
-
-    def test_concat(self):
-        base = range(100)
-        data = Dataset(base)
-        data = lineflow.zip(data, data)
-        expected = list(zip(base, base))
+    def test_zip(self):
+        data = lineflow.zip(self.data, self.data)
+        expected = list(zip(self.base, self.base))
         for i, (x, y) in enumerate(zip(data, expected)):
             self.assertEqual(x, y)
             self.assertEqual(data[i], y)
@@ -221,5 +217,23 @@ class ZipTestCase(TestCase):
         for i, (x, y) in enumerate(zip(result, expected)):
             self.assertEqual(x, y)
             self.assertEqual(result[i], y)
-
         self.assertEqual(result._dataset, data)
+
+    def test_filter(self):
+        result = lineflow.filter(lambda x: x % 2 == 0, self.data)
+        expected = [x for x in self.data if x % 2 == 0]
+        self.assertListEqual(result, expected)
+
+        result = lineflow.filter(lambda x: x % 2 == 0, self.data, lazy=True)
+        for x, y in zip(result, expected):
+            self.assertEqual(x, y)
+
+    def test_flat_map(self):
+        result = lineflow.flat_map(lambda x: [x] * 3, self.data)
+        expected = [[x] * 3 for x in self.data]
+        expected = [x for xs in expected for x in xs]
+        self.assertListEqual(result, expected)
+
+        result = lineflow.flat_map(lambda x: [x] * 3, self.data)
+        for x, y in zip(result, expected):
+            self.assertEqual(x, y)
