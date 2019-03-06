@@ -157,26 +157,50 @@ class CacheDataset(MapDataset):
         return self._cache[i]
 
 
-class SingleTextDataset(Dataset):
-    def __init__(self, filepath, encoding='utf-8'):
-        filepath = Path(filepath)
-        assert filepath.is_file()
+class TextDataset(Dataset):
+    def __init__(self, filepaths, encoding='utf-8'):
+        if isinstance(filepaths, str):
+            filepaths = Path(filepaths)
+            assert filepaths.exists()
+            self._iterate = self._iterate_sinle_file
+            self.get_example = self._getline_from_single_file
+        else:
+            filepaths = [Path(p) for p in filepaths]
+            assert all(p.is_file() for p in filepaths)
+            self._iterate = self._iterate_multiple_files
+            self.get_example = self._getlines_from_multiple_files
 
-        self._filepath = filepath
+        self._filepaths = filepaths
         self._encoding = encoding
         self._length = None
 
     def __iter__(self):
-        with self._filepath.open(encoding=self._encoding) as f:
+        yield from self._iterate()
+
+    def _iterate_sinle_file(self):
+        with self._filepaths.open(encoding=self._encoding) as f:
             for line in f:
                 yield line.rstrip(os.linesep)
 
-    def get_example(self, i):
-        return linecache.getline(
-            str(self._filepath), i + 1).rstrip(os.linesep)
+    def _iterate_multiple_files(self):
+        fps = [p.open(encoding=self._encoding) for p in self._filepaths]
+        for lines in zip(*fps):
+            yield tuple(l.rstrip(os.linesep) for l in lines)
+        for fp in fps:
+            fp.close()
+
+    def _getline_from_single_file(self, i):
+        return linecache.getline(str(self._filepaths), i + 1).rstrip(os.linesep)
+
+    def _getlines_from_multiple_files(self, i):
+        return tuple(linecache.getline(str(p), i + 1).rstrip(os.linesep)
+                     for p in self._filepaths)
 
     def get_length(self):
-        return self._count_lines(self._filepath)
+        if isinstance(self._filepaths, list):
+            return self._count_lines(self._filepaths[0])
+        else:
+            return self._count_lines(self._filepaths)
 
     def _count_lines(self, filepath):
         count = 0
@@ -189,33 +213,6 @@ class SingleTextDataset(Dataset):
     @property
     def _dataset(self):
         return self
-
-
-class TextDataset(SingleTextDataset):
-    def __new__(cls, filepaths, encoding='utf-8'):
-        if isinstance(filepaths, str):
-            return SingleTextDataset(filepaths, encoding)
-        return super().__new__(cls)
-
-    def __init__(self, filepaths, encoding='utf-8'):
-        filepaths = [Path(p) for p in filepaths]
-        assert all(p.is_file() for p in filepaths)
-
-        self._filepaths = filepaths
-        self._encoding = encoding
-        self._length = None
-
-    def __iter__(self):
-        fps = [p.open(encoding=self._encoding) for p in self._filepaths]
-        for lines in zip(*fps):
-            yield tuple(l.rstrip(os.linesep) for l in lines)
-
-    def get_example(self, i):
-        return tuple(linecache.getline(str(p), i + 1).rstrip(os.linesep)
-                     for p in self._filepaths)
-
-    def get_length(self):
-        return self._count_lines(self._filepaths[0])
 
 
 def lineflow_concat(*datasets):
