@@ -234,6 +234,6 @@ class MiscTestCase(TestCase):
         expected = [x for xs in expected for x in xs]
         self.assertListEqual(result, expected)
 
-        result = lineflow.flat_map(lambda x: [x] * 3, self.data)
+        result = lineflow.flat_map(lambda x: [x] * 3, self.data, lazy=True)
         for x, y in zip(result, expected):
             self.assertEqual(x, y)
