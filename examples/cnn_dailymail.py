@@ -22,7 +22,9 @@ class CnnDailymailReader(DatasetReader):
                  target_tokenizer=None,
                  source_token_indexers=None,
                  source_length_limit=400,
-                 target_length_limit=100):
+                 target_length_limit=100,
+                 source_field_name='source_tokens',
+                 target_field_name='target_tokens'):
         super().__init__(lazy=False)
 
         self._source_tokenizer = source_tokenizer or WordTokenizer(word_splitter=JustSpacesWordSplitter())
@@ -31,6 +33,8 @@ class CnnDailymailReader(DatasetReader):
         self._target_token_indexers = self._source_token_indexers
         self._source_length_limit = source_length_limit
         self._target_length_limit = target_length_limit
+        self._source_field_name = source_field_name
+        self._target_field_name = target_field_name
 
     def text_to_instance(self, x):
         source_string, target_string = x
@@ -45,7 +49,8 @@ class CnnDailymailReader(DatasetReader):
         tokenized_target.append(Token(END_SYMBOL))
         target_field = TextField(tokenized_target, self._target_token_indexers)
 
-        return Instance({'source_tokens': source_field, 'target_tokens': target_field})
+        return Instance({self._source_field_name: source_field,
+                         self._target_field_name: target_field})
 
     def read(self, file_path):
         source_file_path = f'{file_path}.src'
@@ -63,7 +68,13 @@ if __name__ == '__main__':
         os.system('tar xf cnndm.tar.gz -C cnndm')
 
     print('reading...')
-    reader = CnnDailymailReader(source_length_limit=400, target_length_limit=100)
+    source_field_name = 'source_field_name'
+    target_field_name = 'target_field_name'
+    reader = CnnDailymailReader(
+        source_length_limit=400,
+        target_length_limit=100,
+        source_field_name=source_field_name,
+        target_field_name=target_field_name)
     train = reader.read('./cnndm/train.txt')
     validation = reader.read('./cnndm/val.txt')
 
@@ -78,10 +89,10 @@ if __name__ == '__main__':
         print('loading vocabulary...')
         vocab = Vocabulary.from_files('./vocabulary')
 
-    iterator = BucketIterator(sorting_keys=[('source_tokens', 'num_tokens')], batch_size=32)
+    iterator = BucketIterator(sorting_keys=[(source_field_name, 'num_tokens')], batch_size=32)
     iterator.index_with(vocab)
 
     num_batches = math.ceil(len(train) / iterator._batch_size)
 
-    for batch in Tqdm.tqdm(iterator(train), total=num_batches):
+    for batch in Tqdm.tqdm(iterator(train, num_epochs=1), total=num_batches):
         ...
