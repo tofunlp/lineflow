@@ -1,7 +1,7 @@
 from ..core import MapDataset, TextDataset
 
 
-class CnnDailymailDataset(TextDataset):
+class Seq2SeqDataset(TextDataset):
     def __init__(self,
                  source_file_path,
                  target_file_path):
@@ -20,8 +20,8 @@ class CnnDailymailDataset(TextDataset):
                     target_token_indexers=None,
                     source_field_name='source_tokens',
                     target_field_name='target_tokens',
-                    source_length_limit=400,
-                    target_length_limit=100):
+                    source_length_limit=None,
+                    target_length_limit=None):
         from allennlp.common.util import START_SYMBOL, END_SYMBOL
         from allennlp.data.fields import TextField
         from allennlp.data.instance import Instance

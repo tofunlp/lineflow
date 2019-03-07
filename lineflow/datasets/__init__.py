@@ -1,1 +1,1 @@
-from .cnn_dailymail import CnnDailymailDataset  # NOQA
+from .seq2seq import Seq2SeqDataset  # NOQA
