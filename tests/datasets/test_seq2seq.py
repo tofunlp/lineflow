@@ -5,10 +5,10 @@ import tempfile
 from allennlp.data.instance import Instance
 from torchtext import data
 
-from lineflow.datasets import CnnDailymailDataset
+from lineflow.datasets import Seq2SeqDataset
 
 
-class CnnDailymailDatasetTestCase(TestCase):
+class Seq2SeqDatasetTestCase(TestCase):
 
     def setUp(self):
         source_lines = ['source string 1', 'source string 2']
@@ -41,12 +41,12 @@ class CnnDailymailDatasetTestCase(TestCase):
         self.linecache_getline_patcher.stop()
 
     def test_init(self):
-        ds = CnnDailymailDataset(self.source_fp.name, self.target_fp.name)
+        ds = Seq2SeqDataset(self.source_fp.name, self.target_fp.name)
         for i, x in enumerate(ds):
             self.assertTupleEqual(x, (self.source_lines[i], self.target_lines[i]))
 
     def test_to_dict(self):
-        ds = CnnDailymailDataset(self.source_fp.name, self.target_fp.name)
+        ds = Seq2SeqDataset(self.source_fp.name, self.target_fp.name)
         source_field_name = 'source'
         target_field_name = 'target'
         ds_dict = ds.to_dict(source_field_name,
@@ -56,7 +56,7 @@ class CnnDailymailDatasetTestCase(TestCase):
                                      target_field_name: self.target_lines[i]})
 
     def test_to_allennlp(self):
-        ds = CnnDailymailDataset(self.source_fp.name, self.target_fp.name)
+        ds = Seq2SeqDataset(self.source_fp.name, self.target_fp.name)
         ds_allennlp = ds.to_allennlp()
         for i, x in enumerate(ds_allennlp):
             self.assertIsInstance(x, Instance)
@@ -66,7 +66,7 @@ class CnnDailymailDatasetTestCase(TestCase):
             self.assertListEqual(target_tokens, self.target_lines[i].split())
 
     def test_to_torchtext(self):
-        ds = CnnDailymailDataset(self.source_fp.name, self.target_fp.name)
+        ds = Seq2SeqDataset(self.source_fp.name, self.target_fp.name)
         src = data.Field(tokenize=str.split)
         tgt = data.Field(tokenize=str.split)
         ds_torchtext = ds.to_torchtext([('src', src), ('tgt', tgt)])
