@@ -66,6 +66,7 @@ class Dataset:
 
     @staticmethod
     def load(filename):
+        print(f'Loading data from {filename}...')
         with open(filename, 'rb') as f:
             dataset = pickle.load(f)
         return Dataset(dataset)
