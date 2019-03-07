@@ -92,7 +92,7 @@ if __name__ == '__main__':
     print(f'vocab size: {len(token_to_index)}')
 
     loader = DataLoader(
-        train.map(postprocess(token_to_index)),
+        train.map(postprocess(token_to_index)).save('cnndm.preprossed'),
         batch_size=32,
         num_workers=4,
         collate_fn=collate)

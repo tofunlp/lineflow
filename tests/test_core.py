@@ -72,12 +72,14 @@ class DatasetTestCase(TestCase):
         self.assertListEqual(data, expected)
 
     @patch('lineflow.core.open')
+    @patch('lineflow.core.pickle.load')
     @patch('lineflow.core.pickle.dump')
-    def test_save(self, pickle_dump_mock, open_mock):
+    def test_save(self, pickle_dump_mock, pickle_load_mock, open_mock):
         enter_mock = Mock()
         # mock file object
         open_mock.return_value.__enter__.return_value = enter_mock
 
+        # the case cache doesn't exists
         filepath1 = '/path/to/dataset1'
         self.data.save(filepath1)
         open_mock.assert_called_with(filepath1, 'wb')
@@ -86,12 +88,27 @@ class DatasetTestCase(TestCase):
         self.assertEqual(open_mock.call_count, 1)
         self.assertEqual(pickle_dump_mock.call_count, 1)
 
+        with patch('lineflow.core.os.path.exists') as os_path_exists_mock:
+            # the case cache exists
+            os_path_exists_mock.return_value = True
+            pickle_load_mock.return_value = list(self.base)
+            data = self.data.save(filepath1)
+            os_path_exists_mock.assert_called_with(filepath1)
+            open_mock.assert_called_with(filepath1, 'rb')
+            pickle_load_mock.assert_called_once_with(enter_mock)
+            self.assertEqual(open_mock.call_count, 2)
+            self.assertEqual(pickle_load_mock.call_count, 1)
+            self.assertListEqual(data.all(), list(self.base))
+            self.assertEqual(data._dataset, self.base)
+            self.assertEqual(data._cache, list(self.base))
+
+        # the cache doesn't exists and Dataset is MapDataset
         filepath2 = '/path/to/dataset2'
         data = self.data.map(lambda x: x ** 2).save(filepath2)
         open_mock.assert_called_with(filepath2, 'wb')
         pickle_dump_mock.assert_called_with(
             data.all(), enter_mock)
-        self.assertEqual(open_mock.call_count, 2)
+        self.assertEqual(open_mock.call_count, 3)
         self.assertEqual(pickle_dump_mock.call_count, 2)
 
         expected = [x ** 2 for x in self.base]
