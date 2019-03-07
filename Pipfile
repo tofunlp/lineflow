@@ -9,4 +9,6 @@ flake8 = "*"
 ipython = "*"
 autopep8 = "*"
 pytest-cov = "*"
+
+[packages]
 allennlp = "*"
