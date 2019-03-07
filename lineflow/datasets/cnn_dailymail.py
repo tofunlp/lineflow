@@ -1,5 +1,4 @@
-from ..core import MapDataset
-from ..core import TextDataset
+from ..core import MapDataset, TextDataset
 
 
 class CnnDailymailDataset(TextDataset):
@@ -53,3 +52,13 @@ class CnnDailymailDataset(TextDataset):
                              target_field_name: target_field})
 
         return MapDataset(self, text_to_instance)
+
+    def to_torchtext(self, fields, filter_pred=None):
+        from torchtext.data import Example, Dataset
+
+        def text_to_example(x):
+            return Example.fromlist(data=x, fields=fields)
+
+        return Dataset(examples=MapDataset(self, text_to_example),
+                       fields=fields,
+                       filter_pred=filter_pred)

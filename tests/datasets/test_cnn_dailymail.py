@@ -3,6 +3,7 @@ from unittest.mock import patch
 import tempfile
 
 from allennlp.data.instance import Instance
+from torchtext import data
 
 from lineflow.datasets import CnnDailymailDataset
 
@@ -63,3 +64,13 @@ class CnnDailymailDatasetTestCase(TestCase):
             self.assertListEqual(source_tokens, self.source_lines[i].split())
             target_tokens = [token.text for token in x.fields['target_tokens'].tokens[1:-1]]
             self.assertListEqual(target_tokens, self.target_lines[i].split())
+
+    def test_to_torchtext(self):
+        ds = CnnDailymailDataset(self.source_fp.name, self.target_fp.name)
+        src = data.Field(tokenize=str.split)
+        tgt = data.Field(tokenize=str.split)
+        ds_torchtext = ds.to_torchtext([('src', src), ('tgt', tgt)])
+        for i, x in enumerate(ds_torchtext):
+            self.assertIsInstance(x, data.Example)
+            self.assertListEqual(x.src, self.source_lines[i].split())
+            self.assertListEqual(x.tgt, self.target_lines[i].split())
