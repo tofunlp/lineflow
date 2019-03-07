@@ -7,7 +7,7 @@ from allennlp.data.vocabulary import Vocabulary
 from allennlp.data.iterators import BucketIterator
 
 
-from lineflow.datasets import CnnDailymailDataset
+from lineflow.datasets import Seq2SeqDataset
 
 
 if __name__ == '__main__':
@@ -22,14 +22,20 @@ if __name__ == '__main__':
     source_field_name = 'source_field_name'
     target_field_name = 'target_field_name'
 
-    train = CnnDailymailDataset(
+    train = Seq2SeqDataset(
         source_file_path='./cnndm/train.txt.src',
         target_file_path='./cnndm/train.txt.tgt.tagged') \
-        .to_allennlp(source_field_name=source_field_name, target_field_name=target_field_name)
-    validation = CnnDailymailDataset(
+        .to_allennlp(source_field_name=source_field_name,
+                     target_field_name=target_field_name,
+                     source_length_limit=400,
+                     target_length_limit=100)
+    validation = Seq2SeqDataset(
         source_file_path='./cnndm/val.txt.src',
         target_file_path='./cnndm/val.txt.tgt.tagged') \
-        .to_allennlp(source_field_name=source_field_name, target_field_name=target_field_name)
+        .to_allennlp(source_field_name=source_field_name,
+                     target_field_name=target_field_name,
+                     source_length_limit=400,
+                     target_length_limit=100)
 
     if not osp.exists('./vocabulary'):
         print('building vocabulary...')
