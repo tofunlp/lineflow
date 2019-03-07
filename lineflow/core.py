@@ -53,9 +53,15 @@ class Dataset:
         return next(iter(self))
 
     def save(self, filename):
-        cache = list(self)
-        with open(filename, 'wb') as f:
-            pickle.dump(cache, f)
+        if os.path.exists(filename):
+            print(f'Loading data from {filename}...')
+            with open(filename, 'rb') as f:
+                cache = pickle.load(f)
+        else:
+            print(f'Saving data to {filename}...')
+            cache = list(self)
+            with open(filename, 'wb') as f:
+                pickle.dump(cache, f)
         return CacheDataset(self, cache)
 
     @staticmethod
