@@ -1,5 +1,6 @@
 # lineflow: Framework-Agnostic NLP Data Pipeline in Python
 [![Build Status](https://travis-ci.org/yasufumy/lineflow.svg?branch=master)](https://travis-ci.org/yasufumy/lineflow)
+[![codecov](https://codecov.io/gh/yasufumy/lineflow/branch/master/graph/badge.svg)](https://codecov.io/gh/yasufumy/lineflow)
 
 ## Installation
 
