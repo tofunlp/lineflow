@@ -6,6 +6,7 @@ from allennlp.common.tqdm import Tqdm
 from allennlp.data.vocabulary import Vocabulary
 from allennlp.data.iterators import BucketIterator
 
+
 from lineflow.datasets import CnnDailymailDataset
 
 
@@ -20,6 +21,7 @@ if __name__ == '__main__':
     print('reading...')
     source_field_name = 'source_field_name'
     target_field_name = 'target_field_name'
+
     train = CnnDailymailDataset(
         source_file_path='./cnndm/train.txt.src',
         target_file_path='./cnndm/train.txt.tgt.tagged') \
