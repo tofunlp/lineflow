@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 import lineflow as lf
-from lineflow.datasets import CnnDailymailDataset
+from lineflow.datasets import Seq2SeqDataset
 
 
 PAD_TOKEN = '<pad>'
@@ -73,10 +73,10 @@ if __name__ == '__main__':
         os.system('tar xf cnndm.tar.gz -C cnndm')
 
     print('reading...')
-    train = CnnDailymailDataset(
+    train = Seq2SeqDataset(
         source_file_path='./cnndm/train.txt.src',
         target_file_path='./cnndm/train.txt.tgt.tagged').to_dict()
-    validation = CnnDailymailDataset(
+    validation = Seq2SeqDataset(
         source_file_path='./cnndm/val.txt.src',
         target_file_path='./cnndm/val.txt.tgt.tagged').to_dict()
 

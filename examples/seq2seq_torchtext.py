@@ -4,7 +4,7 @@ import os.path as osp
 from torchtext import data
 from tqdm import tqdm
 
-from lineflow.datasets import CnnDailymailDataset
+from lineflow.datasets import Seq2SeqDataset
 
 
 if __name__ == '__main__':
@@ -20,11 +20,11 @@ if __name__ == '__main__':
     tgt = data.Field(tokenize=str.split, fix_length=100)
     fields = [('src',  src), ('tgt', tgt)]
 
-    train = CnnDailymailDataset(
+    train = Seq2SeqDataset(
         source_file_path='./cnndm/train.txt.src',
         target_file_path='./cnndm/train.txt.tgt.tagged') \
         .to_torchtext(fields)
-    validation = CnnDailymailDataset(
+    validation = Seq2SeqDataset(
         source_file_path='./cnndm/val.txt.src',
         target_file_path='./cnndm/val.txt.tgt.tagged') \
         .to_torchtext(fields)
