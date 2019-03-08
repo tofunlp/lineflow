@@ -5,8 +5,8 @@
 lineflow is a simple text dataset loader for NLP deep learning tasks.
 
 - lineflow was designed to use in all deep learning frameworks.
-- lineflow enables you to build pipelines and it's lazy evaluation.
-- lineflow supports some functional API.
+- lineflow enables you to build pipelines.
+- lineflow supports functional API and lazy evaluation.
 
 ## Installation
 
@@ -35,16 +35,15 @@ lineflow.TextDataset expects line-oriented text files:
 ```py
 import lineflow as lf
 
+
+def preprocess(x):
+    return x.split()
+
 '''/path/to/text will looks like below:
 i 'm a line 1 .
 i 'm a line 2 .
 i 'm a line 3 .
 '''
-
-
-def preprocess(x):
-    return x.split()
-
 ds = lf.TextDataset('/path/to/text')
 ds.first()  # "i 'm a line 1 ."
 ds[1]  # "i 'm a line 2 ."
@@ -59,7 +58,7 @@ ds = ds.map(lambda x: (x[0].split(), x[1].split()))
 ds.first()  # (["i", "'m", "a", "line", "1", "."], ["i", "'m", "a", "line", "1", "."])
 ```
 
-## Use lineflow with AllenNLP
+## lineflow with Deep Learning Frameworks
 
 Use lineflow with AllenNLP:
 
@@ -89,4 +88,4 @@ for batch in Tqdm.tqdm(iterator(train, num_epochs=1), total=num_batches):
     ...  # Your training code here
 ```
 
-See more in [examples](https://github.com/yasufumy/lineflow/tree/master/examples)
+You can find other examples [here](https://github.com/yasufumy/lineflow/tree/master/examples).
