@@ -1,6 +1,12 @@
-# lineflow: Framework-Agnostic NLP Data Pipeline in Python
+# lineflow: Framework-Agnostic NLP Data Loader in Python
 [![Build Status](https://travis-ci.org/yasufumy/lineflow.svg?branch=master)](https://travis-ci.org/yasufumy/lineflow)
 [![codecov](https://codecov.io/gh/yasufumy/lineflow/branch/master/graph/badge.svg)](https://codecov.io/gh/yasufumy/lineflow)
+
+lineflow is a simple text dataset loader for NLP deep learning tasks.
+
+- lineflow was designed to use in all deep learning frameworks.
+- lineflow enables you to build pipelines and it's lazy evaluation.
+- lineflow supports some functional API.
 
 ## Installation
 
@@ -10,78 +16,81 @@ To install lineflow, simply:
 $ pip install lineflow
 ```
 
+If you'd like to use lineflow with [AllenNLP](https://allennlp.org/):
+
+```sh
+$ pip install "lineflow[allennlp]"
+```
+
+Also, if you'd like to use lineflow with [torchtext](https://torchtext.readthedocs.io/en/latest/):
+
+```sh
+$ pip install "lineflow[torchtext]"
+```
+
 ## Usage
 
-Load a text dataset and peek items:
+lineflow.TextDataset expects line-oriented text files:
 
 ```py
 import lineflow as lf
 
+'''/path/to/text will looks like below:
+i 'm a line 1 .
+i 'm a line 2 .
+i 'm a line 3 .
+'''
 
-ds = lf.TextDataset('/path/to/dataset')
 
-print(ds.first())  # peek a first item
-print(ds.take(5))  # peek a first 5 items
-print(ds[100])  # random access
+def preprocess(x):
+    return x.split()
 
-ds.map(tokenize)  # apply your own processing line by line (lazy evaluation)
+ds = lf.TextDataset('/path/to/text')
+
+ds.first()  # "i 'm a line 1 ."
+ds[1]  # "i 'm a line 2 ."
+
+ds = ds.map(preprocess)
+
+ds.first()  # ["i", "'m", "a", "line", "1", "."]
+
+ds = lf.TextDataset(['/path/to/text', '/path/to/text'])
+
+ds.first()  # ("i 'm a line 1 .", "i 'm a line 1 .")
+
+ds = ds.map(lambda x: (x[0].split(), x[1].split()))
+
+ds.first()  # (["i", "'m", "a", "line", "1", "."], ["i", "'m", "a", "line", "1", "."])
 ```
 
-Use lineflow with [PyTorch](https://pytorch.org/):
+## Use lineflow with AllenNLP
 
-```py
-import lineflow as lf
-from pytorch.utils.data import DataLoader
-
-
-ds = lf.TextDataset('/path/to/dataset').map(tokenize)
-
-loader = DataLoader(ds, batch_size=3, shuffle=True, num_workers=4)
-it = iter(loader)
-print(next(it))
-del it
-```
-
-Use lineflow with [Keras](https://keras.io/):
+Use lineflow with AllenNLP:
 
 ```py
 import math
 
-import lineflow as lf
-from keras.utils import OrderedEnqueuer, Sequence
+from allennlp.common.tqdm import Tqdm
+from allennlp.data.vocabulary import Vocabulary
+from allennlp.data.iterators import BucketIterator
+
+from lineflow.datasets import Seq2SeqDataset
 
 
-class TextSequence(Sequence):
-    def __init__(self, dataset, batch_size):
-        self._dataset = dataset
-        self._batch_size = batch_size
+ds = Seq2SeqDataset(
+    source_file_path='/path/to/source',
+    target_file_path='/path/to/target'
+).to_allennlp()
 
-    def __len__(self):
-        return int(math.ceil(len(self._dataset)) / float(self._batch_size))
+vocab = Vocabulary.from_instances(ds)
 
-    def __getitem__(self, index):
-        return self._dataset[index * self._batch_size:
-                             (index + 1) * self._batch_size]
+iterator = BucketIterator(sorting_keys=[('source_tokens', 'num_tokens')])
+iterator.index_with(vocab)
 
+num_batches = math.ceil(len(ds) / iterator._batch_size)
 
-ds = lf.TextDataset('/path/to/dataset').map(tokenize)
-sequence = TextSequence(ds, batch_size=3)
-enqueuer = OrderedEnqueuer(sequence, shuffle=True, use_multiprocessing=True)
-enqueuer.start()
-it = enqueuer.get()
-print(next(it))
-enqueuer.stop()
+for batch in Tqdm.tqdm(iterator(train, num_epochs=1), total=num_batches):
+    ...  # Your training code here
 ```
 
-Use lineflow with [Chainer](https://chainer.org/):
-
-```py
-import lineflow as lf
-from chainer.iterators import MultiprocessIterator
-
-
-ds = lf.TextSequence('/path/to/dataset').map(tokenize)
-it = MultiprocessIterator(ds, batch_size=3, shuffle=True, n_processes=4)
-print(next(it))
-it.finalize()
-```
+See more in [examples](https://github.com/yasufumy/lineflow/tree/master/examples)
