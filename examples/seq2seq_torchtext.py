@@ -10,12 +10,12 @@ from lineflow.datasets import Seq2SeqDataset
 if __name__ == '__main__':
 
     if not osp.exists('./cnndm'):
-        print('downloading...')
+        print('Downloading...')
         os.system('curl -sOL https://s3.amazonaws.com/opennmt-models/Summary/cnndm.tar.gz')
         os.system('mkdir cnndm')
         os.system('tar xf cnndm.tar.gz -C cnndm')
 
-    print('reading...')
+    print('Reading...')
     src = data.Field(tokenize=str.split, fix_length=400)
     tgt = data.Field(tokenize=str.split, fix_length=100)
     fields = [('src',  src), ('tgt', tgt)]
@@ -29,10 +29,10 @@ if __name__ == '__main__':
         target_file_path='./cnndm/val.txt.tgt.tagged') \
         .to_torchtext(fields)
 
-    print('building vocabulary...')
+    print('Building vocabulary...')
     src.build_vocab(train, validation, max_size=50000)
     tgt.vocab = src.vocab
-    print(f'vocab size: {len(src.vocab)}')
+    print(f'Vocab Size: {len(src.vocab)}')
 
     iterator = data.BucketIterator(
         dataset=train, batch_size=32, sort_key=lambda x: len(x.src))

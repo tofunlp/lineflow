@@ -13,12 +13,12 @@ from lineflow.datasets import Seq2SeqDataset
 if __name__ == '__main__':
 
     if not osp.exists('./cnndm'):
-        print('downloading...')
+        print('Downloading...')
         os.system('curl -sOL https://s3.amazonaws.com/opennmt-models/Summary/cnndm.tar.gz')
         os.system('mkdir cnndm')
         os.system('tar xf cnndm.tar.gz -C cnndm')
 
-    print('reading...')
+    print('Reading...')
     source_field_name = 'source_field_name'
     target_field_name = 'target_field_name'
 
@@ -38,14 +38,14 @@ if __name__ == '__main__':
                      target_length_limit=100)
 
     if not osp.exists('./vocabulary'):
-        print('building vocabulary...')
+        print('Building vocabulary...')
         vocab = Vocabulary.from_instances(train + validation, max_vocab_size=50000)
-        print(f'vocab size: {vocab.get_vocab_size()}')
+        print(f'Vocab Size: {vocab.get_vocab_size()}')
 
-        print('saving...')
+        print('Saving...')
         vocab.save_to_files('./vocabulary')
     else:
-        print('loading vocabulary...')
+        print('Loading vocabulary...')
         vocab = Vocabulary.from_files('./vocabulary')
 
     iterator = BucketIterator(sorting_keys=[(source_field_name, 'num_tokens')], batch_size=32)
