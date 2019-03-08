@@ -46,20 +46,16 @@ def preprocess(x):
     return x.split()
 
 ds = lf.TextDataset('/path/to/text')
-
 ds.first()  # "i 'm a line 1 ."
 ds[1]  # "i 'm a line 2 ."
 
 ds = ds.map(preprocess)
-
 ds.first()  # ["i", "'m", "a", "line", "1", "."]
 
 ds = lf.TextDataset(['/path/to/text', '/path/to/text'])
-
 ds.first()  # ("i 'm a line 1 .", "i 'm a line 1 .")
 
 ds = ds.map(lambda x: (x[0].split(), x[1].split()))
-
 ds.first()  # (["i", "'m", "a", "line", "1", "."], ["i", "'m", "a", "line", "1", "."])
 ```
 
