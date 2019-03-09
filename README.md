@@ -39,7 +39,7 @@ import lineflow as lf
 def preprocess(x):
     return x.split()
 
-'''/path/to/text will looks like below:
+'''/path/to/text will look like below:
 i 'm a line 1 .
 i 'm a line 2 .
 i 'm a line 3 .
