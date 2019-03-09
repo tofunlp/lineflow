@@ -1,5 +1,5 @@
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 import tempfile
 
 from allennlp.data.instance import Instance
@@ -11,6 +11,7 @@ from lineflow.datasets import Seq2SeqDataset
 class Seq2SeqDatasetTestCase(TestCase):
 
     def setUp(self):
+        # Dummy text file
         source_lines = ['source string 1', 'source string 2']
         target_lines = ['target string 1', 'target string 2']
         source_fp = tempfile.NamedTemporaryFile()
@@ -27,6 +28,7 @@ class Seq2SeqDatasetTestCase(TestCase):
         self.target_fp = target_fp
         self.target_lines = target_lines
 
+        # Patch linecache
         lines_dict = {source_fp.name: source_lines, target_fp.name: target_lines}
         linecache_getline_patcher = patch('lineflow.core.linecache.getline')
         linecache_getline_mock = linecache_getline_patcher.start()
@@ -65,12 +67,37 @@ class Seq2SeqDatasetTestCase(TestCase):
             target_tokens = [token.text for token in x.fields['target_tokens'].tokens[1:-1]]
             self.assertListEqual(target_tokens, self.target_lines[i].split())
 
+        with patch.dict('sys.modules',
+                        {'allennlp.common': None, 'allennlp.data': None}):
+            with self.assertRaises(ImportError):
+                ds.to_allennlp()
+
     def test_to_torchtext(self):
         ds = Seq2SeqDataset(self.source_fp.name, self.target_fp.name)
         src = data.Field(tokenize=str.split)
         tgt = data.Field(tokenize=str.split)
-        ds_torchtext = ds.to_torchtext([('src', src), ('tgt', tgt)])
+        fields = [('src', src), ('tgt', tgt)]
+        ds_torchtext = ds.to_torchtext(fields=fields)
         for i, x in enumerate(ds_torchtext):
             self.assertIsInstance(x, data.Example)
             self.assertListEqual(x.src, self.source_lines[i].split())
             self.assertListEqual(x.tgt, self.target_lines[i].split())
+
+        with patch.dict('sys.modules', {'torchtext.data': None}):
+            with self.assertRaises(ImportError):
+                ds.to_torchtext(fields=fields)
+
+    def test_type_checking(self):
+        import importlib
+        from lineflow.datasets import seq2seq
+        with patch('typing.TYPE_CHECKING', True):
+            allennlp_data_mock = Mock()
+            torchtext_mock = Mock()
+            with patch.dict('sys.modules', {'allennlp.data': allennlp_data_mock}), \
+                    patch.dict('sys.modules', {'torchtext': torchtext_mock}):
+                importlib.reload(seq2seq)
+                # Check if "from allennlp.data import Tokenizer, TokenIndexer" is declared
+                self.assertIn('Tokenizer', allennlp_data_mock._mock_children)
+                self.assertIn('TokenIndexer', allennlp_data_mock._mock_children)
+                # Check if "from torchtext import data" is declared
+                self.assertIn('data', torchtext_mock._mock_children)
