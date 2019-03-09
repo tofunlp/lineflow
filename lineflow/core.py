@@ -1,3 +1,4 @@
+from typing import Sequence, Any, Union, Callable, List, Tuple, Iterator, Iterable
 import os
 import pickle
 import linecache
@@ -9,7 +10,8 @@ from bisect import bisect
 
 
 class Dataset:
-    def __init__(self, dataset):
+    def __init__(self,
+                 dataset: Sequence[Any]) -> None:
         if isinstance(dataset, Dataset):
             self._dataset = dataset._dataset
         else:
@@ -17,42 +19,42 @@ class Dataset:
 
         self._length = None
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Any]:
         yield from self._dataset
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: Union[int, slice]) -> Any:
         if isinstance(index, slice):
             start, stop, step = index.indices(len(self))
             return [self.get_example(i) for i in range(start, stop, step)]
         return self.get_example(index)
 
-    def __len__(self):
+    def __len__(self) -> int:
         if self._length is None:
             self._length = self.get_length()
         return self._length
 
-    def __add__(self, other):
+    def __add__(self, other: 'Dataset') -> 'ConcatDataset':
         return ConcatDataset(self, other)
 
-    def get_example(self, i):
+    def get_example(self, i: int) -> Any:
         return self._dataset[i]
 
-    def get_length(self):
+    def get_length(self) -> int:
         return len(self._dataset)
 
-    def map(self, map_func):
+    def map(self, map_func: Callable[[Any], Any]) -> 'MapDataset':
         return MapDataset(self, map_func)
 
-    def all(self):
+    def all(self) -> List[Any]:
         return list(self)
 
-    def take(self, n):
+    def take(self, n: int) -> List[Any]:
         return list(islice(self, n))
 
-    def first(self):
+    def first(self) -> Any:
         return next(iter(self))
 
-    def save(self, filename):
+    def save(self, filename: str) -> 'CacheDataset':
         if os.path.exists(filename):
             print(f'Loading data from {filename}...')
             with open(filename, 'rb') as f:
@@ -65,7 +67,7 @@ class Dataset:
         return CacheDataset(self, cache)
 
     @staticmethod
-    def load(filename):
+    def load(filename: str) -> 'Dataset':
         print(f'Loading data from {filename}...')
         with open(filename, 'rb') as f:
             dataset = pickle.load(f)
@@ -73,7 +75,7 @@ class Dataset:
 
 
 class ConcatDataset(Dataset):
-    def __init__(self, *datasets):
+    def __init__(self, *datasets: List[Dataset]) -> None:
         assert all(isinstance(d, Dataset) for d in datasets)
 
         self._datasets = datasets
@@ -81,44 +83,46 @@ class ConcatDataset(Dataset):
         self._length = self._lengths[-1]
         self._offsets = [0] + self._lengths[:-1]
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Any]:
         for d in self._datasets:
             yield from d
 
-    def get_example(self, i):
+    def get_example(self, i: int) -> Any:
         if i >= self._length:
             raise IndexError('ConcatDataset object index out of range')
         j = bisect(self._lengths, i)
         return self._datasets[j][i - self._offsets[j]]
 
     @property
-    def _dataset(self):
+    def _dataset(self) -> 'ConcatDataset':
         return self
 
 
 class ZipDataset(Dataset):
-    def __init__(self, *datasets):
+    def __init__(self, *datasets: List[Dataset]) -> None:
         assert all(isinstance(d, Dataset) for d in datasets)
 
         self._datasets = datasets
         self._length = min(len(d) for d in datasets)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Any]:
         for x in zip(*self._datasets):
             yield tuple(x)
 
-    def get_example(self, i):
+    def get_example(self, i: int) -> Any:
         if i >= self._length:
             raise IndexError('ZipDataset object index out of range')
         return tuple(d[i] for d in self._datasets)
 
     @property
-    def _dataset(self):
+    def _dataset(self) -> 'ZipDataset':
         return self
 
 
 class MapDataset(Dataset):
-    def __init__(self, dataset, map_func):
+    def __init__(self,
+                 dataset: Dataset,
+                 map_func: Callable[[Any], Any]) -> None:
         assert callable(map_func)
 
         if isinstance(dataset, MapDataset):
@@ -131,13 +135,13 @@ class MapDataset(Dataset):
 
         super().__init__(dataset)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Any]:
         for x in self._dataset:
             for map_func in self._map_func_list:
                 x = map_func(x)
             yield x
 
-    def get_example(self, i):
+    def get_example(self, i: int) -> Any:
         x = self._dataset[i]
         for map_func in self._map_func_list:
             x = map_func(x)
@@ -145,7 +149,9 @@ class MapDataset(Dataset):
 
 
 class CacheDataset(MapDataset):
-    def __init__(self, dataset, cache):
+    def __init__(self,
+                 dataset: Dataset,
+                 cache: List[Any]) -> None:
         if isinstance(dataset, MapDataset):
             map_func_list = copy.deepcopy(dataset._map_func_list)
         else:
@@ -157,15 +163,17 @@ class CacheDataset(MapDataset):
 
         super(MapDataset, self).__init__(dataset)
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Any]:
         yield from self._cache
 
-    def get_example(self, i):
+    def get_example(self, i: int) -> Any:
         return self._cache[i]
 
 
 class TextDataset(Dataset):
-    def __init__(self, filepaths, encoding='utf-8'):
+    def __init__(self,
+                 filepaths: Union[str, List[str]],
+                 encoding: str = 'utf-8') -> None:
         if isinstance(filepaths, str):
             filepaths = Path(filepaths)
             assert filepaths.exists()
@@ -181,35 +189,35 @@ class TextDataset(Dataset):
         self._encoding = encoding
         self._length = None
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Union[str, Tuple[str]]]:
         yield from self._iterate()
 
-    def _iterate_sinle_file(self):
+    def _iterate_sinle_file(self) -> Iterator[str]:
         with self._filepaths.open(encoding=self._encoding) as f:
             for line in f:
                 yield line.rstrip(os.linesep)
 
-    def _iterate_multiple_files(self):
+    def _iterate_multiple_files(self) -> Iterator[Tuple[str]]:
         fps = [p.open(encoding=self._encoding) for p in self._filepaths]
         for lines in zip(*fps):
             yield tuple(l.rstrip(os.linesep) for l in lines)
         for fp in fps:
             fp.close()
 
-    def _getline_from_single_file(self, i):
+    def _getline_from_single_file(self, i: int) -> str:
         return linecache.getline(str(self._filepaths), i + 1).rstrip(os.linesep)
 
-    def _getlines_from_multiple_files(self, i):
+    def _getlines_from_multiple_files(self, i: int) -> Tuple[str]:
         return tuple(linecache.getline(str(p), i + 1).rstrip(os.linesep)
                      for p in self._filepaths)
 
-    def get_length(self):
+    def get_length(self) -> int:
         if isinstance(self._filepaths, list):
             return self._count_lines(self._filepaths[0])
         else:
             return self._count_lines(self._filepaths)
 
-    def _count_lines(self, filepath):
+    def _count_lines(self, filepath: Path) -> int:
         count = 0
         with filepath.open(mode='r+', encoding=self._encoding) as f:
             mm = mmap.mmap(f.fileno(), 0)
@@ -218,19 +226,22 @@ class TextDataset(Dataset):
         return count
 
     @property
-    def _dataset(self):
+    def _dataset(self) -> 'TextDataset':
         return self
 
 
-def lineflow_concat(*datasets):
+def lineflow_concat(*datasets: List[Dataset]) -> ConcatDataset:
     return ConcatDataset(*datasets)
 
 
-def lineflow_zip(*datasets):
+def lineflow_zip(*datasets: List[Dataset]) -> ZipDataset:
     return ZipDataset(*datasets)
 
 
-def lineflow_filter(predicate, dataset, lazy=False):
+def lineflow_filter(
+        predicate: Callable[[Any], bool],
+        dataset: Dataset,
+        lazy: bool = False) -> Union[Iterator[Any], List[Any]]:
     iterator = filter(predicate, dataset)
     if lazy:
         return iterator
@@ -238,7 +249,10 @@ def lineflow_filter(predicate, dataset, lazy=False):
         return list(iterator)
 
 
-def lineflow_flat_map(map_func, dataset, lazy=False):
+def lineflow_flat_map(
+        map_func: Callable[[Iterable[Any]], Any],
+        dataset: Dataset,
+        lazy: bool = False) -> Union[Iterator[Any], List[Any]]:
     iterator = chain.from_iterable(map(map_func, dataset))
     if lazy:
         return iterator
