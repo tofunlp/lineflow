@@ -1,10 +1,12 @@
-from typing import Sequence, Any, Union, Callable, List, Tuple, Iterator, Iterable
+from typing import Sequence, Any, Union, Callable, List, Tuple, Dict, Iterator, Iterable
 import os
 import pickle
 import linecache
+import csv
 import copy
 import mmap
 from pathlib import Path
+from collections import OrderedDict
 from itertools import accumulate, chain, islice
 from bisect import bisect
 
@@ -172,20 +174,20 @@ class CacheDataset(MapDataset):
 
 class TextDataset(Dataset):
     def __init__(self,
-                 filepaths: Union[str, List[str]],
+                 filepath: Union[str, List[str]],
                  encoding: str = 'utf-8') -> None:
-        if isinstance(filepaths, str):
-            filepaths = Path(filepaths)
-            assert filepaths.exists()
+        if isinstance(filepath, str):
+            filepath = Path(filepath)
+            assert filepath.exists()
             self._iterate = self._iterate_sinle_file
             self.get_example = self._getline_from_single_file
         else:
-            filepaths = [Path(p) for p in filepaths]
-            assert all(p.is_file() for p in filepaths)
+            filepath = [Path(p) for p in filepath]
+            assert all(p.is_file() for p in filepath)
             self._iterate = self._iterate_multiple_files
             self.get_example = self._getlines_from_multiple_files
 
-        self._filepaths = filepaths
+        self._filepath = filepath
         self._encoding = encoding
         self._length = None
 
@@ -193,29 +195,29 @@ class TextDataset(Dataset):
         yield from self._iterate()
 
     def _iterate_sinle_file(self) -> Iterator[str]:
-        with self._filepaths.open(encoding=self._encoding) as f:
+        with self._filepath.open(encoding=self._encoding) as f:
             for line in f:
                 yield line.rstrip(os.linesep)
 
     def _iterate_multiple_files(self) -> Iterator[Tuple[str]]:
-        fps = [p.open(encoding=self._encoding) for p in self._filepaths]
+        fps = [p.open(encoding=self._encoding) for p in self._filepath]
         for lines in zip(*fps):
             yield tuple(l.rstrip(os.linesep) for l in lines)
         for fp in fps:
             fp.close()
 
     def _getline_from_single_file(self, i: int) -> str:
-        return linecache.getline(str(self._filepaths), i + 1).rstrip(os.linesep)
+        return linecache.getline(str(self._filepath), i + 1).rstrip(os.linesep)
 
     def _getlines_from_multiple_files(self, i: int) -> Tuple[str]:
         return tuple(linecache.getline(str(p), i + 1).rstrip(os.linesep)
-                     for p in self._filepaths)
+                     for p in self._filepath)
 
     def get_length(self) -> int:
-        if isinstance(self._filepaths, list):
-            return self._count_lines(self._filepaths[0])
+        if isinstance(self._filepath, list):
+            return self._count_lines(self._filepath[0])
         else:
-            return self._count_lines(self._filepaths)
+            return self._count_lines(self._filepath)
 
     def _count_lines(self, filepath: Path) -> int:
         count = 0
@@ -228,6 +230,47 @@ class TextDataset(Dataset):
     @property
     def _dataset(self) -> 'TextDataset':
         return self
+
+
+class CsvDataset(TextDataset):
+    def __init__(self,
+                 filepath: str,
+                 encoding: str = 'utf-8',
+                 delimiter: str = ',',
+                 header: bool = False) -> None:
+
+        filepath = Path(filepath)
+        assert filepath.exists()
+        self._filepath = filepath
+        self._encoding = encoding
+        self._delimiter = delimiter
+        self._length = None
+        self._reader = csv.DictReader if header else csv.reader
+        if header:
+            with filepath.open(encoding=encoding) as f:
+                self._header = next(csv.reader(f))
+        else:
+            self._header = None
+
+    def __iter__(self) -> Iterator[Union[List[str], Dict[str, str]]]:
+        with self._filepath.open(encoding=self._encoding) as f:
+            yield from self._reader(f, delimiter=self._delimiter)
+
+    def get_example(self, i: int) -> Union[List[str], Dict[str, str]]:
+        if self._header is None:
+            line = self._getline_from_single_file(i)
+            return next(csv.reader([line], delimiter=self._delimiter))
+        else:
+            line = self._getline_from_single_file(i + 1)
+            content = next(csv.reader([line], delimiter=self._delimiter))
+            return OrderedDict(zip(self._header, content))
+
+    def get_length(self) -> int:
+        count = self._count_lines(self._filepath)
+        if self._header is None:
+            return count
+        else:
+            return count - 1
 
 
 def lineflow_concat(*datasets: List[Dataset]) -> ConcatDataset:
