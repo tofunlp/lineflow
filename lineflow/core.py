@@ -131,11 +131,13 @@ class MapDataset(Dataset):
         if isinstance(dataset, MapDataset):
             funcs = copy.deepcopy(dataset._funcs)
             funcs.append(map_func)
+            processed_funcs = copy.deepcopy(dataset._processed_funcs)
         else:
             funcs = [map_func]
+            processed_funcs = []
 
         self._funcs = funcs
-        self._processed_funcs = []
+        self._processed_funcs = processed_funcs
 
         super().__init__(dataset)
 
@@ -163,17 +165,11 @@ class CacheDataset(MapDataset):
             processed_funcs = []
 
         self._funcs = []
-        self._processed = processed_funcs
+        self._processed_funcs = processed_funcs
         self._cache = cache
         self._length = len(self._cache)
 
-        super(MapDataset, self).__init__(dataset)
-
-    def __iter__(self) -> Iterator[Any]:
-        yield from self._cache
-
-    def get_example(self, i: int) -> Any:
-        return self._cache[i]
+        super(MapDataset, self).__init__(cache)
 
 
 class TextDataset(Dataset):
