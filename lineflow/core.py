@@ -129,25 +129,26 @@ class MapDataset(Dataset):
         assert callable(map_func)
 
         if isinstance(dataset, MapDataset):
-            map_func_list = copy.deepcopy(dataset._map_func_list)
-            map_func_list.append(map_func)
+            funcs = copy.deepcopy(dataset._funcs)
+            funcs.append(map_func)
         else:
-            map_func_list = [map_func]
+            funcs = [map_func]
 
-        self._map_func_list = map_func_list
+        self._funcs = funcs
+        self._processed_funcs = []
 
         super().__init__(dataset)
 
     def __iter__(self) -> Iterator[Any]:
         for x in self._dataset:
-            for map_func in self._map_func_list:
-                x = map_func(x)
+            for f in self._funcs:
+                x = f(x)
             yield x
 
     def get_example(self, i: int) -> Any:
         x = self._dataset[i]
-        for map_func in self._map_func_list:
-            x = map_func(x)
+        for f in self._funcs:
+            x = f(x)
         return x
 
 
@@ -156,11 +157,13 @@ class CacheDataset(MapDataset):
                  dataset: Dataset,
                  cache: List[Any]) -> None:
         if isinstance(dataset, MapDataset):
-            map_func_list = copy.deepcopy(dataset._map_func_list)
+            funcs = copy.deepcopy(dataset._funcs)
+            processed_funcs = funcs + copy.deepcopy(dataset._processed_funcs)
         else:
-            map_func_list = []
+            processed_funcs = []
 
-        self._map_func_list = map_func_list
+        self._funcs = []
+        self._processed = processed_funcs
         self._cache = cache
         self._length = len(self._cache)
 
