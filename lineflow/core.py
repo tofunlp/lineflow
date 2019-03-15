@@ -55,14 +55,17 @@ class Dataset:
         return next(iter(self))
 
     def save(self, filename: str) -> 'CacheDataset':
-        if os.path.exists(filename):
+        path = Path(filename)
+        if path.exists():
             print(f'Loading data from {filename}...')
-            with open(filename, 'rb') as f:
+            with path.open('rb') as f:
                 cache = pickle.load(f)
         else:
+            if not path.parent.exists():
+                path.parent.mkdir(parents=True)
             print(f'Saving data to {filename}...')
             cache = list(self)
-            with open(filename, 'wb') as f:
+            with path.open('wb') as f:
                 pickle.dump(cache, f)
         return CacheDataset(self, cache)
 

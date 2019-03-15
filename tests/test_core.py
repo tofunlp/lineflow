@@ -71,61 +71,112 @@ class DatasetTestCase(TestCase):
 
         self.assertListEqual(data, expected)
 
-    @patch('lineflow.core.open')
-    @patch('lineflow.core.pickle.load')
+    @patch('lineflow.core.Path.open')
+    @patch('lineflow.core.Path')
     @patch('lineflow.core.pickle.dump')
-    def test_save(self, pickle_dump_mock, pickle_load_mock, open_mock):
-        enter_mock = Mock()
-        # mock file object
-        open_mock.return_value.__enter__.return_value = enter_mock
+    def test_saves_yourself(self, pickle_dump_mock, Path_mock, open_mock):
+        path = Mock()
+        Path_mock.return_value = path
+        # Assume cache doesn't exist, but a directory exists
+        path.exists.return_value = False
+        path.parent.exists.return_value = True
+        # Setup Path.open
+        fp = Mock()
+        open_mock.return_value.__enter__.return_value = fp
+        path.open = open_mock
 
-        # the case cache doesn't exists
-        filepath1 = '/path/to/dataset1'
-        self.data.save(filepath1)
-        open_mock.assert_called_with(filepath1, 'wb')
-        pickle_dump_mock.assert_called_with(
-            self.data.all(), enter_mock)
-        self.assertEqual(open_mock.call_count, 1)
-        self.assertEqual(pickle_dump_mock.call_count, 1)
+        filepath = '/path/to/cache'
+        data = self.data.save(filepath)
 
-        with patch('lineflow.core.os.path.exists') as os_path_exists_mock:
-            # the case cache exists
-            os_path_exists_mock.return_value = True
-            pickle_load_mock.return_value = list(self.base)
-            data = self.data.save(filepath1)
-            os_path_exists_mock.assert_called_with(filepath1)
-            open_mock.assert_called_with(filepath1, 'rb')
-            pickle_load_mock.assert_called_once_with(enter_mock)
-            self.assertEqual(open_mock.call_count, 2)
-            self.assertEqual(pickle_load_mock.call_count, 1)
-            self.assertListEqual(data.all(), list(self.base))
-            self.assertEqual(data._dataset, self.base)
-            self.assertEqual(data._cache, list(self.base))
-
-        # the cache doesn't exists and Dataset is MapDataset
-        filepath2 = '/path/to/dataset2'
-        data = self.data.map(lambda x: x ** 2).save(filepath2)
-        open_mock.assert_called_with(filepath2, 'wb')
-        pickle_dump_mock.assert_called_with(
-            data.all(), enter_mock)
-        self.assertEqual(open_mock.call_count, 3)
-        self.assertEqual(pickle_dump_mock.call_count, 2)
-
-        expected = [x ** 2 for x in self.base]
-        self.assertListEqual(data.all(), expected)
+        path.exists.assert_called_once()
+        path.parent.exists.assert_called_once()
+        path.open.assert_called_once_with('wb')
+        pickle_dump_mock.assert_called_once_with(self.data.all(), fp)
         self.assertIsInstance(data, lineflow.core.CacheDataset)
-        for i, y in enumerate(expected):
+
+    @patch('lineflow.core.Path.open')
+    @patch('lineflow.core.Path')
+    @patch('lineflow.core.pickle.dump')
+    def test_makes_a_directory_and_saves_yourself(self,
+                                                  pickle_dump_mock,
+                                                  Path_mock,
+                                                  open_mock):
+        path = Mock()
+        Path_mock.return_value = path
+        # Assume cache doesn't exist, also a directory doesn't exist
+        path.exists.return_value = False
+        path.parent.exists.return_value = False
+        # Setup Path.open
+        fp = Mock()
+        open_mock.return_value.__enter__.return_value = fp
+        path.open = open_mock
+
+        filepath = '/path/to/cache'
+        data = self.data.save(filepath)
+
+        path.exists.assert_called_once()
+        path.parent.exists.assert_called_once()
+        path.parent.mkdir.assert_called_once_with(parents=True)
+        path.open.assert_called_once_with('wb')
+        pickle_dump_mock.assert_called_once_with(self.data.all(), fp)
+        self.assertIsInstance(data, lineflow.core.CacheDataset)
+
+    @patch('lineflow.core.Path.open')
+    @patch('lineflow.core.Path')
+    @patch('lineflow.core.pickle.dump')
+    def test_maps_func_and_saves_yourself(self,
+                                          pickle_dump_mock,
+                                          Path_mock,
+                                          open_mock):
+        path = Mock()
+        Path_mock.return_value = path
+        # Assume cache doesn't exist, but a directory exists
+        path.exists.return_value = False
+        path.parent.exists.return_value = True
+        # Setup Path.open
+        fp = Mock()
+        open_mock.return_value.__enter__.return_value = fp
+        path.open = open_mock
+
+        filepath = '/path/to/cache'
+        data = self.data.map(lambda x: x ** 2).save(filepath)
+
+        path.exists.assert_called_once()
+        path.parent.exists.assert_called_once()
+        path.open.assert_called_once_with('wb')
+        pickle_dump_mock.assert_called_once_with(data.all(), fp)
+        self.assertIsInstance(data, lineflow.core.CacheDataset)
+
+        for i, x in enumerate(data):
+            y = self.data[i] ** 2
+            self.assertEqual(x, y)
             self.assertEqual(data[i], y)
 
-        data = data.map(lambda x: x ** 2)
-        result = []
-        for x in data._dataset:
-            for f in data._map_func_list:
-                x = f(x)
-            result.append(x)
-        expected = [x ** 2 for x in expected]
-        self.assertListEqual(data.all(), expected)
-        self.assertListEqual(result, expected)
+    @patch('lineflow.core.Path.open')
+    @patch('lineflow.core.Path')
+    @patch('lineflow.core.pickle.load')
+    def test_loads_existed_cache_implicitly(self,
+                                            pickle_load_mock,
+                                            Path_mock,
+                                            open_mock):
+        path = Mock()
+        Path_mock.return_value = path
+        # Assume cache exists
+        path.exists.return_value = True
+        # Setup Path.open
+        fp = Mock()
+        open_mock.return_value.__enter__.return_value = fp
+        path.open = open_mock
+        # Setup pickle.load
+        pickle_load_mock.return_value = list(self.base)
+
+        filepath = '/path/to/cache'
+        data = self.data.save(filepath)
+
+        path.exists.assert_called_once()
+        path.open.assert_called_once_with('rb')
+        pickle_load_mock.assert_called_once_with(fp)
+        self.assertIsInstance(data, lineflow.core.CacheDataset)
 
     @patch('lineflow.core.open')
     @patch('lineflow.core.pickle.load')
