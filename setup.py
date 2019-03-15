@@ -7,7 +7,7 @@ except ImportError:
 
 setup(
     name='lineflow',
-    version='0.2.3',
+    version='0.2.4',
     description='Framework-Agnostic NLP Data Loader in Python',
     long_description=open('./README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
