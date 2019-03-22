@@ -179,12 +179,12 @@ class TextDataset(Dataset):
         if isinstance(filepaths, str):
             filepaths = Path(filepaths)
             assert filepaths.exists()
-            self._iterate = self._iterate_sinle_file
+            self.get_iterator = self._iterate_sinle_file
             self.get_example = self._getline_from_single_file
         else:
             filepaths = [Path(p) for p in filepaths]
             assert all(p.is_file() for p in filepaths)
-            self._iterate = self._iterate_multiple_files
+            self.get_iterator = self._iterate_multiple_files
             self.get_example = self._getlines_from_multiple_files
 
         self._filepaths = filepaths
@@ -192,7 +192,7 @@ class TextDataset(Dataset):
         self._length = None
 
     def __iter__(self) -> Iterator[Union[str, Tuple[str]]]:
-        yield from self._iterate()
+        yield from self.get_iterator()
 
     def _iterate_sinle_file(self) -> Iterator[str]:
         with self._filepaths.open(encoding=self._encoding) as f:
