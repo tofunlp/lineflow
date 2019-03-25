@@ -58,6 +58,46 @@ ds = ds.map(lambda x: (x[0].split(), x[1].split()))
 ds.first()  # (["i", "'m", "a", "line", "1", "."], ["i", "'m", "a", "line", "1", "."])
 ```
 
+## Datasets support
+
+small_parallel_enja:
+
+```py
+import lineflow.datasets as lfd
+
+train = lfd.SmallParallelEnJa('train')
+dev = lfd.SmallParallelEnJa('dev')
+test = lfd.SmallParallelEnJa('test')
+```
+
+IMDB:
+
+```py
+import lineflow.datasets as lfd
+
+train = lfd.Imdb('train')
+test = lfd.Imdb('test')
+```
+
+SQuAD:
+
+```py
+import lineflow.datasets as lfd
+
+train = lfd.Squad('train')
+dev = lfd.Squad('dev')
+```
+
+CNN / Daily Mail:
+
+```py
+import lineflow.datasets as lfd
+
+train = lfd.CnnDailymail('train')
+dev = lfd.CnnDailymail('dev')
+test = lfd.CnnDailymail('test')
+```
+
 ## lineflow with Deep Learning Frameworks
 
 Use lineflow with AllenNLP:
