@@ -1,3 +1,4 @@
+from typing import Tuple
 import tarfile
 from pathlib import Path
 from itertools import chain
@@ -36,7 +37,7 @@ class Imdb(MapDataset):
         path = list(chain(Path(pos_dir).glob('*.txt'),
                           Path(neg_dir).glob('*.txt')))
 
-        def map_func(x):
+        def map_func(x: Path) -> Tuple[str, int]:
             string = x.read_text()
             label = 0 if 'pos' in str(x) else 1
             return (string, label)
