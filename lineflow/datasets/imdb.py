@@ -31,7 +31,7 @@ class Imdb(MapDataset):
             pos_dir = f'{cache_dir / TEST_DIR}/pos'
             neg_dir = f'{cache_dir / TEST_DIR}/neg'
         else:
-            raise ValueError('Error')
+            raise ValueError(f"only 'train' and 'test' are valid for 'split', but '{split}' is given.")
 
         path = list(chain(Path(pos_dir).glob('*.txt'),
                           Path(neg_dir).glob('*.txt')))

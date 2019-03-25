@@ -15,7 +15,7 @@ class Squad(MapDataset):
         elif split == 'dev':
             path = cached_download(DEV_URL)
         else:
-            raise ValueError('Error')
+            raise ValueError(f"only 'train' and 'dev' are valid for 'split', but '{split}' is given.")
 
         dataset = TextDataset(path)
 

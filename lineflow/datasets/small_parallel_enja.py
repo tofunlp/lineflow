@@ -24,6 +24,6 @@ class SmallParallelEnJa(Seq2SeqDataset):
             en_path = cached_download(TEST_EN_URL)
             ja_path = cached_download(TEST_JA_URL)
         else:
-            raise ValueError('Error')
+            raise ValueError(f"only 'train', 'dev' and 'test' are valid for 'split', but '{split}' is given.")
 
         super().__init__(source_file_path=en_path, target_file_path=ja_path)
