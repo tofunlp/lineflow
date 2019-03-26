@@ -57,14 +57,17 @@ class Dataset:
         return next(iter(self))
 
     def save(self, filename: str) -> 'CacheDataset':
-        if os.path.exists(filename):
+        path = Path(filename)
+        if path.exists():
             print(f'Loading data from {filename}...')
-            with open(filename, 'rb') as f:
+            with path.open('rb') as f:
                 cache = pickle.load(f)
         else:
+            if not path.parent.exists():
+                path.parent.mkdir(parents=True)
             print(f'Saving data to {filename}...')
             cache = list(self)
-            with open(filename, 'wb') as f:
+            with path.open('wb') as f:
                 pickle.dump(cache, f)
         return CacheDataset(self, cache)
 
@@ -128,25 +131,28 @@ class MapDataset(Dataset):
         assert callable(map_func)
 
         if isinstance(dataset, MapDataset):
-            map_func_list = copy.deepcopy(dataset._map_func_list)
-            map_func_list.append(map_func)
+            funcs = copy.deepcopy(dataset._funcs)
+            funcs.append(map_func)
+            processed_funcs = copy.deepcopy(dataset._processed_funcs)
         else:
-            map_func_list = [map_func]
+            funcs = [map_func]
+            processed_funcs = []
 
-        self._map_func_list = map_func_list
+        self._funcs = funcs
+        self._processed_funcs = processed_funcs
 
         super().__init__(dataset)
 
     def __iter__(self) -> Iterator[Any]:
         for x in self._dataset:
-            for map_func in self._map_func_list:
-                x = map_func(x)
+            for f in self._funcs:
+                x = f(x)
             yield x
 
     def get_example(self, i: int) -> Any:
         x = self._dataset[i]
-        for map_func in self._map_func_list:
-            x = map_func(x)
+        for f in self._funcs:
+            x = f(x)
         return x
 
 
@@ -155,21 +161,17 @@ class CacheDataset(MapDataset):
                  dataset: Dataset,
                  cache: List[Any]) -> None:
         if isinstance(dataset, MapDataset):
-            map_func_list = copy.deepcopy(dataset._map_func_list)
+            funcs = copy.deepcopy(dataset._funcs)
+            processed_funcs = funcs + copy.deepcopy(dataset._processed_funcs)
         else:
-            map_func_list = []
+            processed_funcs = []
 
-        self._map_func_list = map_func_list
+        self._funcs = []
+        self._processed_funcs = processed_funcs
         self._cache = cache
         self._length = len(self._cache)
 
-        super(MapDataset, self).__init__(dataset)
-
-    def __iter__(self) -> Iterator[Any]:
-        yield from self._cache
-
-    def get_example(self, i: int) -> Any:
-        return self._cache[i]
+        super(MapDataset, self).__init__(cache)
 
 
 class TextDataset(Dataset):
@@ -179,12 +181,12 @@ class TextDataset(Dataset):
         if isinstance(filepath, str):
             filepath = Path(filepath)
             assert filepath.exists()
-            self._iterate = self._iterate_sinle_file
+            self.get_iterator = self._iterate_sinle_file
             self.get_example = self._getline_from_single_file
         else:
             filepath = [Path(p) for p in filepath]
             assert all(p.is_file() for p in filepath)
-            self._iterate = self._iterate_multiple_files
+            self.get_iterator = self._iterate_multiple_files
             self.get_example = self._getlines_from_multiple_files
 
         self._filepath = filepath
@@ -192,7 +194,7 @@ class TextDataset(Dataset):
         self._length = None
 
     def __iter__(self) -> Iterator[Union[str, Tuple[str]]]:
-        yield from self._iterate()
+        yield from self.get_iterator()
 
     def _iterate_sinle_file(self) -> Iterator[str]:
         with self._filepath.open(encoding=self._encoding) as f:
@@ -239,15 +241,12 @@ class CsvDataset(TextDataset):
                  delimiter: str = ',',
                  header: bool = False) -> None:
 
-        filepath = Path(filepath)
-        assert filepath.exists()
-        self._filepath = filepath
-        self._encoding = encoding
+        super().__init__(filepath, encoding)
+
         self._delimiter = delimiter
-        self._length = None
         self._reader = csv.DictReader if header else csv.reader
         if header:
-            with filepath.open(encoding=encoding) as f:
+            with self._filepath.open(encoding=encoding) as f:
                 self._header = next(csv.reader(f))
         else:
             self._header = None
