@@ -3,7 +3,7 @@ from unittest.mock import patch, Mock
 import tempfile
 
 import lineflow
-from lineflow import Dataset, TextDataset
+from lineflow import Dataset, TextDataset, CsvDataset
 
 
 class DatasetTestCase(TestCase):
@@ -244,6 +244,50 @@ class TextDatasetTestCase(TestCase):
         self.assertEqual(data._length, len(lines))
         # check if length is cached
         self.assertEqual(len(data), len(lines))
+
+        fp.close()
+
+
+class CsvDatasetTestCase(TestCase):
+
+    def test_load_csv_with_header(self):
+        lines = ['en,ja',
+                 'this is English .,this is Japanese .',
+                 'this is also English .,this is also Japanese .']
+        fp = tempfile.NamedTemporaryFile()
+        for x in lines:
+            fp.write(f'{x}\n'.encode('utf-8'))
+        fp.seek(0)
+
+        ds = CsvDataset(fp.name, header=True)
+
+        header = lines[0].split(',')
+
+        for i, x in enumerate(ds, start=1):
+            y = dict(zip(header, lines[i].split(',')))
+            self.assertDictEqual(dict(x), y)
+            self.assertDictEqual(dict(ds[i - 1]), y)
+
+        self.assertEqual(len(ds), len(lines) - 1)
+
+        fp.close()
+
+    def test_load_csv_without_header(self):
+        lines = ['this is English .,this is Japanese .',
+                 'this is also English .,this is also Japanese .']
+        fp = tempfile.NamedTemporaryFile()
+        for x in lines:
+            fp.write(f'{x}\n'.encode('utf-8'))
+        fp.seek(0)
+
+        ds = CsvDataset(fp.name)
+
+        for i, x in enumerate(ds):
+            y = lines[i].split(',')
+            self.assertListEqual(x, y)
+            self.assertListEqual(ds[i], y)
+
+        self.assertEqual(len(ds), len(lines))
 
         fp.close()
 
