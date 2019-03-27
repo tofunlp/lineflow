@@ -8,6 +8,8 @@ lineflow is a simple text dataset loader for NLP deep learning tasks.
 - lineflow enables you to build pipelines.
 - lineflow supports functional API and lazy evaluation.
 
+lineflow is heavily inspired by [tensorflow.data.Dataset](https://www.tensorflow.org/api_docs/python/tf/data/Dataset) and [chainer.dataset](https://docs.chainer.org/en/stable/reference/datasets.html)
+
 ## Installation
 
 To install lineflow, simply:
@@ -28,7 +30,7 @@ Also, if you'd like to use lineflow with [torchtext](https://torchtext.readthedo
 $ pip install "lineflow[torchtext]"
 ```
 
-## Usage
+## Basic Usage
 
 lineflow.TextDataset expects line-oriented text files:
 
@@ -36,96 +38,149 @@ lineflow.TextDataset expects line-oriented text files:
 import lineflow as lf
 
 
-def preprocess(x):
-    return x.split()
-
-'''/path/to/text will look like below:
+'''/path/to/text will be expected as follows:
 i 'm a line 1 .
 i 'm a line 2 .
 i 'm a line 3 .
 '''
 ds = lf.TextDataset('/path/to/text')
+
 ds.first()  # "i 'm a line 1 ."
-ds[1]  # "i 'm a line 2 ."
+ds.all() # ["i 'm a line 1 .", "i 'm a line 2 .", "i 'm a line 3 ."]
+len(ds)  # 3
+```
 
-ds = ds.map(preprocess)
-ds.first()  # ["i", "'m", "a", "line", "1", "."]
+## lineflow with PyTorch, torchtext, AllenNLP
 
-ds = lf.TextDataset(['/path/to/text', '/path/to/text'])
-ds.first()  # ("i 'm a line 1 .", "i 'm a line 1 .")
+- [PyTorch](#pytorch)
+- [torchtext](#torchtext)
+- [AllenNLP](#allennlp)
 
-ds = ds.map(lambda x: (x[0].split(), x[1].split()))
-ds.first()  # (["i", "'m", "a", "line", "1", "."], ["i", "'m", "a", "line", "1", "."])
+
+### PyTorch
+
+You can check full code [here](https://github.com/yasufumy/lineflow/blob/master/examples/small_parallel_enja_pytorch.py).
+
+```py
+...
+import lineflow as lf
+import lineflow.datasets as lfds
+
+...
+
+
+if __name__ == '__main__':
+    train = lfds.SmallParallelEnJa('train')
+    validation = lfds.SmallParallelEnJa('dev')
+
+    train = train.map(preprocess)
+    validation = validation.map(preprocess)
+
+    en_tokens = lf.flat_map(lambda x: x[0],
+                            train + validation,
+                            lazy=True)
+    ja_tokens = lf.flat_map(lambda x: x[1],
+                            train + validation,
+                            lazy=True)
+
+    en_token_to_index, _ = build_vocab(en_tokens, 'en.vocab')
+    ja_token_to_index, _ = build_vocab(ja_tokens, 'ja.vocab')
+
+    ...
+
+    loader = DataLoader(
+        train
+        .map(postprocess(en_token_to_index, en_unk_index, ja_token_to_index, ja_unk_index))
+        .save('enja.cache'),
+        batch_size=32,
+        num_workers=4,
+        collate_fn=get_collate_fn(pad_index))
+```
+
+### torchtext
+
+You can check full code [here](https://github.com/yasufumy/lineflow/blob/master/examples/small_parallel_enja_torchtext.py).
+
+```py
+...
+import lineflow.datasets as lfds
+
+
+if __name__ == '__main__':
+    src = data.Field(tokenize=str.split, init_token='<s>', eos_token='</s>')
+    tgt = data.Field(tokenize=str.split, init_token='<s>', eos_token='</s>')
+    fields = [('src', src), ('tgt', tgt)]
+    train = lfds.SmallParallelEnJa('train').to_torchtext(fields)
+    validation = lfds.SmallParallelEnJa('dev').to_torchtext(fields)
+
+    src.build_vocab(train, validation)
+    tgt.build_vocab(train, validation)
+
+    iterator = data.BucketIterator(
+        dataset=train, batch_size=32, sort_key=lambda x: len(x.src))
+```
+
+### AllenNLP
+
+You can check full code [here](https://github.com/yasufumy/lineflow/blob/master/examples/small_parallel_enja_allennlp.py).
+
+```py
+...
+import lineflow.datasets as lfds
+
+
+if __name__ == '__main__':
+    train = lfds.SmallParallelEnJa('train') \
+        .to_allennlp(source_field_name=SOURCE_FIELD_NAME, target_field_name=TARGET_FIELD_NAME).all()
+    validation = lfds.SmallParallelEnJa('dev') \
+        .to_allennlp(source_field_name=SOURCE_FIELD_NAME, target_field_name=TARGET_FIELD_NAME).all()
+
+    if not osp.exists('./enja_vocab'):
+        vocab = Vocabulary.from_instances(train + validation, max_vocab_size=50000)
+        vocab.save_to_files('./enja_vocab')
+    else:
+        vocab = Vocabulary.from_files('./enja_vocab')
+
+    iterator = BucketIterator(sorting_keys=[(SOURCE_FIELD_NAME, 'num_tokens')], batch_size=32)
+    iterator.index_with(vocab)
 ```
 
 ## Datasets support
 
-small_parallel_enja:
+[small_parallel_enja](https://github.com/odashi/small_parallel_enja):
 
-```py
-import lineflow.datasets as lfd
+```PY
+Import lineflow.datasets as lfds
 
-train = lfd.SmallParallelEnJa('train')
-dev = lfd.SmallParallelEnJa('dev')
+train = lfds.SmallParallelEnJa('train')
+dev = lfds.SmallParallelEnJa('dev')
 test = lfd.SmallParallelEnJa('test')
 ```
 
-IMDB:
+[IMDB](http://ai.stanford.edu/~amaas/data/sentiment/):
 
 ```py
-import lineflow.datasets as lfd
+import lineflow.datasets as lfds
 
-train = lfd.Imdb('train')
-test = lfd.Imdb('test')
+train = lfds.Imdb('train')
+test = lfds.Imdb('test')
 ```
 
-SQuAD:
+[SQuAD](https://rajpurkar.github.io/SQuAD-explorer/):
 
 ```py
-import lineflow.datasets as lfd
+import lineflow.datasets as lfds
 
-train = lfd.Squad('train')
-dev = lfd.Squad('dev')
+train = lfds.Squad('train')
+dev = lfds.Squad('dev')
 ```
 
-CNN / Daily Mail:
+[CNN / Daily Mail](https://github.com/harvardnlp/sent-summary):
 
 ```py
-import lineflow.datasets as lfd
+import lineflow.datasets as lfds
 
-train = lfd.CnnDailymail('train')
-dev = lfd.CnnDailymail('dev')
-test = lfd.CnnDailymail('test')
+train = lfds.CnnDailymail('train')
+dev = lfds.CnnDailymail('dev')
+test = lfds.CnnDailymail('test')
 ```
-
-## lineflow with Deep Learning Frameworks
-
-Use lineflow with AllenNLP:
-
-```py
-import math
-
-from allennlp.common.tqdm import Tqdm
-from allennlp.data.vocabulary import Vocabulary
-from allennlp.data.iterators import BucketIterator
-
-from lineflow.datasets import Seq2SeqDataset
-
-
-ds = Seq2SeqDataset(
-    source_file_path='/path/to/source',
-    target_file_path='/path/to/target'
-).to_allennlp()
-
-vocab = Vocabulary.from_instances(ds)
-
-iterator = BucketIterator(sorting_keys=[('source_tokens', 'num_tokens')])
-iterator.index_with(vocab)
-
-num_batches = math.ceil(len(ds) / iterator._batch_size)
-
-for batch in Tqdm.tqdm(iterator(train, num_epochs=1), total=num_batches):
-    ...  # Your training code here
-```
-
-You can find other examples [here](https://github.com/yasufumy/lineflow/tree/master/examples).
