@@ -240,13 +240,17 @@ class CsvDataset(TextDataset):
                  encoding: str = 'utf-8',
                  delimiter: str = ',',
                  header: bool = False) -> None:
+        filepath = Path(filepath)
+        assert filepath.exists()
 
-        super().__init__(filepath, encoding)
+        self._filepath = filepath
+        self._encoding = encoding
+        self._length = None
 
         self._delimiter = delimiter
         self._reader = csv.DictReader if header else csv.reader
         if header:
-            with self._filepath.open(encoding=encoding) as f:
+            with filepath.open(encoding=encoding) as f:
                 self._header = next(csv.reader(f))
         else:
             self._header = None
@@ -261,8 +265,8 @@ class CsvDataset(TextDataset):
             return next(csv.reader([line], delimiter=self._delimiter))
         else:
             line = self._getline_from_single_file(i + 1)
-            content = next(csv.reader([line], delimiter=self._delimiter))
-            return OrderedDict(zip(self._header, content))
+            row = next(csv.reader([line], delimiter=self._delimiter))
+            return OrderedDict(zip(self._header, row))
 
     def get_length(self) -> int:
         count = self._count_lines(self._filepath)
