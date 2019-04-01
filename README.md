@@ -8,7 +8,7 @@ lineflow is a simple text dataset loader for NLP deep learning tasks.
 - lineflow enables you to build pipelines.
 - lineflow supports functional API and lazy evaluation.
 
-lineflow is heavily inspired by [tensorflow.data.Dataset](https://www.tensorflow.org/api_docs/python/tf/data/Dataset) and [chainer.dataset](https://docs.chainer.org/en/stable/reference/datasets.html)
+lineflow is heavily inspired by [tensorflow.data.Dataset](https://www.tensorflow.org/api_docs/python/tf/data/Dataset) and [chainer.dataset](https://docs.chainer.org/en/stable/reference/datasets.html).
 
 ## Installation
 
@@ -55,6 +55,8 @@ len(ds)  # 3
 - [PyTorch](#pytorch)
 - [torchtext](#torchtext)
 - [AllenNLP](#allennlp)
+
+You can find more examples [here](https://github.com/yasufumy/lineflow/tree/master/examples).
 
 
 ### PyTorch
