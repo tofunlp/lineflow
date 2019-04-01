@@ -15,19 +15,19 @@ lineflow is heavily inspired by [tensorflow.data.Dataset](https://www.tensorflow
 To install lineflow, simply:
 
 ```sh
-$ pip install lineflow
+pip install lineflow
 ```
 
 If you'd like to use lineflow with [AllenNLP](https://allennlp.org/):
 
 ```sh
-$ pip install "lineflow[allennlp]"
+pip install "lineflow[allennlp]"
 ```
 
 Also, if you'd like to use lineflow with [torchtext](https://torchtext.readthedocs.io/en/latest/):
 
 ```sh
-$ pip install "lineflow[torchtext]"
+pip install "lineflow[torchtext]"
 ```
 
 ## Basic Usage
@@ -150,7 +150,7 @@ if __name__ == '__main__':
 [small_parallel_enja](https://github.com/odashi/small_parallel_enja):
 
 ```PY
-Import lineflow.datasets as lfds
+import lineflow.datasets as lfds
 
 train = lfds.SmallParallelEnJa('train')
 dev = lfds.SmallParallelEnJa('dev')
