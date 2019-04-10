@@ -22,7 +22,7 @@ class Squad(MapDataset):
             train_url = TRAIN_V2_URL
             dev_url = DEV_V2_URL
         else:
-            raise ValueError(f"only 1 and 2 are valid for 'version', but '{split}' is given.")
+            raise ValueError(f"only 1 and 2 are valid for 'version', but {version} is given.")
 
         if split == 'train':
             path = cached_download(train_url)
