@@ -4,7 +4,7 @@ import tempfile
 
 
 from lineflow.datasets import Squad
-from lineflow.datasets.squad import TRAIN_URL, DEV_URL
+from lineflow.datasets.squad import TRAIN_V1_URL, DEV_V1_URL, TRAIN_V2_URL, DEV_V2_URL
 
 
 class SquadTestCase(TestCase):
@@ -24,14 +24,26 @@ class SquadTestCase(TestCase):
         self.fp.close()
         self.cached_download_patcher.stop()
 
-    def test_returns_train_set(self):
-        Squad(split='train')
-        self.cached_download_mock.assert_called_once_with(TRAIN_URL)
+    def test_returns_train_set_v1(self):
+        Squad(split='train', version=1)
+        self.cached_download_mock.assert_called_once_with(TRAIN_V1_URL)
 
-    def test_returns_dev_set(self):
-        Squad(split='dev')
-        self.cached_download_mock.assert_called_once_with(DEV_URL)
+    def test_returns_dev_set_v1(self):
+        Squad(split='dev', version=1)
+        self.cached_download_mock.assert_called_once_with(DEV_V1_URL)
+
+    def test_returns_train_set_v2(self):
+        Squad(split='train', version=2)
+        self.cached_download_mock.assert_called_once_with(TRAIN_V2_URL)
+
+    def test_returns_dev_set_v2(self):
+        Squad(split='dev', version=2)
+        self.cached_download_mock.assert_called_once_with(DEV_V2_URL)
 
     def test_raises_value_error_with_invalid_split(self):
         with self.assertRaises(ValueError):
             Squad(split='invalid_split')
+
+    def test_raises_value_error_with_invalid_version(self):
+        with self.assertRaises(ValueError):
+            Squad(version=3)
