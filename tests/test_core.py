@@ -186,7 +186,7 @@ class DatasetTestCase(TestCase):
         open_mock.return_value.__enter__.return_value = enter_mock
 
         filepath = '/path/to/dataset'
-        data = Dataset.load(filepath)
+        data = lineflow.load(filepath)
         open_mock.assert_called_once_with(filepath, 'rb')
         pickle_load_mock.assert_called_once_with(enter_mock)
 

@@ -71,13 +71,6 @@ class Dataset:
                 pickle.dump(cache, f)
         return CacheDataset(self, cache)
 
-    @staticmethod
-    def load(filename: str) -> 'Dataset':
-        print(f'Loading data from {filename}...')
-        with open(filename, 'rb') as f:
-            dataset = pickle.load(f)
-        return Dataset(dataset)
-
 
 class ConcatDataset(Dataset):
     def __init__(self, *datasets: List[Dataset]) -> None:
@@ -304,3 +297,10 @@ def lineflow_flat_map(
         return iterator
     else:
         return list(iterator)
+
+
+def lineflow_load(filename: str) -> Dataset:
+    print(f'Loading data from {filename}...')
+    with open(filename, 'rb') as f:
+        dataset = pickle.load(f)
+    return Dataset(dataset)
