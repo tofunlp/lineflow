@@ -1,4 +1,5 @@
 from typing import Sequence, Any, Union, Callable, List, Tuple, Dict, Iterator, Iterable
+import warnings
 import os
 import pickle
 import linecache
@@ -70,6 +71,15 @@ class Dataset:
             with path.open('wb') as f:
                 pickle.dump(cache, f)
         return CacheDataset(self, cache)
+
+    @staticmethod
+    def load(filename: str) -> 'Dataset':
+        warnings.warn(
+            'lineflow.Dataset.load is deprecated. Please refer to '
+            'lineflow.load.',
+            DeprecationWarning,
+            stacklevel=2)
+        return lineflow_load(filename)
 
 
 class ConcatDataset(Dataset):

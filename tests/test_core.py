@@ -193,6 +193,9 @@ class DatasetTestCase(TestCase):
         self.assertListEqual(data.all(), list(self.base))
         self.assertEqual(data._dataset, list(self.base))
 
+        with self.assertWarns(DeprecationWarning):
+            lineflow.Dataset.load(filepath)
+
 
 class TextDatasetTestCase(TestCase):
 
