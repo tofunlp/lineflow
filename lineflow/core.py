@@ -180,7 +180,11 @@ class CacheDataset(MapDataset):
 class TextDataset(Dataset):
     def __init__(self,
                  filepath: Union[str, List[str]],
-                 encoding: str = 'utf-8') -> None:
+                 encoding: str = 'utf-8',
+                 mode: str = 'zip') -> None:
+        self._encoding = encoding
+        self._length = None
+
         if isinstance(filepath, str):
             filepath = Path(filepath)
             assert filepath.exists()
@@ -189,12 +193,19 @@ class TextDataset(Dataset):
         else:
             filepath = [Path(p) for p in filepath]
             assert all(p.is_file() for p in filepath)
-            self.get_iterator = self._iterate_multiple_files
-            self.get_example = self._getlines_from_multiple_files
+            if mode == 'zip':
+                self.get_iterator = self._iterate_multiple_files_zip
+                self.get_example = self._getlines_from_multiple_files_zip
+            elif mode == 'concat':
+                self._lengths = list(accumulate(self._count_lines(p) for p in filepath))
+                self._length = self._lengths[-1]
+                self._offsets = [0] + self._lengths[:-1]
+                self.get_iterator = self._iterate_multiple_files_concat
+                self.get_example = self._getlines_from_multiple_files_concat
+            else:
+                raise ValueError(f"only 'zip' and 'concat' are valid for 'mode', but '{mode}' is given.")
 
         self._filepath = filepath
-        self._encoding = encoding
-        self._length = None
 
     def __iter__(self) -> Iterator[Union[str, Tuple[str]]]:
         yield from self.get_iterator()
@@ -204,19 +215,32 @@ class TextDataset(Dataset):
             for line in f:
                 yield line.rstrip(os.linesep)
 
-    def _iterate_multiple_files(self) -> Iterator[Tuple[str]]:
+    def _iterate_multiple_files_zip(self) -> Iterator[Tuple[str]]:
         fps = [p.open(encoding=self._encoding) for p in self._filepath]
         for lines in zip(*fps):
             yield tuple(l.rstrip(os.linesep) for l in lines)
         for fp in fps:
             fp.close()
 
+    def _iterate_multiple_files_concat(self) -> Iterator[str]:
+        for p in self._filepath:
+            with p.open(encoding=self._encoding) as f:
+                for line in f:
+                    yield line.rstrip(os.linesep)
+
     def _getline_from_single_file(self, i: int) -> str:
         return linecache.getline(str(self._filepath), i + 1).rstrip(os.linesep)
 
-    def _getlines_from_multiple_files(self, i: int) -> Tuple[str]:
+    def _getlines_from_multiple_files_zip(self, i: int) -> Tuple[str]:
         return tuple(linecache.getline(str(p), i + 1).rstrip(os.linesep)
                      for p in self._filepath)
+
+    def _getlines_from_multiple_files_concat(self, i: int) -> str:
+        if i >= self._length:
+            return linecache.getline(str(self._filepath[-1]), self._lengths[-1]).rstrip(os.linesep)
+        j = bisect(self._lengths, i)
+        return linecache.getline(str(self._filepath[j]),
+                                 i - self._offsets[j] + 1).rstrip(os.linesep)
 
     def get_length(self) -> int:
         if isinstance(self._filepath, list):
