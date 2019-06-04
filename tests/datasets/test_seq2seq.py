@@ -30,7 +30,7 @@ class Seq2SeqDatasetTestCase(TestCase):
 
         # Patch linecache
         lines_dict = {source_fp.name: source_lines, target_fp.name: target_lines}
-        linecache_getline_patcher = patch('lineflow.core.linecache.getline')
+        linecache_getline_patcher = patch('lineflow.text.linecache.getline')
         linecache_getline_mock = linecache_getline_patcher.start()
         linecache_getline_mock.side_effect = lambda filename, i: lines_dict[filename][i - 1]
 
