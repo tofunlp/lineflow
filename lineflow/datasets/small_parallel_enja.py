@@ -1,5 +1,5 @@
-from ..download import cached_download
-from ..datasets import Seq2SeqDataset
+from lineflow.download import cached_download
+from lineflow.datasets import Seq2SeqDataset
 
 
 TRAIN_EN_URL = 'https://raw.githubusercontent.com/odashi/small_parallel_enja/master/train.en'

@@ -1,7 +1,8 @@
 import json
 
-from ..download import cached_download
-from ..core import TextDataset, MapDataset
+from lineflow.download import cached_download
+from lineflow.core import MapDataset
+from lineflow.text import SingleTextDataset
 
 
 TRAIN_V1_URL = 'https://github.com/yasufumy/SQuAD_JSONL/blob/master/dataset/train-v1.1.jsonl?raw=true'
