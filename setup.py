@@ -7,7 +7,8 @@ except ImportError:
 
 setup(
     name='lineflow',
-    version='0.2.8',
+    use_scm_version=True,
+    setup_requires=['setuptools_scm'],
     description='Framework-Agnostic NLP Data Loader in Python',
     long_description=open('./README.md', encoding='utf-8').read(),
     long_description_content_type='text/markdown',
