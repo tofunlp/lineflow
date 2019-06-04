@@ -32,6 +32,6 @@ class Squad(MapDataset):
         else:
             raise ValueError(f"only 'train' and 'dev' are valid for 'split', but '{split}' is given.")
 
-        dataset = TextDataset(path)
+        dataset = SingleTextDataset(path)
 
         super().__init__(dataset, json.loads)
