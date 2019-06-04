@@ -1,13 +1,14 @@
 from typing import List, Tuple, Optional, Callable, TYPE_CHECKING
 
-from ..core import MapDataset, TextDataset
+from lineflow.core import MapDataset
+from lineflow.text import ZipTextDataset
 
 if TYPE_CHECKING:
     from allennlp.data import Tokenizer, TokenIndexer  # NOQA
     from torchtext import data  # NOQA
 
 
-class Seq2SeqDataset(TextDataset):
+class Seq2SeqDataset(ZipTextDataset):
     def __init__(self,
                  source_file_path: str,
                  target_file_path: str) -> None:
