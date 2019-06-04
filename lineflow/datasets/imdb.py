@@ -3,9 +3,9 @@ import tarfile
 from pathlib import Path
 from itertools import chain
 
-from ..download import cached_download
-from ..download import get_cache_root
-from ..core import MapDataset
+from lineflow.download import cached_download
+from lineflow.download import get_cache_root
+from lineflow.core import MapDataset
 
 
 IMDB_URL = 'https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz'

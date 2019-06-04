@@ -1,9 +1,9 @@
 import tarfile
 from pathlib import Path
 
-from ..download import cached_download
-from ..download import get_cache_directory
-from ..datasets import Seq2SeqDataset
+from lineflow.download import cached_download
+from lineflow.download import get_cache_directory
+from lineflow.datasets import Seq2SeqDataset
 
 
 CNN_DAILYMAIL_URL = 'https://s3.amazonaws.com/opennmt-models/Summary/cnndm.tar.gz'
