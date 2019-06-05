@@ -69,30 +69,26 @@ class TextDataset(Dataset):
                  encoding: str = 'utf-8',
                  mode: str = 'zip') -> None:
         if isinstance(filepath, str):
-            self.__dataset = SingleTextDataset(filepath, encoding)
+            self._dataset = SingleTextDataset(filepath, encoding)
         elif isinstance(filepath, list):
             if mode == 'zip':
-                self.__dataset = ZipTextDataset(filepath, encoding)
+                self._dataset = ZipTextDataset(filepath, encoding)
             elif mode == 'concat':
-                self.__dataset = ConcatTextDataset(filepath, encoding)
+                self._dataset = ConcatTextDataset(filepath, encoding)
             else:
                 raise ValueError(f"only 'zip' and 'concat' are valid for 'mode', but '{mode}' is given.")
 
         self._filepath = filepath
-        self._length = self.__dataset._length
+        self._length = self._dataset._length
 
     def __iter__(self) -> Iterator[Union[str, Tuple[str]]]:
-        yield from self.__dataset
+        yield from self._dataset
 
     def get_example(self, i: int) -> Union[str, Tuple[str]]:
-        return self.__dataset[i]
+        return self._dataset[i]
 
     def get_length(self) -> int:
-        return len(self.__dataset)
-
-    @property
-    def _dataset(self) -> Union[SingleTextDataset, ZipTextDataset, ConcatTextDataset]:
-        return self.__dataset
+        return len(self._dataset)
 
 
 class CsvDataset(SingleTextDataset):
