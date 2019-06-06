@@ -43,4 +43,4 @@ class CnnDailymail(Seq2SeqDataset):
         else:
             raise ValueError(f"only 'train', 'dev' and 'test' are valid for 'split', but '{split}' is given.")
 
-        super().__init__(source_file_path=src_path, target_file_path=tgt_path)
+        super().__init__(source_file_path=str(src_path), target_file_path=str(tgt_path))

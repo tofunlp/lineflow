@@ -53,22 +53,22 @@ class CnnDailymailTestCase(TestCase):
         CnnDailymail(split='train')
         self.cached_download_mock.assert_called_once_with(CNN_DAILYMAIL_URL)
         self.init_mock.assert_called_once_with(
-            source_file_path=self.cache_dir / TRAIN_SOURCE_NAME,
-            target_file_path=self.cache_dir / TRAIN_TARGET_NAME)
+            source_file_path=str(self.cache_dir / TRAIN_SOURCE_NAME),
+            target_file_path=str(self.cache_dir / TRAIN_TARGET_NAME))
 
     def test_returns_dev_set(self):
         CnnDailymail(split='dev')
         self.cached_download_mock.assert_called_once_with(CNN_DAILYMAIL_URL)
         self.init_mock.assert_called_once_with(
-            source_file_path=self.cache_dir / VAL_SOURCE_NAME,
-            target_file_path=self.cache_dir / VAL_TARGET_NAME)
+            source_file_path=str(self.cache_dir / VAL_SOURCE_NAME),
+            target_file_path=str(self.cache_dir / VAL_TARGET_NAME))
 
     def test_returns_test_set(self):
         CnnDailymail(split='test')
         self.cached_download_mock.assert_called_once_with(CNN_DAILYMAIL_URL)
         self.init_mock.assert_called_once_with(
-            source_file_path=self.cache_dir / TEST_SOURCE_NAME,
-            target_file_path=self.cache_dir / TEST_TARGET_NAME)
+            source_file_path=str(self.cache_dir / TEST_SOURCE_NAME),
+            target_file_path=str(self.cache_dir / TEST_TARGET_NAME))
 
     def test_raises_value_error_with_invalid_split(self):
         with self.assertRaises(ValueError):
