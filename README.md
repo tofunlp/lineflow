@@ -147,16 +147,16 @@ if __name__ == '__main__':
     iterator.index_with(vocab)
 ```
 
-## Datasets support
+## Datasets
 
-[small_parallel_enja](https://github.com/odashi/small_parallel_enja):
+[CNN / Daily Mail](https://github.com/harvardnlp/sent-summary):
 
-```PY
+```py
 import lineflow.datasets as lfds
 
-train = lfds.SmallParallelEnJa('train')
-dev = lfds.SmallParallelEnJa('dev')
-test = lfd.SmallParallelEnJa('test')
+train = lfds.CnnDailymail('train')
+dev = lfds.CnnDailymail('dev')
+test = lfds.CnnDailymail('test')
 ```
 
 [IMDB](http://ai.stanford.edu/~amaas/data/sentiment/):
@@ -168,6 +168,25 @@ train = lfds.Imdb('train')
 test = lfds.Imdb('test')
 ```
 
+[Microsoft Research Paraphrase Corpus](https://www.microsoft.com/en-us/download/details.aspx?id=52398):
+
+```py
+import lineflow.datasets as lfds
+
+train = lfds.MsrParaphrase('train')
+test = lfds.MsrParaphrase('test')
+```
+
+[small_parallel_enja](https://github.com/odashi/small_parallel_enja):
+
+```py
+import lineflow.datasets as lfds
+
+train = lfds.SmallParallelEnJa('train')
+dev = lfds.SmallParallelEnJa('dev')
+test = lfd.SmallParallelEnJa('test')
+```
+
 [SQuAD](https://rajpurkar.github.io/SQuAD-explorer/):
 
 ```py
@@ -175,14 +194,4 @@ import lineflow.datasets as lfds
 
 train = lfds.Squad('train')
 dev = lfds.Squad('dev')
-```
-
-[CNN / Daily Mail](https://github.com/harvardnlp/sent-summary):
-
-```py
-import lineflow.datasets as lfds
-
-train = lfds.CnnDailymail('train')
-dev = lfds.CnnDailymail('dev')
-test = lfds.CnnDailymail('test')
 ```
