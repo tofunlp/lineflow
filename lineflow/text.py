@@ -110,7 +110,12 @@ class CsvDataset(SingleTextDataset):
 
     def __iter__(self) -> Iterator[Union[List[str], Dict[str, str]]]:
         with open(self._filepath, encoding=self._encoding) as f:
-            yield from self._reader(f, delimiter=self._delimiter)
+            if self._header is None:
+                yield from self._reader(f, delimiter=self._delimiter)
+            else:
+                reader = self._reader(f, delimiter=self._delimiter, fieldnames=self._header)
+                next(reader)
+                yield from reader
 
     def get_example(self, i: int) -> Union[List[str], Dict[str, str]]:
         if self._header is None:
