@@ -5,10 +5,10 @@ import csv
 import mmap
 
 from lineflow import Dataset
-from lineflow.core import ConcatDataset, ZipDataset
+from lineflow.core import RandomAccessConcat, RandomAccessZip
 
 
-class RandomAccessFile:
+class RandomAccessText:
     def __init__(self, path: str, encoding: str = 'utf-8') -> None:
         assert osp.exists(path)
 
@@ -32,7 +32,7 @@ class RandomAccessFile:
         if self._offsets is None:
             self._initialize_offsets()
         if index < 0 or len(self) <= index:
-            raise IndexError('RandomAccessTextFile object index out of range')
+            raise IndexError('RandomAccessText object index out of range')
         with open(self._path, encoding=self._encoding) as f:
             f.seek(self._offsets[index])
             return f.readline().rstrip(os.linesep)
@@ -45,66 +45,19 @@ class RandomAccessFile:
         return self._length
 
 
-class SingleTextDataset(Dataset):
-    def __init__(self,
-                 path: str,
-                 encoding: str = 'utf-8') -> None:
-        super().__init__(RandomAccessFile(path, encoding))
-
-        self._path = path
-        self._encoding = encoding
-
-
-class ConcatTextDataset(ConcatDataset):
-    def __init__(self,
-                 paths: List[str],
-                 encoding: str = 'utf-8') -> None:
-        super().__init__(
-            *[SingleTextDataset(path, encoding) for path in paths]
-        )
-
-
-class ZipTextDataset(ZipDataset):
-    def __init__(self,
-                 paths: List[str],
-                 encoding: str = 'utf-8') -> None:
-        super().__init__(
-            *[SingleTextDataset(path, encoding) for path in paths]
-        )
-
-
-class TextDataset(Dataset):
-    def __init__(self,
-                 paths: Union[str, List[str]],
-                 encoding: str = 'utf-8',
-                 mode: str = 'zip') -> None:
-        if isinstance(paths, str):
-            dataset = SingleTextDataset(paths, encoding)
-        elif isinstance(paths, list):
-            if mode == 'zip':
-                dataset = ZipTextDataset(paths, encoding)
-            elif mode == 'concat':
-                dataset = ConcatTextDataset(paths, encoding)
-            else:
-                raise ValueError(f"only 'zip' and 'concat' are valid for 'mode', but '{mode}' is given.")
-
-        super().__init__(dataset)
-
-
-class CsvDataset(SingleTextDataset):
+class RandomAccessCsv(RandomAccessText):
     def __init__(self,
                  path: str,
                  encoding: str = 'utf-8',
                  delimiter: str = ',',
                  header: bool = False) -> None:
-
         super().__init__(path, encoding)
 
         self._delimiter = delimiter
         self._reader = csv.DictReader if header else csv.reader
         if header:
             with open(path, encoding=encoding) as f:
-                self._header = next(csv.reader(f))
+                self._header = next(csv.reader(f, delimiter=delimiter))
         else:
             self._header = None
 
@@ -117,19 +70,59 @@ class CsvDataset(SingleTextDataset):
                 next(reader)
                 yield from reader
 
-    def get_example(self, i: int) -> Union[List[str], Dict[str, str]]:
+    def __getitem__(self, i: int) -> Union[List[str], Dict[str, str]]:
         if self._header is None:
-            row = self._reader([self._dataset[i]],
+            row = self._reader([super().__getitem__(i)],
                                delimiter=self._delimiter)
         else:
-            row = self._reader([self._dataset[i + 1]],
+            row = self._reader([super().__getitem__(i + 1)],
                                delimiter=self._delimiter,
                                fieldnames=self._header)
         return next(row)
 
-    def get_length(self) -> int:
-        length = len(self._dataset)
+    def __len__(self) -> int:
+        length = super().__len__()
         if self._header is None:
             return length
         else:
+            self._length += 1
             return length - 1
+
+
+class TextDataset(Dataset):
+    def __init__(self,
+                 paths: Union[str, List[str]],
+                 encoding: str = 'utf-8',
+                 mode: str = 'zip') -> None:
+        if isinstance(paths, str):
+            dataset = RandomAccessText(paths, encoding)
+        elif isinstance(paths, list):
+            if mode == 'zip':
+                dataset = RandomAccessZip(*[RandomAccessText(p, encoding) for p in paths])
+            elif mode == 'concat':
+                dataset = RandomAccessConcat(*[RandomAccessText(p, encoding) for p in paths])
+            else:
+                raise ValueError(f"only 'zip' and 'concat' are valid for 'mode', but '{mode}' is given.")
+
+        super().__init__(dataset)
+
+
+class CsvDataset(Dataset):
+    def __init__(self,
+                 path: str,
+                 encoding: str = 'utf-8',
+                 delimiter: str = ',',
+                 header: bool = False) -> None:
+
+        super().__init__(RandomAccessCsv(path=path,
+                                         encoding=encoding,
+                                         delimiter=delimiter,
+                                         header=header))
+
+    @property
+    def _header(self):
+        return self._dataset._header
+
+    @_header.setter
+    def _header(self, header):
+        self._dataset._header = header
