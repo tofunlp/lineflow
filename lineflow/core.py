@@ -4,7 +4,7 @@ import pickle
 import copy
 from pathlib import Path
 from itertools import accumulate, chain, islice
-from bisect import bisect
+import bisect
 
 
 class Dataset:
@@ -81,20 +81,31 @@ class ConcatDataset(Dataset):
     def __init__(self, *datasets: List[Dataset]) -> None:
         assert all(isinstance(d, Dataset) for d in datasets)
 
-        self._datasets = datasets
-        self._lengths = list(accumulate(len(d) for d in datasets))
-        self._length = self._lengths[-1]
-        self._offsets = [0] + self._lengths[:-1]
+        self._datasets = [d._dataset for d in datasets]
+        self._length = None
+        self._offsets = None
+        self._lengths = None
 
     def __iter__(self) -> Iterator[Any]:
         for d in self._datasets:
             yield from d
 
     def get_example(self, i: int) -> Any:
-        if i >= self._length:
+        if self._offsets is None:
+            self._initialize()
+        if i >= len(self):
             raise IndexError(f'{self.__class__.__name__} object index out of range')
-        j = bisect(self._lengths, i)
+        j = bisect.bisect_right(self._lengths, i)
         return self._datasets[j][i - self._offsets[j]]
+
+    def get_length(self) -> int:
+        if self._lengths is None:
+            self._initialize()
+        return self._lengths[-1]
+
+    def _initialize(self) -> None:
+        self._lengths = list(accumulate(len(d) for d in self._datasets))
+        self._offsets = [0] + self._lengths[:-1]
 
     @property
     def _dataset(self) -> 'ConcatDataset':
@@ -105,17 +116,20 @@ class ZipDataset(Dataset):
     def __init__(self, *datasets: List[Dataset]) -> None:
         assert all(isinstance(d, Dataset) for d in datasets)
 
-        self._datasets = datasets
-        self._length = min(len(d) for d in datasets)
+        self._datasets = [d._dataset for d in datasets]
+        self._length = None
 
     def __iter__(self) -> Iterator[Any]:
         for x in zip(*self._datasets):
             yield tuple(x)
 
     def get_example(self, i: int) -> Any:
-        if i >= self._length:
+        if i >= len(self):
             raise IndexError(f'{self.__class__.__name__} object index out of range')
         return tuple(d[i] for d in self._datasets)
+
+    def get_length(self) -> int:
+        return min(len(d) for d in self._datasets)
 
     @property
     def _dataset(self) -> 'ZipDataset':
