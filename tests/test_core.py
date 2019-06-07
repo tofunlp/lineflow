@@ -3,6 +3,7 @@ from unittest.mock import patch, Mock
 
 import lineflow
 from lineflow import Dataset
+from lineflow.core import RandomAccessConcat, RandomAccessZip
 
 
 class DatasetTestCase(TestCase):
@@ -217,7 +218,7 @@ class MiscTestCase(TestCase):
         for i, (x, y) in enumerate(zip(result, expected)):
             self.assertEqual(x, y)
             self.assertEqual(result[i], y)
-        self.assertEqual(result._dataset, data)
+        self.assertIsInstance(result._dataset, RandomAccessConcat)
 
     def test_zip(self):
         data = lineflow.zip(self.data, self.data)
@@ -233,7 +234,7 @@ class MiscTestCase(TestCase):
         for i, (x, y) in enumerate(zip(result, expected)):
             self.assertEqual(x, y)
             self.assertEqual(result[i], y)
-        self.assertEqual(result._dataset, data)
+        self.assertIsInstance(result._dataset, RandomAccessZip)
 
     def test_filter(self):
         result = lineflow.filter(lambda x: x % 2 == 0, self.data)

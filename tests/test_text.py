@@ -2,12 +2,12 @@ from unittest import TestCase
 import tempfile
 
 import lineflow
+from lineflow.core import RandomAccessConcat, RandomAccessZip
 from lineflow import TextDataset, CsvDataset
-from lineflow.text import RandomAccessFile
-from lineflow.text import ZipTextDataset, ConcatTextDataset
+from lineflow.text import RandomAccessText, RandomAccessCsv
 
 
-class RandomAccessFileTestCase(TestCase):
+class RandomAccessTextTestCase(TestCase):
 
     def setUp(self):
         self.length = 100
@@ -22,29 +22,29 @@ class RandomAccessFileTestCase(TestCase):
         self.fp.close()
 
     def test_init(self):
-        text = RandomAccessFile(self.fp.name)
+        text = RandomAccessText(self.fp.name)
         self.assertEqual(text._path, self.fp.name)
         self.assertEqual(text._offsets, None)
         self.assertEqual(text._length, None)
 
     def test_initialize_offsets(self):
-        text = RandomAccessFile(self.fp.name)
+        text = RandomAccessText(self.fp.name)
         text._initialize_offsets()
         self.assertIsInstance(text._offsets, list)
 
     def test_getitem(self):
-        text = RandomAccessFile(self.fp.name)
+        text = RandomAccessText(self.fp.name)
         for i in range(self.length):
             self.assertEqual(text[i], f'line #{i}')
 
     def test_raises_index_error_with_invalid_index(self):
-        text = RandomAccessFile(self.fp.name)
+        text = RandomAccessText(self.fp.name)
         with self.assertRaises(IndexError):
             text[-1]
             text[self._length]
 
     def test_len(self):
-        text = RandomAccessFile(self.fp.name)
+        text = RandomAccessText(self.fp.name)
         self.assertEqual(len(text), self.length)
 
 
@@ -79,7 +79,7 @@ class TextDatasetTestCase(TestCase):
         # check if length is cached
         self.assertEqual(len(data), len(lines))
 
-        self.assertIsInstance(data._dataset, RandomAccessFile)
+        self.assertIsInstance(data._dataset, RandomAccessText)
 
         data = data.map(str.split)
 
@@ -87,7 +87,7 @@ class TextDatasetTestCase(TestCase):
             self.assertEqual(x, y.split())
 
         self.assertIsInstance(data, lineflow.core.MapDataset)
-        self.assertIsInstance(data._dataset, RandomAccessFile)
+        self.assertIsInstance(data._dataset, RandomAccessText)
 
     def test_zips_multiple_files(self):
         fp = self.fp
@@ -100,10 +100,8 @@ class TextDatasetTestCase(TestCase):
             self.assertTupleEqual(data[j], (y, y))
         self.assertEqual(len(data), len(lines))
         self.assertEqual(data._length, len(lines))
-        self.assertIsInstance(data._dataset, ZipTextDataset)
-        self.assertIsInstance(data.map(lambda x: x)._dataset, ZipTextDataset)
-        for d in data._dataset._datasets:
-            self.assertIsInstance(d, RandomAccessFile)
+        self.assertIsInstance(data._dataset, RandomAccessZip)
+        self.assertIsInstance(data.map(lambda x: x)._dataset, RandomAccessZip)
 
     def test_concats_multiple_files(self):
         fp = self.fp
@@ -118,10 +116,8 @@ class TextDatasetTestCase(TestCase):
         self.assertEqual(data._length, len(lines) * 2)
 
         self.assertEqual(data[len(data) - 1], lines[-1])
-        self.assertIsInstance(data._dataset, ConcatTextDataset)
-        self.assertIsInstance(data.map(lambda x: x)._dataset, ConcatTextDataset)
-        for d in data._dataset._datasets:
-            self.assertIsInstance(d, RandomAccessFile)
+        self.assertIsInstance(data._dataset, RandomAccessConcat)
+        self.assertIsInstance(data.map(lambda x: x)._dataset, RandomAccessConcat)
 
     def test_raises_value_error_with_invalid_mode(self):
         with self.assertRaises(ValueError):
@@ -142,15 +138,17 @@ class CsvDatasetTestCase(TestCase):
         ds = CsvDataset(fp.name, header=True)
 
         self.assertEqual(len(ds), len(lines) - 1)
+        self.assertListEqual(ds._header, lines[0].split(','))
 
-        header = lines[0].split(',')
+        header = ('EN', 'JA')
+        ds._header = header
 
         for i, x in enumerate(ds, start=1):
             y = dict(zip(header, lines[i].split(',')))
             self.assertDictEqual(dict(x), y)
             self.assertDictEqual(dict(ds[i - 1]), y)
 
-        self.assertIsInstance(ds._dataset, RandomAccessFile)
+        self.assertIsInstance(ds._dataset, RandomAccessCsv)
 
         fp.close()
 
@@ -171,6 +169,6 @@ class CsvDatasetTestCase(TestCase):
             self.assertListEqual(x, y)
             self.assertListEqual(ds[i], y)
 
-        self.assertIsInstance(ds._dataset, RandomAccessFile)
+        self.assertIsInstance(ds._dataset, RandomAccessCsv)
 
         fp.close()
