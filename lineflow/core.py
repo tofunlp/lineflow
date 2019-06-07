@@ -7,14 +7,59 @@ from itertools import accumulate, chain, islice
 import bisect
 
 
+class RandomAccessConcat:
+    def __init__(self, *datasets):
+        self._datasets = datasets
+        self._offsets = None
+        self._length = None
+
+    def _initialize_offsets(self):
+        self._lengths = list(accumulate(len(d) for d in self._datasets))
+        self._offsets = [0] + self._lengths[:-1]
+
+    def __iter__(self):
+        for d in self._datasets:
+            yield from d
+
+    def __getitem__(self, index):
+        if self._offsets is None:
+            self._initialize_offsets()
+        if index < 0 or len(self) <= index:
+            raise IndexError('RandomAccessConcat object index out of range')
+        j = bisect.bisect_right(self._lengths, index)
+        return self._datasets[j][index - self._offsets[j]]
+
+    def __len__(self):
+        if self._offsets is None:
+            self._initialize_offsets()
+        if self._length is None:
+            self._length = self._lengths[-1]
+        return self._length
+
+
+class RandomAccessZip:
+    def __init__(self, *datasets):
+        self._datasets = datasets
+        self._length = None
+
+    def __iter__(self):
+        yield from zip(*self._datasets)
+
+    def __getitem__(self, index):
+        if index < 0 or len(self) <= index:
+            raise IndexError('RandomAccessZip object index out of range')
+        return tuple(d[index] for d in self._datasets)
+
+    def __len__(self):
+        if self._length is None:
+            self._length = min(len(d) for d in self._datasets)
+        return self._length
+
+
 class Dataset:
     def __init__(self,
                  dataset: Sequence[Any]) -> None:
-        if isinstance(dataset, Dataset):
-            self._dataset = dataset._dataset
-        else:
-            self._dataset = dataset
-
+        self._dataset = dataset
         self._length = None
 
     def __iter__(self) -> Iterator[Any]:
@@ -81,59 +126,14 @@ class ConcatDataset(Dataset):
     def __init__(self, *datasets: List[Dataset]) -> None:
         assert all(isinstance(d, Dataset) for d in datasets)
 
-        self._datasets = [d._dataset for d in datasets]
-        self._length = None
-        self._offsets = None
-        self._lengths = None
-
-    def __iter__(self) -> Iterator[Any]:
-        for d in self._datasets:
-            yield from d
-
-    def get_example(self, i: int) -> Any:
-        if self._offsets is None:
-            self._initialize()
-        if i >= len(self):
-            raise IndexError(f'{self.__class__.__name__} object index out of range')
-        j = bisect.bisect_right(self._lengths, i)
-        return self._datasets[j][i - self._offsets[j]]
-
-    def get_length(self) -> int:
-        if self._lengths is None:
-            self._initialize()
-        return self._lengths[-1]
-
-    def _initialize(self) -> None:
-        self._lengths = list(accumulate(len(d) for d in self._datasets))
-        self._offsets = [0] + self._lengths[:-1]
-
-    @property
-    def _dataset(self) -> 'ConcatDataset':
-        return self
+        super().__init__(RandomAccessConcat(*datasets))
 
 
 class ZipDataset(Dataset):
     def __init__(self, *datasets: List[Dataset]) -> None:
         assert all(isinstance(d, Dataset) for d in datasets)
 
-        self._datasets = [d._dataset for d in datasets]
-        self._length = None
-
-    def __iter__(self) -> Iterator[Any]:
-        for x in zip(*self._datasets):
-            yield tuple(x)
-
-    def get_example(self, i: int) -> Any:
-        if i >= len(self):
-            raise IndexError(f'{self.__class__.__name__} object index out of range')
-        return tuple(d[i] for d in self._datasets)
-
-    def get_length(self) -> int:
-        return min(len(d) for d in self._datasets)
-
-    @property
-    def _dataset(self) -> 'ZipDataset':
-        return self
+        super().__init__(RandomAccessZip(*datasets))
 
 
 class MapDataset(Dataset):
@@ -153,6 +153,8 @@ class MapDataset(Dataset):
         self._funcs = funcs
         self._processed_funcs = processed_funcs
 
+        if isinstance(dataset, Dataset):
+            dataset = dataset._dataset
         super().__init__(dataset)
 
     def __iter__(self) -> Iterator[Any]:
