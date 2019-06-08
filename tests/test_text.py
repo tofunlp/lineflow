@@ -24,13 +24,7 @@ class RandomAccessTextTestCase(TestCase):
     def test_init(self):
         text = RandomAccessText(self.fp.name)
         self.assertEqual(text._path, self.fp.name)
-        self.assertEqual(text._offsets, None)
         self.assertEqual(text._length, None)
-
-    def test_initialize_offsets(self):
-        text = RandomAccessText(self.fp.name)
-        text._initialize_offsets()
-        self.assertIsInstance(text._offsets, list)
 
     def test_getitem(self):
         text = RandomAccessText(self.fp.name)

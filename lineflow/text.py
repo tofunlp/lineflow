@@ -3,6 +3,7 @@ import os
 import os.path as osp
 import csv
 import mmap
+import linecache
 
 from lineflow import Dataset
 from lineflow.core import RandomAccessConcat, RandomAccessZip
@@ -14,14 +15,13 @@ class RandomAccessText:
 
         self._path = path
         self._encoding = encoding
-        self._offsets = None
         self._length = None
+        self._offset = 1
 
-    def _initialize_offsets(self) -> None:
+    def _get_length(self) -> int:
         with open(self._path, 'r+', encoding=self._encoding) as f:
             mm = mmap.mmap(f.fileno(), 0)
-            offsets = [0] + [mm.tell() for _ in iter(mm.readline, b'')]
-        self._offsets = offsets
+            return sum(1 for _ in iter(mm.readline, b''))
 
     def __iter__(self) -> Iterator[str]:
         with open(self._path, encoding=self._encoding) as f:
@@ -29,19 +29,13 @@ class RandomAccessText:
                 yield line.rstrip(os.linesep)
 
     def __getitem__(self, index: int) -> str:
-        if self._offsets is None:
-            self._initialize_offsets()
         if index < 0 or len(self) <= index:
             raise IndexError('RandomAccessText object index out of range')
-        with open(self._path, encoding=self._encoding) as f:
-            f.seek(self._offsets[index])
-            return f.readline().rstrip(os.linesep)
+        return linecache.getline(self._path, index + self._offset).rstrip(os.linesep)
 
     def __len__(self) -> int:
-        if self._offsets is None:
-            self._initialize_offsets()
         if self._length is None:
-            self._length = len(self._offsets) - 1
+            self._length = self._get_length()
         return self._length
 
 
@@ -58,13 +52,16 @@ class RandomAccessCsv(RandomAccessText):
         if header:
             with open(path, encoding=encoding) as f:
                 self._header = next(csv.reader(f, delimiter=delimiter))
+            self._offset = 2
         else:
             self._header = None
 
-    def _initialize_offsets(self):
-        super()._initialize_offsets()
-        if self._header is not None:
-            self._offsets.pop(0)
+    def _get_length(self) -> int:
+        length = super()._get_length()
+        if self._header is None:
+            return length
+        else:
+            return length - 1
 
     def __iter__(self) -> Iterator[Union[List[str], Dict[str, str]]]:
         with open(self._path, encoding=self._encoding) as f:
