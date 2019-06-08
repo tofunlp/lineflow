@@ -61,6 +61,11 @@ class RandomAccessCsv(RandomAccessText):
         else:
             self._header = None
 
+    def _initialize_offsets(self):
+        super()._initialize_offsets()
+        if self._header is not None:
+            self._offsets.pop(0)
+
     def __iter__(self) -> Iterator[Union[List[str], Dict[str, str]]]:
         with open(self._path, encoding=self._encoding) as f:
             if self._header is None:
@@ -71,22 +76,12 @@ class RandomAccessCsv(RandomAccessText):
                 yield from reader
 
     def __getitem__(self, i: int) -> Union[List[str], Dict[str, str]]:
+        x = super().__getitem__(i)
         if self._header is None:
-            row = self._reader([super().__getitem__(i)],
-                               delimiter=self._delimiter)
+            row = self._reader([x], delimiter=self._delimiter)
         else:
-            row = self._reader([super().__getitem__(i + 1)],
-                               delimiter=self._delimiter,
-                               fieldnames=self._header)
+            row = self._reader([x], delimiter=self._delimiter, fieldnames=self._header)
         return next(row)
-
-    def __len__(self) -> int:
-        length = super().__len__()
-        if self._header is None:
-            return length
-        else:
-            self._length += 1
-            return length - 1
 
 
 class TextDataset(Dataset):
@@ -114,15 +109,5 @@ class CsvDataset(Dataset):
                  delimiter: str = ',',
                  header: bool = False) -> None:
 
-        super().__init__(RandomAccessCsv(path=path,
-                                         encoding=encoding,
-                                         delimiter=delimiter,
-                                         header=header))
-
-    @property
-    def _header(self):
-        return self._dataset._header
-
-    @_header.setter
-    def _header(self, header):
-        self._dataset._header = header
+        super().__init__(
+            RandomAccessCsv(path=path, encoding=encoding, delimiter=delimiter, header=header))
