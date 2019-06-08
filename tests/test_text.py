@@ -48,6 +48,47 @@ class RandomAccessTextTestCase(TestCase):
         self.assertEqual(len(text), self.length)
 
 
+class RandomAccessCsvTestCase(TestCase):
+
+    def setUp(self):
+        lines = ['en,ja',
+                 'this is English .,this is Japanese .',
+                 'this is also English .,this is also Japanese .']
+        self.lines = lines
+        fp = tempfile.NamedTemporaryFile()
+        for x in lines:
+            fp.write(f'{x}\n'.encode('utf-8'))
+        fp.seek(0)
+        self.fp = fp
+
+    def tearDown(self):
+        self.fp.close()
+
+    def test_loads_csv_with_header(self):
+        data = RandomAccessCsv(self.fp.name, header=True)
+        self.assertListEqual(data._header, self.lines[0].split(','))
+
+    def test_iterates_csv_with_header(self):
+        from collections import OrderedDict
+
+        data = RandomAccessCsv(self.fp.name, header=True)
+        expected = [OrderedDict(zip(data._header, line.split(','))) for line in self.lines[1:]]
+        self.assertSequenceEqual(data, expected)
+        for x, y in zip(data, expected):
+            self.assertEqual(x, y)
+
+    def test_loads_csv_without_header(self):
+        data = RandomAccessCsv(self.fp.name, header=False)
+        self.assertIsNone(data._header)
+
+    def test_iterates_csv_without_header(self):
+        data = RandomAccessCsv(self.fp.name, header=False)
+        expected = [line.split(',') for line in self.lines]
+        self.assertSequenceEqual(data, expected)
+        for x, y in zip(data, expected):
+            self.assertEqual(x, y)
+
+
 class TextDatasetTestCase(TestCase):
 
     def setUp(self):
@@ -126,49 +167,29 @@ class TextDatasetTestCase(TestCase):
 
 class CsvDatasetTestCase(TestCase):
 
-    def test_loads_csv_with_header(self):
+    def setUp(self):
         lines = ['en,ja',
                  'this is English .,this is Japanese .',
                  'this is also English .,this is also Japanese .']
+        self.lines = lines
         fp = tempfile.NamedTemporaryFile()
         for x in lines:
             fp.write(f'{x}\n'.encode('utf-8'))
         fp.seek(0)
+        self.fp = fp
 
-        ds = CsvDataset(fp.name, header=True)
+    def tearDown(self):
+        self.fp.close()
 
-        self.assertEqual(len(ds), len(lines) - 1)
-        self.assertListEqual(ds._header, lines[0].split(','))
+    def test_keeps_original_dataset(self):
+        data = CsvDataset(self.fp.name, header=True)
+        for i in range(100):
+            data = data.map(lambda x: x)
+            self.assertIsInstance(data._dataset, RandomAccessCsv)
+            self.assertEqual(len(data._funcs), i + 1)
 
-        header = ('EN', 'JA')
-        ds._header = header
-
-        for i, x in enumerate(ds, start=1):
-            y = dict(zip(header, lines[i].split(',')))
-            self.assertDictEqual(dict(x), y)
-            self.assertDictEqual(dict(ds[i - 1]), y)
-
-        self.assertIsInstance(ds._dataset, RandomAccessCsv)
-
-        fp.close()
-
-    def test_loads_csv_without_header(self):
-        lines = ['this is English .,this is Japanese .',
-                 'this is also English .,this is also Japanese .']
-        fp = tempfile.NamedTemporaryFile()
-        for x in lines:
-            fp.write(f'{x}\n'.encode('utf-8'))
-        fp.seek(0)
-
-        ds = CsvDataset(fp.name)
-
-        self.assertEqual(len(ds), len(lines))
-
-        for i, x in enumerate(ds):
-            y = lines[i].split(',')
-            self.assertListEqual(x, y)
-            self.assertListEqual(ds[i], y)
-
-        self.assertIsInstance(ds._dataset, RandomAccessCsv)
-
-        fp.close()
+        data = CsvDataset(self.fp.name)
+        for i in range(100):
+            data = data.map(lambda x: x)
+            self.assertIsInstance(data._dataset, RandomAccessCsv)
+            self.assertEqual(len(data._funcs), i + 1)
