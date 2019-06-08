@@ -28,19 +28,9 @@ class Seq2SeqDatasetTestCase(TestCase):
         self.target_fp = target_fp
         self.target_lines = target_lines
 
-        # Patch linecache
-        lines_dict = {source_fp.name: source_lines, target_fp.name: target_lines}
-        linecache_getline_patcher = patch('lineflow.text.linecache.getline')
-        linecache_getline_mock = linecache_getline_patcher.start()
-        linecache_getline_mock.side_effect = lambda filename, i: lines_dict[filename][i - 1]
-
-        self.linecache_getline_patcher = linecache_getline_patcher
-        self.linecache_getline_mock = linecache_getline_mock
-
     def tearDown(self):
         self.source_fp.close()
         self.target_fp.close()
-        self.linecache_getline_patcher.stop()
 
     def test_init(self):
         ds = Seq2SeqDataset(self.source_fp.name, self.target_fp.name)

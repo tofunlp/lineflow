@@ -1,6 +1,6 @@
-from lineflow.download import cached_download
 from lineflow import Dataset
-from lineflow.text import CsvDataset
+from lineflow.download import cached_download
+from lineflow.text import RandomAccessCsv
 
 
 TRAIN_URL = 'https://raw.githubusercontent.com/wasiahmad/paraphrase_identification/master/dataset/msr-paraphrase-corpus/msr_paraphrase_train.txt'  # NOQA
@@ -17,7 +17,7 @@ class MsrParaphrase(Dataset):
         else:
             raise ValueError(f"only 'train' and 'test' are valid for 'split', but '{split}' is given.")
 
-        dataset = CsvDataset(path, header=True, delimiter='\t')
-        dataset._header = ('quality', '#1id', '#2id', '#1string', '#2string')
+        dataset = RandomAccessCsv(path, encoding='utf-8', header=True, delimiter='\t')
+        dataset._header = ('quality', 'id1', 'id2', 'string1', 'string2')
 
         super().__init__(dataset)

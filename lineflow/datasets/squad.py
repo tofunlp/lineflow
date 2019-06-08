@@ -2,7 +2,7 @@ import json
 
 from lineflow.download import cached_download
 from lineflow.core import MapDataset
-from lineflow.text import SingleTextDataset
+from lineflow.text import RandomAccessText
 
 
 TRAIN_V1_URL = 'https://github.com/yasufumy/SQuAD_JSONL/blob/master/dataset/train-v1.1.jsonl?raw=true'
@@ -32,6 +32,6 @@ class Squad(MapDataset):
         else:
             raise ValueError(f"only 'train' and 'dev' are valid for 'split', but '{split}' is given.")
 
-        dataset = SingleTextDataset(path)
+        dataset = RandomAccessText(path)
 
         super().__init__(dataset, json.loads)
