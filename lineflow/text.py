@@ -3,7 +3,7 @@ import os
 import os.path as osp
 import csv
 import mmap
-import linecache
+import threading
 
 from lineflow import Dataset
 from lineflow.core import RandomAccessConcat, RandomAccessZip
@@ -16,12 +16,22 @@ class RandomAccessText:
         self._path = path
         self._encoding = encoding
         self._length = None
-        self._offset = 1
+        self._initialize_variables()
 
-    def _get_length(self) -> int:
-        with open(self._path, 'r+', encoding=self._encoding) as f:
-            mm = mmap.mmap(f.fileno(), 0)
-            return sum(1 for _ in iter(mm.readline, b''))
+    def _initialize_variables(self) -> None:
+        self._offsets = None
+        self._mm = None
+        self._fp = None
+        self._lock = threading.Lock()
+        self._ready = False
+
+    def _prepare_reading(self) -> None:
+        fp = open(self._path, 'r+', encoding=self._encoding)
+        mm = mmap.mmap(fp.fileno(), 0)
+        self._offsets = [0] + [mm.tell() for _ in iter(mm.readline, b'')]
+        self._mm = mm
+        self._fp = fp
+        self._ready = True
 
     def __iter__(self) -> Iterator[str]:
         with open(self._path, encoding=self._encoding) as f:
@@ -29,13 +39,28 @@ class RandomAccessText:
                 yield line.rstrip(os.linesep)
 
     def __getitem__(self, index: int) -> str:
+        if not self._ready:
+            self._prepare_reading()
         if index < 0 or len(self) <= index:
             raise IndexError('RandomAccessText object index out of range')
-        return linecache.getline(self._path, index + self._offset).rstrip(os.linesep)
+        self._lock.acquire()
+        try:
+            self._mm.seek(self._offsets[index])
+            return self._mm.readline().decode('utf-8').rstrip(os.linesep)
+        finally:
+            self._lock.release()
+
+    def __del__(self) -> None:
+        if self._mm is not None:
+            self._mm.close()
+        if self._fp is not None:
+            self._fp.close()
 
     def __len__(self) -> int:
+        if not self._ready:
+            self._prepare_reading()
         if self._length is None:
-            self._length = self._get_length()
+            self._length = len(self._offsets) - 1
         return self._length
 
 
@@ -49,6 +74,7 @@ class RandomAccessCsv(RandomAccessText):
 
         self._delimiter = delimiter
         self._reader = csv.DictReader if header else csv.reader
+        self._header = header
         if header:
             with open(path, encoding=encoding) as f:
                 self._header = next(csv.reader(f, delimiter=delimiter))
@@ -56,12 +82,10 @@ class RandomAccessCsv(RandomAccessText):
         else:
             self._header = None
 
-    def _get_length(self) -> int:
-        length = super()._get_length()
-        if self._header is None:
-            return length
-        else:
-            return length - 1
+    def _prepare_reading(self) -> None:
+        super()._prepare_reading()
+        if self._header is not None:
+            self._offsets.pop(0)
 
     def __iter__(self) -> Iterator[Union[List[str], Dict[str, str]]]:
         with open(self._path, encoding=self._encoding) as f:
