@@ -1,15 +1,26 @@
+import tempfile
+import contextlib
 import hashlib
 import os
 import shutil
 import sys
 from urllib import request
 
-from .utils import tempdir
-
 
 _cache_root = os.environ.get(
     'LINEFLOW_CACHE_ROOT',
     os.path.join(os.path.expanduser('~'), '.lineflow', 'cache'))
+
+
+@contextlib.contextmanager
+def tempdir(**kwargs):
+    ignore_errors = kwargs.pop('ignore_errors', False)
+
+    temp_dir = tempfile.mkdtemp(**kwargs)
+    try:
+        yield temp_dir
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=ignore_errors)
 
 
 def get_cache_root() -> str:
