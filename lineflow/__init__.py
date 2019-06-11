@@ -14,3 +14,6 @@ from lineflow.cross_validation import split_dataset_n  # NOQA
 from lineflow.cross_validation import split_dataset_n_random  # NOQA
 from lineflow.cross_validation import get_cross_validation_datasets  # NOQA
 from lineflow.cross_validation import get_cross_validation_datasets_random  # NOQA
+
+from lineflow.utils import apply  # NOQA
+from lineflow.utils import apply_all  # NOQA
