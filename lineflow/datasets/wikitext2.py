@@ -1,5 +1,5 @@
 from lineflow.download import cached_download
-from lineflow.text import TextDataset
+from lineflow.text import Dataset, RandomAccessText
 
 
 TRAIN_URL = 'https://raw.githubusercontent.com/sobamchan/wikitext-2/master/train.txt'
@@ -7,7 +7,7 @@ VALID_URL = 'https://raw.githubusercontent.com/sobamchan/wikitext-2/master/valid
 TEST_URL = 'https://raw.githubusercontent.com/sobamchan/wikitext-2/master/test.txt'
 
 
-class WikiText(TextDataset):
+class WikiText2(Dataset):
     def __init__(self, split: str = 'train') -> None:
         if split == 'train':
             path = cached_download(TRAIN_URL)
@@ -16,5 +16,7 @@ class WikiText(TextDataset):
         elif split == 'test':
             path = cached_download(TEST_URL)
         else:
-            raise ValueError(f"only 'train', 'valid', and 'test' are valid for 'split', but '{split}' is give.")
-        super().__init__(path)
+            raise ValueError(f"only 'train', 'valid', and 'test' are valid for 'split', but '{split}' is given.")
+
+        dataset = RandomAccessText(path)
+        super().__init__(dataset)
