@@ -68,7 +68,6 @@ class RandomAccessCsv(RandomAccessText):
         if header:
             with open(path, encoding=encoding) as f:
                 self._header = next(csv.reader(f, delimiter=delimiter))
-            self._offset = 2
         else:
             self._header = None
 
