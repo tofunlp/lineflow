@@ -195,3 +195,13 @@ import lineflow.datasets as lfds
 train = lfds.Squad('train')
 dev = lfds.Squad('dev')
 ```
+
+[WikiText-2](https://blog.einstein.ai/the-wikitext-long-term-dependency-language-modeling-dataset/) (Added by [sobamchan](https://github.com/sobamchan), thanks.)
+
+```py
+import lineflow.datasets as lfds
+
+train = lfds.WikiText2('train')
+dev = lfds.WikiText2('dev')
+test = lfds.WikiText2('test')
+```
