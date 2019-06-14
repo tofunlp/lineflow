@@ -17,7 +17,7 @@ class SubDataset(Dataset):
         self._finish = finish
         self._size = finish - start
         if indices is not None and len(indices) != len(dataset):
-            msg = (f'order option must have the same length as the base '
+            msg = (f'indices option must have the same length as the base '
                    'dataset: len(indices) = {len(indices)} while len(dataset) = {len(dataset)}')
             raise ValueError(msg)
         self._indices = indices or list(range(len(dataset)))
