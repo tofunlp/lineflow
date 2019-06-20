@@ -13,3 +13,4 @@ pytest-cov = "*"
 [packages]
 allennlp = "*"
 torchtext = "*"
+textfile = "*"
