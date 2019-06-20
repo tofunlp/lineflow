@@ -1,5 +1,7 @@
+import textfile
+
 from lineflow.download import cached_download
-from lineflow.text import Dataset, RandomAccessText
+from lineflow.text import Dataset
 
 
 TRAIN_URL = 'https://raw.githubusercontent.com/sobamchan/wikitext-2/master/train.txt'
@@ -18,5 +20,5 @@ class WikiText2(Dataset):
         else:
             raise ValueError(f"only 'train', 'valid', and 'test' are valid for 'split', but '{split}' is given.")
 
-        dataset = RandomAccessText(path)
+        dataset = textfile.TextFile(path)
         super().__init__(dataset)
