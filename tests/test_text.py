@@ -1,86 +1,11 @@
 from unittest import TestCase
 import tempfile
 
+import textfile
+
 import lineflow
 from lineflow.core import RandomAccessConcat, RandomAccessZip
 from lineflow import TextDataset, CsvDataset
-from lineflow.text import RandomAccessText, RandomAccessCsv
-
-
-class RandomAccessTextTestCase(TestCase):
-
-    def setUp(self):
-        self.length = 100
-
-        fp = tempfile.NamedTemporaryFile()
-        for i in range(self.length):
-            fp.write(f'line #{i}\n'.encode('utf-8'))
-        fp.seek(0)
-        self.fp = fp
-
-    def tearDown(self):
-        self.fp.close()
-
-    def test_init(self):
-        text = RandomAccessText(self.fp.name)
-        self.assertEqual(text._path, self.fp.name)
-        self.assertEqual(text._length, None)
-
-    def test_getitem(self):
-        text = RandomAccessText(self.fp.name)
-        for i in range(self.length):
-            self.assertEqual(text[i], f'line #{i}')
-
-    def test_raises_index_error_with_invalid_index(self):
-        text = RandomAccessText(self.fp.name)
-        with self.assertRaises(IndexError):
-            text[-1]
-            text[self._length]
-
-    def test_len(self):
-        text = RandomAccessText(self.fp.name)
-        self.assertEqual(len(text), self.length)
-
-
-class RandomAccessCsvTestCase(TestCase):
-
-    def setUp(self):
-        lines = ['en,ja',
-                 'this is English .,this is Japanese .',
-                 'this is also English .,this is also Japanese .']
-        self.lines = lines
-        fp = tempfile.NamedTemporaryFile()
-        for x in lines:
-            fp.write(f'{x}\n'.encode('utf-8'))
-        fp.seek(0)
-        self.fp = fp
-
-    def tearDown(self):
-        self.fp.close()
-
-    def test_loads_csv_with_header(self):
-        data = RandomAccessCsv(self.fp.name, header=True)
-        self.assertListEqual(data._header, self.lines[0].split(','))
-
-    def test_iterates_csv_with_header(self):
-        from collections import OrderedDict
-
-        data = RandomAccessCsv(self.fp.name, header=True)
-        expected = [OrderedDict(zip(data._header, line.split(','))) for line in self.lines[1:]]
-        self.assertSequenceEqual(data, expected)
-        for x, y in zip(data, expected):
-            self.assertEqual(x, y)
-
-    def test_loads_csv_without_header(self):
-        data = RandomAccessCsv(self.fp.name, header=False)
-        self.assertIsNone(data._header)
-
-    def test_iterates_csv_without_header(self):
-        data = RandomAccessCsv(self.fp.name, header=False)
-        expected = [line.split(',') for line in self.lines]
-        self.assertSequenceEqual(data, expected)
-        for x, y in zip(data, expected):
-            self.assertEqual(x, y)
 
 
 class TextDatasetTestCase(TestCase):
@@ -114,7 +39,7 @@ class TextDatasetTestCase(TestCase):
         # check if length is cached
         self.assertEqual(len(data), len(lines))
 
-        self.assertIsInstance(data._dataset, RandomAccessText)
+        self.assertIsInstance(data._dataset, textfile.TextFile)
 
         data = data.map(str.split)
 
@@ -122,7 +47,7 @@ class TextDatasetTestCase(TestCase):
             self.assertEqual(x, y.split())
 
         self.assertIsInstance(data, lineflow.core.MapDataset)
-        self.assertIsInstance(data._dataset, RandomAccessText)
+        self.assertIsInstance(data._dataset, textfile.TextFile)
 
     def test_zips_multiple_files(self):
         fp = self.fp
@@ -179,11 +104,11 @@ class CsvDatasetTestCase(TestCase):
         data = CsvDataset(self.fp.name, header=True)
         for i in range(100):
             data = data.map(lambda x: x)
-            self.assertIsInstance(data._dataset, RandomAccessCsv)
+            self.assertIsInstance(data._dataset, textfile.CsvFile)
             self.assertEqual(len(data._funcs), i + 1)
 
         data = CsvDataset(self.fp.name)
         for i in range(100):
             data = data.map(lambda x: x)
-            self.assertIsInstance(data._dataset, RandomAccessCsv)
+            self.assertIsInstance(data._dataset, textfile.CsvFile)
             self.assertEqual(len(data._funcs), i + 1)
