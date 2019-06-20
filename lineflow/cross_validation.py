@@ -8,16 +8,16 @@ class SubDataset(Dataset):
     def __init__(self,
                  dataset: Dataset,
                  start: int,
-                 finish: int,
+                 end: int,
                  indices: List[int] = None) -> None:
-        if start < 0 or finish > len(dataset):
+        if start < 0 or end > len(dataset):
             raise ValueError('subset overruns the base dataset.')
         self._dataset = dataset
         self._start = start
-        self._finish = finish
-        self._size = finish - start
+        self._end = end
+        self._size = end - start
         if indices is not None and len(indices) != len(dataset):
-            msg = (f'order option must have the same length as the base '
+            msg = (f'indices option must have the same length as the base '
                    'dataset: len(indices) = {len(indices)} while len(dataset) = {len(dataset)}')
             raise ValueError(msg)
         self._indices = indices or list(range(len(dataset)))
@@ -26,7 +26,7 @@ class SubDataset(Dataset):
         return self._size
 
     def __iter__(self) -> Iterator[Any]:
-        for index in self._indices[self._start: self._finish]:
+        for index in self._indices[self._start: self._end]:
             yield self._dataset[index]
 
     def get_example(self, i: int) -> Any:
@@ -37,7 +37,7 @@ class SubDataset(Dataset):
         else:
             if i < -self._size:
                 raise IndexError('dataset index out of range')
-            index = self._finish + i
+            index = self._end + i
 
         return self._dataset[self._indices[index]]
 

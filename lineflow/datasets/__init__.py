@@ -5,3 +5,4 @@ from .imdb import Imdb  # NOQA
 from .msr_paraphrase import MsrParaphrase  # NOQA
 from .small_parallel_enja import SmallParallelEnJa  # NOQA
 from .squad import Squad  # NOQA
+from .wikitext2 import WikiText2  # NOQA
