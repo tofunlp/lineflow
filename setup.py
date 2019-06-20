@@ -23,6 +23,7 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
+    install_requires=['textfile'],
     tests_require=['pytest'],
     extras_require={
         'allennlp': ['allennlp'],
