@@ -1,4 +1,4 @@
-import textfile
+import easyfile
 
 from lineflow.download import cached_download
 from lineflow.text import Dataset
@@ -20,5 +20,5 @@ class WikiText2(Dataset):
         else:
             raise ValueError(f"only 'train', 'valid', and 'test' are valid for 'split', but '{split}' is given.")
 
-        dataset = textfile.TextFile(path)
+        dataset = easyfile.TextFile(path)
         super().__init__(dataset)

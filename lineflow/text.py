@@ -1,6 +1,6 @@
 from typing import Union, List
 
-import textfile
+import easyfile
 
 from lineflow import Dataset
 from lineflow.core import RandomAccessConcat, RandomAccessZip
@@ -12,12 +12,12 @@ class TextDataset(Dataset):
                  encoding: str = 'utf-8',
                  mode: str = 'zip') -> None:
         if isinstance(paths, str):
-            dataset = textfile.TextFile(paths, encoding)
+            dataset = easyfile.TextFile(paths, encoding)
         elif isinstance(paths, list):
             if mode == 'zip':
-                dataset = RandomAccessZip(*[textfile.TextFile(p, encoding) for p in paths])
+                dataset = RandomAccessZip(*[easyfile.TextFile(p, encoding) for p in paths])
             elif mode == 'concat':
-                dataset = RandomAccessConcat(*[textfile.TextFile(p, encoding) for p in paths])
+                dataset = RandomAccessConcat(*[easyfile.TextFile(p, encoding) for p in paths])
             else:
                 raise ValueError(f"only 'zip' and 'concat' are valid for 'mode', but '{mode}' is given.")
 
@@ -32,4 +32,4 @@ class CsvDataset(Dataset):
                  header: bool = False) -> None:
 
         super().__init__(
-            textfile.CsvFile(path=path, encoding=encoding, delimiter=delimiter, header=header))
+            easyfile.CsvFile(path=path, encoding=encoding, delimiter=delimiter, header=header))

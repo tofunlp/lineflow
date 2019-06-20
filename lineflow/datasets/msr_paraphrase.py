@@ -1,4 +1,4 @@
-import textfile
+import easyfile
 
 from lineflow import Dataset
 from lineflow.download import cached_download
@@ -18,7 +18,7 @@ class MsrParaphrase(Dataset):
         else:
             raise ValueError(f"only 'train' and 'test' are valid for 'split', but '{split}' is given.")
 
-        dataset = textfile.CsvFile(path, encoding='utf-8', header=True, delimiter='\t')
+        dataset = easyfile.CsvFile(path, encoding='utf-8', header=True, delimiter='\t')
         dataset._header = ('quality', 'id1', 'id2', 'string1', 'string2')
 
         super().__init__(dataset)

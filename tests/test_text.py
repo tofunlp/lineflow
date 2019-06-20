@@ -1,7 +1,7 @@
 from unittest import TestCase
 import tempfile
 
-import textfile
+import easyfile
 
 import lineflow
 from lineflow.core import RandomAccessConcat, RandomAccessZip
@@ -39,7 +39,7 @@ class TextDatasetTestCase(TestCase):
         # check if length is cached
         self.assertEqual(len(data), len(lines))
 
-        self.assertIsInstance(data._dataset, textfile.TextFile)
+        self.assertIsInstance(data._dataset, easyfile.TextFile)
 
         data = data.map(str.split)
 
@@ -47,7 +47,7 @@ class TextDatasetTestCase(TestCase):
             self.assertEqual(x, y.split())
 
         self.assertIsInstance(data, lineflow.core.MapDataset)
-        self.assertIsInstance(data._dataset, textfile.TextFile)
+        self.assertIsInstance(data._dataset, easyfile.TextFile)
 
     def test_zips_multiple_files(self):
         fp = self.fp
@@ -104,11 +104,11 @@ class CsvDatasetTestCase(TestCase):
         data = CsvDataset(self.fp.name, header=True)
         for i in range(100):
             data = data.map(lambda x: x)
-            self.assertIsInstance(data._dataset, textfile.CsvFile)
+            self.assertIsInstance(data._dataset, easyfile.CsvFile)
             self.assertEqual(len(data._funcs), i + 1)
 
         data = CsvDataset(self.fp.name)
         for i in range(100):
             data = data.map(lambda x: x)
-            self.assertIsInstance(data._dataset, textfile.CsvFile)
+            self.assertIsInstance(data._dataset, easyfile.CsvFile)
             self.assertEqual(len(data._funcs), i + 1)

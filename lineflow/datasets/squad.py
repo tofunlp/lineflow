@@ -1,6 +1,6 @@
 import json
 
-import textfile
+import easyfile
 
 from lineflow.download import cached_download
 from lineflow.core import MapDataset
@@ -33,6 +33,6 @@ class Squad(MapDataset):
         else:
             raise ValueError(f"only 'train' and 'dev' are valid for 'split', but '{split}' is given.")
 
-        dataset = textfile.TextFile(path)
+        dataset = easyfile.TextFile(path)
 
         super().__init__(dataset, json.loads)
