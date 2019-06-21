@@ -45,10 +45,10 @@
         },
         "awscli": {
             "hashes": [
-                "sha256:067f98cbf60c7b466df9dcee7757231b6209e09f1757f214c4bb464fa2d77358",
-                "sha256:db7d4ee6fd0b4904918d6cf26ddff11f88cda7f7cdb8c0e7110eba9661832139"
+                "sha256:3d26b70818510b89b25695b21ec8e7ad61a85323f6fb04f6fbf4a257152cf058",
+                "sha256:891d6ecb59f71def3ce9f231b977dd514e83358e3789ae77c466326f9dcb6b2a"
             ],
-            "version": "==1.16.182"
+            "version": "==1.16.183"
         },
         "babel": {
             "hashes": [
@@ -77,17 +77,17 @@
         },
         "boto3": {
             "hashes": [
-                "sha256:64acb422442042a6f908d03909d2e73a3f3ca2eed4252c8b6e3a460b43d316d1",
-                "sha256:e482f835cd547589bf9f11c5c1cbad5f3303105e1e909af620d3617c6dee08eb"
+                "sha256:1a0cc76f91f1c46804da4c6486ab4b806a765eaa3470a2d6c1cc6c1a0f466057",
+                "sha256:1cd2f629a1340d217e8cc746e9241fe8d51cb4e654050921b2cdb22498978b4c"
             ],
-            "version": "==1.9.172"
+            "version": "==1.9.173"
         },
         "botocore": {
             "hashes": [
-                "sha256:13e75f594c77988efd13f0862f3c7397d587e74b623fe0825d48b0ec0dc96d6b",
-                "sha256:1fa1ad4be9e9fea77eed7d5021be4283e9bcfecc60d2de83f96552025c4725d1"
+                "sha256:18903b5dabfc081ed7d00aac5365b46878f39ca4f4f5c91537510583697e4ae2",
+                "sha256:1b7adcd080fcb010831cbbbaa2e6de26b79401a021ad5462678a36711bf442ae"
             ],
-            "version": "==1.12.172"
+            "version": "==1.12.173"
         },
         "certifi": {
             "hashes": [
@@ -1117,10 +1117,10 @@
         },
         "jedi": {
             "hashes": [
-                "sha256:2bb0603e3506f708e792c7f4ad8fc2a7a9d9c2d292a358fbbd58da531695595b",
-                "sha256:2c6bcd9545c7d6440951b12b44d373479bf18123a401a52025cf98563fbd826c"
+                "sha256:49ccb782651bb6f7009810d17a3316f8867dde31654c750506970742e18b553d",
+                "sha256:79d0f6595f3846dffcbe667cc6dc821b96e5baa8add125176c31a3917eb19d58"
             ],
-            "version": "==0.13.3"
+            "version": "==0.14.0"
         },
         "mccabe": {
             "hashes": [
@@ -1146,10 +1146,10 @@
         },
         "parso": {
             "hashes": [
-                "sha256:17cc2d7a945eb42c3569d4564cdf49bde221bc2b552af3eca9c1aad517dcdd33",
-                "sha256:2e9574cb12e7112a87253e14e2c380ce312060269d04bd018478a3c92ea9a376"
+                "sha256:5052bb33be034cba784193e74b1cde6ebf29ae8b8c1e4ad94df0c4209bfc4826",
+                "sha256:db5881df1643bf3e66c097bfd8935cf03eae73f4cb61ae4433c9ea4fb6613446"
             ],
-            "version": "==0.4.0"
+            "version": "==0.5.0"
         },
         "pexpect": {
             "hashes": [
