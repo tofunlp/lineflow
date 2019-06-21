@@ -1,33 +1,21 @@
-# lineflow: Framework-Agnostic NLP Data Loader in Python
+# Lineflow: Framework-Agnostic NLP Data Loader in Python
 [![Build Status](https://travis-ci.org/yasufumy/lineflow.svg?branch=master)](https://travis-ci.org/yasufumy/lineflow)
 [![codecov](https://codecov.io/gh/yasufumy/lineflow/branch/master/graph/badge.svg)](https://codecov.io/gh/yasufumy/lineflow)
 
-lineflow is a simple text dataset loader for NLP deep learning tasks.
+Lineflow is a simple text dataset loader for NLP deep learning tasks.
 
-- lineflow was designed to use in all deep learning frameworks.
-- lineflow enables you to build pipelines.
-- lineflow supports functional API and lazy evaluation.
+- Lineflow was designed to use in all deep learning frameworks.
+- Lineflow enables you to build pipelines.
+- Lineflow supports functional API and lazy evaluation.
 
-lineflow is heavily inspired by [tensorflow.data.Dataset](https://www.tensorflow.org/api_docs/python/tf/data/Dataset) and [chainer.dataset](https://docs.chainer.org/en/stable/reference/datasets.html).
+Lineflow is heavily inspired by [tensorflow.data.Dataset](https://www.tensorflow.org/api_docs/python/tf/data/Dataset) and [chainer.dataset](https://docs.chainer.org/en/stable/reference/datasets.html).
 
 ## Installation
 
-To install lineflow, simply:
+To install Lineflow:
 
 ```sh
 pip install lineflow
-```
-
-If you'd like to use lineflow with [AllenNLP](https://allennlp.org/):
-
-```sh
-pip install "lineflow[allennlp]"
-```
-
-Also, if you'd like to use lineflow with [torchtext](https://torchtext.readthedocs.io/en/latest/):
-
-```sh
-pip install "lineflow[torchtext]"
 ```
 
 ## Basic Usage
@@ -48,103 +36,41 @@ ds = lf.TextDataset('/path/to/text')
 ds.first()  # "i 'm a line 1 ."
 ds.all() # ["i 'm a line 1 .", "i 'm a line 2 .", "i 'm a line 3 ."]
 len(ds)  # 3
+ds.map(lambda x: x.split()).first()  # ["i", "'m", "a", "line", "1", "."]
 ```
 
-## lineflow with PyTorch, torchtext, AllenNLP
+## Example
 
-- [PyTorch](#pytorch)
-- [torchtext](#torchtext)
-- [AllenNLP](#allennlp)
+- Please check out the [examples/small\_parallel\_enja\_pytorch.py](https://github.com/yasufumy/lineflow/blob/feature/readme/examples/small_parallel_enja_pytorch.py) to see how to tokenize a sentence, build vocabulary, and do indexing.
+- Also check out the other [examples](https://github.com/yasufumy/lineflow/tree/master/examples) to see how to use Lineflow.
 
-You can find more examples [here](https://github.com/yasufumy/lineflow/tree/master/examples).
-
-
-### PyTorch
-
-You can check full code [here](https://github.com/yasufumy/lineflow/blob/master/examples/small_parallel_enja_pytorch.py).
+Load the predefined dataset:
 
 ```py
-...
-import lineflow as lf
-import lineflow.datasets as lfds
-
-...
-
-
-if __name__ == '__main__':
-    train = lfds.SmallParallelEnJa('train')
-    validation = lfds.SmallParallelEnJa('dev')
-
-    train = train.map(preprocess)
-    validation = validation.map(preprocess)
-
-    en_tokens = lf.flat_map(lambda x: x[0],
-                            train + validation,
-                            lazy=True)
-    ja_tokens = lf.flat_map(lambda x: x[1],
-                            train + validation,
-                            lazy=True)
-
-    en_token_to_index, _ = build_vocab(en_tokens, 'en.vocab')
-    ja_token_to_index, _ = build_vocab(ja_tokens, 'ja.vocab')
-
-    ...
-
-    loader = DataLoader(
-        train
-        .map(postprocess(en_token_to_index, en_unk_index, ja_token_to_index, ja_unk_index))
-        .save('enja.cache'),
-        batch_size=32,
-        num_workers=4,
-        collate_fn=get_collate_fn(pad_index))
+>>> import lineflow.datasets as lfds
+>>> train = lfds.SmallParallelEnJa('train')
+>>> train.first()
+("i can 't tell who will arrive first .", '誰 が 一番 に 着 く か 私 に は 分か り ま せ ん 。')
 ```
 
-### torchtext
-
-You can check full code [here](https://github.com/yasufumy/lineflow/blob/master/examples/small_parallel_enja_torchtext.py).
+Split the sentence to the words:
 
 ```py
-...
-import lineflow.datasets as lfds
-
-
-if __name__ == '__main__':
-    src = data.Field(tokenize=str.split, init_token='<s>', eos_token='</s>')
-    tgt = data.Field(tokenize=str.split, init_token='<s>', eos_token='</s>')
-    fields = [('src', src), ('tgt', tgt)]
-    train = lfds.SmallParallelEnJa('train').to_torchtext(fields)
-    validation = lfds.SmallParallelEnJa('dev').to_torchtext(fields)
-
-    src.build_vocab(train, validation)
-    tgt.build_vocab(train, validation)
-
-    iterator = data.BucketIterator(
-        dataset=train, batch_size=32, sort_key=lambda x: len(x.src))
+>>> # continuing from above
+>>> train = train.map(lambda x: (x[0].split(), x[1].split()))
+>>> train.first()
+(['i', 'can', "'t", 'tell', 'who', 'will', 'arrive', 'first', '.'],
+ ['誰', 'が', '一番', 'に', '着', 'く', 'か', '私', 'に', 'は', '分か', 'り', 'ま', 'せ', 'ん', '。'])
 ```
 
-### AllenNLP
-
-You can check full code [here](https://github.com/yasufumy/lineflow/blob/master/examples/small_parallel_enja_allennlp.py).
+Obtain words in dataset:
 
 ```py
-...
-import lineflow.datasets as lfds
-
-
-if __name__ == '__main__':
-    train = lfds.SmallParallelEnJa('train') \
-        .to_allennlp(source_field_name=SOURCE_FIELD_NAME, target_field_name=TARGET_FIELD_NAME).all()
-    validation = lfds.SmallParallelEnJa('dev') \
-        .to_allennlp(source_field_name=SOURCE_FIELD_NAME, target_field_name=TARGET_FIELD_NAME).all()
-
-    if not osp.exists('./enja_vocab'):
-        vocab = Vocabulary.from_instances(train + validation, max_vocab_size=50000)
-        vocab.save_to_files('./enja_vocab')
-    else:
-        vocab = Vocabulary.from_files('./enja_vocab')
-
-    iterator = BucketIterator(sorting_keys=[(SOURCE_FIELD_NAME, 'num_tokens')], batch_size=32)
-    iterator.index_with(vocab)
+>>> # continuing from above
+>>> import lineflow as lf
+>>> en_tokens = lf.flat_map(lambda x: x[0], train)
+>>> en_tokens[:5] # This is useful to build vocabulary.
+['i', 'can', "'t", 'tell', 'who']
 ```
 
 ## Datasets

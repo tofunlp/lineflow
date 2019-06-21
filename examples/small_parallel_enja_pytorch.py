@@ -1,9 +1,11 @@
 import os.path as osp
 import pickle
 from collections import Counter
+import random
 
 import torch
 from torch.utils.data import DataLoader
+from torch.utils.data import Sampler, BatchSampler
 
 from tqdm import tqdm
 
@@ -19,11 +21,61 @@ END_TOKEN = '</s>'
 IGNORE_INDEX = -100
 
 
+class SortedSampler(Sampler):
+    def __init__(self, dataset, sort_key, sorting_size=None):
+        self._num_samples = len(dataset)
+        self._dataset = dataset
+        self._sort_key = sort_key
+        self._sorting_size = sorting_size or self._num_samples
+
+    def __iter__(self):
+        chunk = []
+        for i, x in enumerate(self._dataset):
+            chunk.append((i, self._sort_key(x)))
+            if len(chunk) == self._sorting_size:
+                chunk.sort(key=lambda x: x[1])
+                yield from (i for i, _ in chunk)
+                chunk = []
+        if chunk:
+            chunk.sort(key=lambda x: x[1])
+            yield from (i for i, _ in chunk)
+
+    def __len__(self):
+        return self._num_samples
+
+
+class RandomBatchSampler(BatchSampler):
+    def __init__(self, sampler, batch_size, drop_last, pool_size=100):
+        super().__init__(sampler, batch_size, drop_last)
+
+        self.pool_size = pool_size
+
+    def __iter__(self):
+        bucket = []
+        batch = []
+        for index in self.sampler:
+            batch.append(index)
+            if len(batch) == self.batch_size:
+                bucket.append(batch)
+                batch = []
+            if len(bucket) == self.pool_size:
+                random.shuffle(bucket)
+                yield from bucket
+                bucket = []
+        if len(bucket) > 0:
+            yield from bucket
+        if len(batch) > 0 and not self.drop_last:
+            yield batch
+
+
+def to_dict(x):
+    return {'en': x[0], 'ja': x[1]}
+
+
+@lf.apply('en')
+@lf.apply('ja')
 def preprocess(x):
-    source_string = x[0]
-    target_string = x[1]
-    return ([START_TOKEN] + source_string.split() + [END_TOKEN],
-            [START_TOKEN] + target_string.split() + [END_TOKEN])
+    return [START_TOKEN] + x.split() + [END_TOKEN]
 
 
 def build_vocab(tokens, cache='vocab.pkl', max_size=50000):
@@ -47,20 +99,16 @@ def build_vocab(tokens, cache='vocab.pkl', max_size=50000):
     return token_to_index, words
 
 
-def postprocess(en_token_to_index,
-                en_unk_index,
-                ja_token_to_index,
-                ja_unk_index):
-    def f(x):
-        source_ids = [en_token_to_index.get(token, en_unk_index) for token in x[0]]
-        target_ids = [ja_token_to_index.get(token, ja_unk_index) for token in x[1]]
-        return source_ids, target_ids
-    return f
+def get_indexer(key, token_to_index, unk_index):
+    @lf.apply(key)
+    def indexing(x):
+        return [token_to_index.get(token, unk_index) for token in x]
+    return indexing
 
 
 def get_collate_fn(pad_index):
     def f(batch):
-        src, tgt = zip(*batch)
+        src, tgt = zip(*((x['en'], x['ja']) for x in batch))
         src_max_length = max(len(x) for x in src)
         tgt_max_length = max(len(y) for y in tgt)
         padded_src = [x + [pad_index] * (src_max_length - len(x)) for x in src]
@@ -71,16 +119,16 @@ def get_collate_fn(pad_index):
 
 if __name__ == '__main__':
     print('Reading...')
-    train = lfds.SmallParallelEnJa('train')
-    validation = lfds.SmallParallelEnJa('dev')
+    train = lfds.SmallParallelEnJa('train').map(to_dict)
+    validation = lfds.SmallParallelEnJa('dev').map(to_dict)
 
     train = train.map(preprocess)
     validation = validation.map(preprocess)
 
-    en_tokens = lf.flat_map(lambda x: x[0],
+    en_tokens = lf.flat_map(lambda x: x['en'],
                             train + validation,
                             lazy=True)
-    ja_tokens = lf.flat_map(lambda x: x[1],
+    ja_tokens = lf.flat_map(lambda x: x['ja'],
                             train + validation,
                             lazy=True)
     print('Building vocabulary...')
@@ -89,15 +137,23 @@ if __name__ == '__main__':
     print(f'Vocab Size: {len(en_token_to_index)}')
     print(f'Vocab Size: {len(ja_token_to_index)}')
 
-    pad_index = en_token_to_index[PAD_TOKEN]
     en_unk_index = en_token_to_index[UNK_TOKEN]
     ja_unk_index = ja_token_to_index[UNK_TOKEN]
 
+    train = train \
+        .map(get_indexer('en', en_token_to_index, en_token_to_index)) \
+        .map(get_indexer('ja', ja_token_to_index, ja_token_to_index))
+
+    pad_index = en_token_to_index[PAD_TOKEN]
+
+    batch_size = 64
+    pool_size = 100
+
     loader = DataLoader(
-        train
-        .map(postprocess(en_token_to_index, en_unk_index, ja_token_to_index, ja_unk_index))
-        .save('enja.cache'),
-        batch_size=32,
+        train,
+        batch_sampler=RandomBatchSampler(
+            SortedSampler(train, lambda x: - len(x['en']), batch_size * pool_size),
+            batch_size, False, pool_size),
         num_workers=4,
         collate_fn=get_collate_fn(pad_index))
 
