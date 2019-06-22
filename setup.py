@@ -27,5 +27,6 @@ setup(
     tests_require=['pytest'],
     extras_require={
         'allennlp': ['allennlp'],
+        'pytorch': ['pytorch'],
         'torchtext': ['torchtext']}
 )
