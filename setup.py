@@ -16,7 +16,7 @@ setup(
     author='Yasufumi Taniguchi',
     author_email='yasufumi.taniguchi@gmail.com',
     packages=[
-        'lineflow', 'lineflow.datasets'
+        'lineflow', 'lineflow.datasets', 'lineflow.torch'
     ],
     license='MIT',
     classifiers=[
