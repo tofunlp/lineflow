@@ -22,8 +22,8 @@ class TextDataset(Dataset):
             worker_id = worker_info.id
             num_workers = worker_info.num_workers
             fp, end = self._read_block(worker_id, num_workers)
-            for line in io.TextIOWrapper(fp, encoding=self._encoding):
-                yield line.rstrip(os.linesep)
+            for line in fp:
+                yield line.decode(self._encoding).rstrip(os.linesep)
                 if fp.tell() >= end:
                     break
             fp.close()
