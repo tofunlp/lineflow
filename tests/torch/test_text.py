@@ -1,5 +1,8 @@
 from unittest import TestCase
 import tempfile
+from itertools import chain
+
+from torch.utils.data import DataLoader
 
 from lineflow.torch import TextDataset
 
@@ -26,10 +29,17 @@ class TextDatasetTestCase(TestCase):
         for x, i in zip(self.data, range(self.n)):
             self.assertEqual(x, f'line #{str(i).zfill(3)}')
 
-    def test_pytorch_dataloader(self):
-        from itertools import chain
-        from torch.utils.data import DataLoader
+    def test_loads_with_torch_dataloader(self):
         loader = DataLoader(self.data,
+                            batch_size=16,
+                            collate_fn=lambda x: x,
+                            shuffle=False,
+                            num_workers=2)
+        for x, i in zip(sorted(chain.from_iterable(loader)), range(self.n)):
+            self.assertEqual(x, f'line #{str(i).zfill(3)}')
+
+    def test_loads_with_torch_dataloader_after_shuffle(self):
+        loader = DataLoader(self.data.shuffle(16 * 2),
                             batch_size=16,
                             collate_fn=lambda x: x,
                             shuffle=False,
