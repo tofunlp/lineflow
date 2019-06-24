@@ -17,6 +17,11 @@ class Dataset(IterableDataset):
     def take(self, n) -> List[Any]:
         return list(itertools.islice(self, n))
 
+    def apply(self,
+              transformation_func: Callable[[Iterator[Any]], Iterator[Any]]
+              ) -> 'ApplyDataset':
+        return ApplyDataset(self, transformation_func)
+
     def map(self, map_func: Callable[[Any], Any]) -> 'MapDataset':
         return MapDataset(self, map_func)
 
@@ -32,6 +37,21 @@ class Dataset(IterableDataset):
     @staticmethod
     def range(n: int) -> 'RangeDataset':
         return RangeDataset(n)
+
+
+class ApplyDataset(Dataset):
+    def __init__(self,
+                 dataset: Dataset,
+                 transformation_func: Callable[[Iterator[Any]], Iterator[Any]]
+                 ) -> None:
+        assert isinstance(dataset, Dataset)
+        assert callable(transformation_func)
+
+        self._transformation_func = transformation_func
+        self._dataset = dataset
+
+    def __iter__(self) -> Iterator[Any]:
+        return self._transformation_func(self._dataset)
 
 
 class MapDataset(Dataset):
