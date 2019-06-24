@@ -90,3 +90,19 @@ class ShuffleDataset(Dataset):
         if chunk:
             random.shuffle(chunk)
             yield from chunk
+
+
+class RangeDataset(Dataset):
+    def __init__(self, n: int) -> None:
+        self._n = n
+
+    def __iter__(self) -> Iterator[int]:
+        worker_info = get_worker_info()
+        if worker_info is None:
+            yield from range(self._n)
+        else:
+            per_worker = math.ceil(self._n / worker_info.num_workers)
+            worker_id = worker_info.id
+            start = worker_id * per_worker
+            end = min(start + per_worker, self._n)
+            yield from range(start, end)
