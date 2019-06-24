@@ -41,7 +41,7 @@ ds.map(lambda x: x.split()).first()  # ["i", "'m", "a", "line", "1", "."]
 
 ## Example
 
-- Please check out the [examples/small\_parallel\_enja\_pytorch.py](https://github.com/yasufumy/lineflow/blob/feature/readme/examples/small_parallel_enja_pytorch.py) to see how to tokenize a sentence, build vocabulary, and do indexing.
+- Please check out the [examples/small\_parallel\_enja\_pytorch.py](https://github.com/yasufumy/lineflow/blob/master/examples/small_parallel_enja_pytorch.py) to see how to tokenize a sentence, build vocabulary, and do indexing.
 - Also check out the other [examples](https://github.com/yasufumy/lineflow/tree/master/examples) to see how to use Lineflow.
 
 Load the predefined dataset:
