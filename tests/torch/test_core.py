@@ -9,6 +9,17 @@ class DatasetTestCase(TestCase):
         self.base = range(100)
         self.data = Dataset.range(100)
 
+    def test_apply(self):
+        def f(it):
+            for x in it:
+                if x % 2 == 0:
+                    yield x ** 2
+
+        expected = map(lambda x: x ** 2, filter(lambda x: x % 2 == 0, self.base))
+
+        for x, y in zip(self.data.apply(f), expected):
+            self.assertEqual(x, y)
+
     def test_map(self):
         def f(x): return x ** 2
 
