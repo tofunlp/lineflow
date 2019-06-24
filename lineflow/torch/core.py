@@ -1,77 +1,76 @@
+from typing import Any, Iterator, Iterable, List, Callable
+import math
 import random
 import itertools
 
 from torch.utils.data import IterableDataset
+from torch.utils.data import get_worker_info
 
 
 class Dataset(IterableDataset):
-    def __init__(self, dataset):
-        self._dataset = dataset
-
-    def __iter__(self):
-        yield from self._dataset
-
-    def all(self):
+    def all(self) -> List[Any]:
         return list(self)
 
-    def first(self):
+    def first(self) -> Any:
         return next(iter(self))
 
-    def take(self, n):
+    def take(self, n) -> List[Any]:
         return list(itertools.islice(self, n))
 
-    def map(self, map_func):
+    def map(self, map_func: Callable[[Any], Any]) -> 'MapDataset':
         return MapDataset(self, map_func)
 
-    def flat_map(self, map_func):
+    def flat_map(self, map_func: Callable[[Any], Iterable[Any]]) -> 'FlatMapDataset':
         return FlatMapDataset(self, map_func)
 
-    def filter(self, predicate):
+    def filter(self, predicate: Callable[[Any], bool]) -> 'FilterDataset':
         return FilterDataset(self, predicate)
 
-    def shuffle(self, buffer_size=None):
+    def shuffle(self, buffer_size: int = None) -> 'ShuffleDataset':
         return ShuffleDataset(self, buffer_size)
+
+    @staticmethod
+    def range(n: int) -> 'RangeDataset':
+        return RangeDataset(n)
 
 
 class MapDataset(Dataset):
-    def __init__(self, dataset, map_func):
+    def __init__(self, dataset: Dataset, map_func: Callable[[Any], Any]) -> None:
+        assert isinstance(dataset, Dataset)
         assert callable(map_func)
 
-        self._dataset = dataset
         self._map_func = map_func
+        self._dataset = dataset
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Any]:
         yield from map(self._map_func, self._dataset)
 
 
-class FlatMapDataset(Dataset):
-    def __init__(self, dataset, map_func):
-        assert callable(map_func)
-
-        self._dataset = dataset
-        self._map_func = map_func
-
-    def __iter__(self):
+class FlatMapDataset(MapDataset):
+    def __iter__(self) -> Iterator[Any]:
         yield from itertools.chain.from_iterable(map(self._map_func, self._dataset))
 
 
 class FilterDataset(Dataset):
-    def __init__(self, dataset, predicate):
+    def __init__(self, dataset: Dataset, predicate: Callable[[Any], bool]) -> None:
+        assert isinstance(dataset, Dataset)
         assert callable(predicate)
 
-        self._dataset = dataset
         self._predicate = predicate
+        self._dataset = dataset
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[Any]:
         yield from filter(self._predicate, self._dataset)
 
 
 class ShuffleDataset(Dataset):
-    def __init__(self, dataset, buffer_size=None):
-        self._dataset = dataset
-        self._buffer_size = buffer_size
+    def __init__(self, dataset: Dataset, buffer_size: int = None) -> None:
+        assert isinstance(dataset, Dataset)
 
-    def __iter__(self):
+        self._buffer_size = buffer_size
+        self._dataset = dataset
+
+    def __iter__(self) -> Iterator[Any]:
         chunk = []
 
         if self._buffer_size is None:

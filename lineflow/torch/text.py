@@ -1,3 +1,4 @@
+from typing import Iterator, Tuple
 import os
 import io
 
@@ -7,12 +8,12 @@ from lineflow.torch import Dataset
 
 
 class TextDataset(Dataset):
-    def __init__(self, path, encoding='utf-8'):
+    def __init__(self, path: str, encoding: str = 'utf-8') -> None:
         self._path = path
         self._encoding = encoding
         self._total_size = os.stat(path).st_size
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[str]:
         worker_info = get_worker_info()
         if worker_info is None:
             with io.open(self._path, 'r', encoding=self._encoding) as fp:
@@ -28,7 +29,9 @@ class TextDataset(Dataset):
                     break
             fp.close()
 
-    def _read_block(self, worker_id, num_workers):
+    def _read_block(self,
+                    worker_id: int,
+                    num_workers: int) -> Tuple[io.BufferedReader, int]:
         chunk_size = self._total_size // num_workers
         fp = io.open(self._path, 'rb')
         # end position
