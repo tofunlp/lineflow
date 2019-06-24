@@ -28,8 +28,12 @@ class DatasetTestCase(TestCase):
         for x, y in zip(self.data.flat_map(f), chain.from_iterable(map(f, self.base))):
             self.assertEqual(x, y)
 
-    def test_shuffle(self):
+    def test_shuffles_data_with_buffer(self):
         for x, y in zip(sorted(self.data.shuffle(3)), self.base):
+            self.assertEqual(x, y)
+
+    def test_shuffles_data_without_buffer(self):
+        for x, y in zip(sorted(self.data.shuffle()), self.base):
             self.assertEqual(x, y)
 
     def test_all(self):
