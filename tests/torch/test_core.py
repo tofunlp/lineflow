@@ -7,7 +7,7 @@ class DatasetTestCase(TestCase):
 
     def setUp(self):
         self.base = range(100)
-        self.data = Dataset(self.base)
+        self.data = Dataset.range(100)
 
     def test_map(self):
         def f(x): return x ** 2
@@ -45,3 +45,16 @@ class DatasetTestCase(TestCase):
     def test_take(self):
         n = 50
         self.assertListEqual(self.data.take(n), list(self.base[:n]))
+
+    def test_range_with_pytorch_dataloader(self):
+        from itertools import chain
+        from torch.utils.data import DataLoader
+        loader = DataLoader(self.data,
+                            batch_size=16,
+                            collate_fn=lambda x: x,
+                            shuffle=False,
+                            num_workers=2)
+        self.assertListEqual(
+            list(sorted(chain.from_iterable(loader))),
+            list(self.base)
+        )
