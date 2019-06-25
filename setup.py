@@ -16,7 +16,7 @@ setup(
     author='Yasufumi Taniguchi',
     author_email='yasufumi.taniguchi@gmail.com',
     packages=[
-        'lineflow', 'lineflow.datasets'
+        'lineflow', 'lineflow.datasets', 'lineflow.torch'
     ],
     license='MIT',
     classifiers=[
@@ -27,5 +27,12 @@ setup(
     tests_require=['pytest'],
     extras_require={
         'allennlp': ['allennlp'],
-        'torchtext': ['torchtext']}
+        'pytorch': ['torch_nightly'],
+        'torchtext': ['torchtext']
+    },
+    dependency_links=[
+        'https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html',
+        'https://download.pytorch.org/whl/nightly/cu90/torch_nightly.html',
+        'https://download.pytorch.org/whl/nightly/cu100/torch_nightly.html',
+    ],
 )
