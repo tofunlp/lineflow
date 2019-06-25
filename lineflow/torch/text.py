@@ -1,4 +1,4 @@
-from typing import Iterator, Tuple
+from typing import Iterator
 import os
 import io
 
@@ -9,9 +9,10 @@ from lineflow.torch import Dataset
 
 class TextDataset(Dataset):
     def __init__(self, path: str, encoding: str = 'utf-8') -> None:
+        assert os.path.exists(path)
+
         self._path = path
         self._encoding = encoding
-        self._total_size = os.stat(path).st_size
 
     def __iter__(self) -> Iterator[str]:
         worker_info = get_worker_info()
@@ -22,30 +23,7 @@ class TextDataset(Dataset):
         else:
             worker_id = worker_info.id
             num_workers = worker_info.num_workers
-            fp, end = self._read_block(worker_id, num_workers)
-            for line in fp:
-                yield line.decode(self._encoding).rstrip(os.linesep)
-                if fp.tell() >= end:
-                    break
-            fp.close()
-
-    def _read_block(self,
-                    worker_id: int,
-                    num_workers: int) -> Tuple[io.BufferedReader, int]:
-        chunk_size = self._total_size // num_workers
-        fp = io.open(self._path, 'rb')
-        # end position
-        if (worker_id + 1) == num_workers:
-            end = self._total_size
-        else:
-            offset = chunk_size * (worker_id + 1)
-            fp.seek(offset)
-            end = offset + len(fp.readline())
-        # start position
-        if worker_id == 0:
-            fp.seek(0)
-        else:
-            offset = chunk_size * worker_id
-            fp.seek(offset)
-            fp.readline()
-        return fp, end
+            with io.open(self._path, 'rb') as fp:
+                for i, line in enumerate(fp):
+                    if i % num_workers == worker_id:
+                        yield line.decode(self._encoding).rstrip(os.linesep)
