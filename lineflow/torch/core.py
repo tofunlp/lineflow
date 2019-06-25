@@ -2,6 +2,7 @@ from typing import Any, Iterator, Iterable, List, Callable
 import math
 import random
 import itertools
+import collections
 
 from torch.utils.data import IterableDataset
 from torch.utils.data import get_worker_info
@@ -33,6 +34,9 @@ class Dataset(IterableDataset):
 
     def shuffle(self, buffer_size: int = None) -> 'ShuffleDataset':
         return ShuffleDataset(self, buffer_size)
+
+    def window(self, window_size: int, shift: int = None) -> 'WindowDataset':
+        return WindowDataset(self, window_size, shift)
 
     @staticmethod
     def range(n: int) -> 'RangeDataset':
@@ -125,3 +129,34 @@ class RangeDataset(Dataset):
             start = worker_id * per_worker
             end = min(start + per_worker, self._n)
             yield from range(start, end)
+
+
+class WindowDataset(Dataset):
+    def __init__(self, dataset: Dataset, window_size: int, shift: int = None) -> None:
+        assert isinstance(dataset, Dataset)
+
+        self._dataset = dataset
+        self._window_size = window_size
+        self._shift = shift or 1
+
+    def __iter__(self) -> Iterator[Any]:
+        iterator = iter(self._dataset)
+        window = collections.deque([], self._window_size)
+        append = window.append
+
+        for _ in range(self._window_size):
+            append(next(iterator))
+        yield tuple(window)
+
+        i = 0
+        for x in iterator:
+            append(x)
+            i = (i + 1) % self._shift
+            if i % self._shift == 0:
+                yield tuple(window)
+
+        if (i % self._shift) and (self._shift - i < self._window_size):
+            popleft = window.popleft
+            for _ in range(self._shift - i):
+                popleft()
+        yield tuple(window)
