@@ -1,4 +1,5 @@
 from unittest import TestCase
+from itertools import chain
 
 from lineflow.torch import Dataset
 
@@ -33,7 +34,6 @@ class DatasetTestCase(TestCase):
             self.assertEqual(x, y)
 
     def test_flat_map(self):
-        from itertools import chain
         def f(x): return [x] * 5
 
         for x, y in zip(self.data.flat_map(f), chain.from_iterable(map(f, self.base))):
@@ -58,7 +58,6 @@ class DatasetTestCase(TestCase):
         self.assertListEqual(self.data.take(n), list(self.base[:n]))
 
     def test_range_with_pytorch_dataloader(self):
-        from itertools import chain
         from torch.utils.data import DataLoader
         loader = DataLoader(self.data,
                             batch_size=16,
@@ -69,3 +68,7 @@ class DatasetTestCase(TestCase):
             list(sorted(chain.from_iterable(loader))),
             list(self.base)
         )
+
+    def test_window(self):
+        for x, y in zip(chain.from_iterable(self.data.window(3, 3)), self.base):
+            self.assertEqual(x, y)
