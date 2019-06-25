@@ -14,7 +14,6 @@ class TextDatasetTestCase(TestCase):
         self.n = 100
         for i in range(self.n):
             self.fp.write(f'line #{str(i).zfill(3)}\n'.encode('utf-8'))
-        self.size = self.fp.tell()
         self.fp.seek(0)
         self.data = TextDataset(self.fp.name)
 
@@ -23,7 +22,6 @@ class TextDatasetTestCase(TestCase):
 
     def test_dunder_init(self):
         self.assertEqual(self.data._path, self.fp.name)
-        self.assertEqual(self.data._total_size, self.size)
 
     def test_dunder_iter(self):
         for x, i in zip(self.data, range(self.n)):
