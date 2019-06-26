@@ -2,7 +2,7 @@
 try:
     from setuptools import setup
 except ImportError:
-    from distuils.core import setup
+    from distutils.core import setup
 
 
 setup(
@@ -16,7 +16,7 @@ setup(
     author='Yasufumi Taniguchi',
     author_email='yasufumi.taniguchi@gmail.com',
     packages=[
-        'lineflow', 'lineflow.datasets', 'lineflow.torch'
+        'lineflow', 'lineflow.datasets'
     ],
     license='MIT',
     classifiers=[
@@ -27,12 +27,6 @@ setup(
     tests_require=['pytest'],
     extras_require={
         'allennlp': ['allennlp'],
-        'pytorch': ['torch_nightly'],
         'torchtext': ['torchtext']
     },
-    dependency_links=[
-        'https://download.pytorch.org/whl/nightly/cpu/torch_nightly.html',
-        'https://download.pytorch.org/whl/nightly/cu90/torch_nightly.html',
-        'https://download.pytorch.org/whl/nightly/cu100/torch_nightly.html',
-    ],
 )
