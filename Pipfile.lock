@@ -45,10 +45,10 @@
         },
         "awscli": {
             "hashes": [
-                "sha256:42cc603a0b488af28557655372eda096f1e2ffd18beef01c3f8709e8cba630a0",
-                "sha256:753bc4bf21b1d58fb2b64814b90f1dd34af5c79244f35868e74057af7c3f25e5"
+                "sha256:c9f2c1611a9348998c338b6c166a605a32909a8eb8dbec731ff3ce131862ad2f",
+                "sha256:e119c3c850178f86136d60834f5ec89fbbb6932b634d17913ed4412d932948b5"
             ],
-            "version": "==1.16.184"
+            "version": "==1.16.186"
         },
         "babel": {
             "hashes": [
@@ -77,17 +77,17 @@
         },
         "boto3": {
             "hashes": [
-                "sha256:73b65793f12141e14393a4f321861f3f33b68f9dfe4f14b7e65cdbfda5c7ccdb",
-                "sha256:e6472861a88d0bb47844c7d03764b730c7fb9ab393a5f0a29f6b4dc0b20bee3d"
+                "sha256:25095a83429a429a6a3186f6aaa1c170011b8791929a84af3373775850ab2e07",
+                "sha256:cb584b7112901f0bffa0ddc784b32e09b2ee0e530b03067224f7484667d0c189"
             ],
-            "version": "==1.9.174"
+            "version": "==1.9.176"
         },
         "botocore": {
             "hashes": [
-                "sha256:3356e72901d5a4259b8858785e415a895641454971e3fa67b4076b4c9bed543d",
-                "sha256:f7220c6dd551724d4af796fb7ddfef6d423bade92e78c3cc2282953b38dfb259"
+                "sha256:9010ba5240cb85cdba0a280c054607a432d4ee1484b6d17d056b76f326141bde",
+                "sha256:bc64583e25823764da3603048bd7664e5736aea06c26d4e9e3722876689fbc6a"
             ],
-            "version": "==1.12.174"
+            "version": "==1.12.176"
         },
         "certifi": {
             "hashes": [
@@ -212,10 +212,10 @@
         },
         "flaky": {
             "hashes": [
-                "sha256:12bd5e41f372b2190e8d754b6e5829c2f11dbc764e10b30f57e59f829c9ca1da",
-                "sha256:a94931c46a33469ec26f09b652bc88f55a8f5cc77807b90ca7bbafef1108fd7d"
+                "sha256:36fa125bceebfe869739b62e203db4653488dff09615e5a4f3d7607d48363c6a",
+                "sha256:c24e321b3b4b4a2d323b646acff6738e7601849832f4280864d69f00a6a9869d"
             ],
-            "version": "==3.5.3"
+            "version": "==3.6.0"
         },
         "flask": {
             "hashes": [
@@ -800,10 +800,9 @@
         },
         "snowballstemmer": {
             "hashes": [
-                "sha256:919f26a68b2c17a7634da993d91339e288964f93c274f1343e3bbbe2096e1128",
-                "sha256:9f3bcd3c401c3e862ec0ebe6d2c069ebc012ce142cce209c098ccb5b09136e89"
+                "sha256:9f3b9ffe0809d174f7047e121431acf99c89a7040f0ca84f94ba53a498e6d0c9"
             ],
-            "version": "==1.2.1"
+            "version": "==1.9.0"
         },
         "spacy": {
             "hashes": [
