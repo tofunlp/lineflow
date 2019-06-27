@@ -113,15 +113,6 @@ class Dataset:
                 pickle.dump(cache, f)
         return CacheDataset(self, cache)
 
-    @staticmethod
-    def load(filename: str) -> 'Dataset':
-        warnings.warn(
-            'lineflow.Dataset.load is deprecated. Please refer to '
-            'lineflow.load.',
-            DeprecationWarning,
-            stacklevel=2)
-        return lineflow_load(filename)
-
 
 class ConcatDataset(Dataset):
     def __init__(self, *datasets: List[Dataset]) -> None:

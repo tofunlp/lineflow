@@ -236,24 +236,6 @@ class DatasetTestCase(TestCase):
         pickle_load_mock.assert_called_once_with(fp)
         self.assertIsInstance(data, lineflow.core.CacheDataset)
 
-    @patch('lineflow.core.open')
-    @patch('lineflow.core.pickle.load')
-    def test_load(self, pickle_load_mock, open_mock):
-        pickle_load_mock.return_value = list(self.base)
-        enter_mock = Mock()
-        open_mock.return_value.__enter__.return_value = enter_mock
-
-        filepath = '/path/to/dataset'
-        data = lineflow.load(filepath)
-        open_mock.assert_called_once_with(filepath, 'rb')
-        pickle_load_mock.assert_called_once_with(enter_mock)
-
-        self.assertListEqual(data.all(), list(self.base))
-        self.assertEqual(data._dataset, list(self.base))
-
-        with self.assertWarns(DeprecationWarning):
-            lineflow.Dataset.load(filepath)
-
 
 class LineflowConcatTestCase(TestCase):
 
@@ -368,3 +350,22 @@ class LineflowWindowTestCase(TestCase):
         self.assertIsInstance(result, Generator)
         for x, y in zip(result, self.expected):
             self.assertTupleEqual(x, y)
+
+
+class LineflowLoadTestCase(TestCase):
+
+    @patch('lineflow.core.open')
+    @patch('lineflow.core.pickle.load')
+    def test_load(self, pickle_load_mock, open_mock):
+        target = list(range(100))
+        pickle_load_mock.return_value = target
+        enter_mock = Mock()
+        open_mock.return_value.__enter__.return_value = enter_mock
+
+        filepath = '/path/to/dataset'
+        data = lineflow.load(filepath)
+        open_mock.assert_called_once_with(filepath, 'rb')
+        pickle_load_mock.assert_called_once_with(enter_mock)
+
+        self.assertListEqual(data.all(), target)
+        self.assertEqual(data._dataset, target)
