@@ -1,5 +1,6 @@
 from unittest import TestCase
 from unittest.mock import patch, Mock
+import itertools
 
 import lineflow
 from lineflow import Dataset
@@ -26,8 +27,6 @@ class RandomAccessConcatTestCase(TestCase):
         self.assertIsNone(self.data._length)
 
     def test_supports_random_access_lazily(self):
-        import itertools
-
         self.assertIsNone(self.data._offsets)
         self.assertSequenceEqual(self.data, list(self.base) * self.n)
         expected_lengths = list(itertools.accumulate(len(self.base) for _ in range(self.n)))
@@ -334,11 +333,38 @@ class LineflowFlatMapTestCase(TestCase):
         self.assertListEqual(result, expected)
 
     def test_returns_flat_mapped_data_lazily(self):
-        import itertools
-
         result = lineflow.flat_map(lambda x: [x] * 3, self.data, lazy=True)
         self.assertIsInstance(result, itertools.chain)
         expected = list(itertools.chain.from_iterable(
             [[x] * 3 for x in self.data]))
         for x, y in zip(result, expected):
             self.assertEqual(x, y)
+
+
+class LineflowWindowTestCase(TestCase):
+
+    def setUp(self):
+        self.data = Dataset(range(100))
+        window_size = 3
+        expected = []
+        it = iter(range(100))
+        window = tuple(itertools.islice(it, window_size))
+        while window:
+            expected.append(window)
+            window = tuple(itertools.islice(it, window_size))
+        self.expected = expected
+        self.window_size = window_size
+
+    def test_returns_windowed_data_eagerly(self):
+        result = lineflow.window(self.data, self.window_size)
+        self.assertIsInstance(result, list)
+        for x, y in zip(result, self.expected):
+            self.assertTupleEqual(x, y)
+
+    def test_returns_windowed_data_lazily(self):
+        from collections.abc import Generator
+
+        result = lineflow.window(self.data, self.window_size, lazy=True)
+        self.assertIsInstance(result, Generator)
+        for x, y in zip(result, self.expected):
+            self.assertTupleEqual(x, y)
