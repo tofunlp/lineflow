@@ -1,5 +1,4 @@
 from typing import Sequence, Any, Union, Callable, List, Tuple, Iterator, Iterable
-import warnings
 import pickle
 import copy
 from pathlib import Path
