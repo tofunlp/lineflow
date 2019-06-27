@@ -4,6 +4,7 @@ import pickle
 import copy
 from pathlib import Path
 from itertools import accumulate, chain, islice
+from collections import deque
 import bisect
 
 
@@ -213,6 +214,42 @@ def lineflow_flat_map(
         dataset: Dataset,
         lazy: bool = False) -> Union[Iterator[Any], List[Any]]:
     iterator = chain.from_iterable(map(map_func, dataset))
+    if lazy:
+        return iterator
+    else:
+        return list(iterator)
+
+
+def lineflow_window(
+        dataset: Dataset,
+        window_size: int,
+        shift: int = None,
+        lazy: bool = False) -> Union[Iterator[Any], List[Any]]:
+    shift = shift or window_size
+
+    def generator():
+        iterator = iter(dataset)
+        window = deque([], window_size)
+        append = window.append
+
+        for _ in range(window_size):
+            append(next(iterator))
+        yield tuple(window)
+
+        i = 0
+        for x in iterator:
+            append(x)
+            i = (i + 1) % shift
+            if i % shift == 0:
+                yield tuple(window)
+
+        if (i % shift) and (shift - i < window_size):
+            popleft = window.popleft
+            for _ in range(shift - i):
+                popleft()
+        yield tuple(window)
+
+    iterator = generator()
     if lazy:
         return iterator
     else:
