@@ -18,7 +18,7 @@ class MapFunction:
                 x = list(x)
                 x[key] = self._func(x[key])
                 x = tuple(x)
-            elif isinstance(x, dict) or isinstance(x, list):
+            elif isinstance(x, (dict, list)):
                 x[key] = self._func(x[key])
             else:
                 raise TypeError(f'Passed argument should be tuple, list or dict',
