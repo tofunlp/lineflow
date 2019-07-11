@@ -3,7 +3,7 @@ from typing import Union, List
 import easyfile
 
 from lineflow import Dataset
-from lineflow.core import RandomAccessConcat, RandomAccessZip
+from lineflow.core import IndexedConcat, IndexedZip
 
 
 class TextDataset(Dataset):
@@ -15,9 +15,9 @@ class TextDataset(Dataset):
             dataset = easyfile.TextFile(paths, encoding)
         elif isinstance(paths, list):
             if mode == 'zip':
-                dataset = RandomAccessZip(*[easyfile.TextFile(p, encoding) for p in paths])
+                dataset = IndexedZip(*[easyfile.TextFile(p, encoding) for p in paths])
             elif mode == 'concat':
-                dataset = RandomAccessConcat(*[easyfile.TextFile(p, encoding) for p in paths])
+                dataset = IndexedConcat(*[easyfile.TextFile(p, encoding) for p in paths])
             else:
                 raise ValueError(f"only 'zip' and 'concat' are valid for 'mode', but '{mode}' is given.")
 

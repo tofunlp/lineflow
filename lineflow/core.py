@@ -7,37 +7,62 @@ from collections import deque
 import bisect
 
 
-class RandomAccessConcat:
+class IndexedMixin:
+    def __getitem__(self, index: Union[int, slice]) -> Union[Any, List[Any]]:
+        if isinstance(index, slice):
+            start, stop, step = index.indices(len(self))
+            return [self.get_example(i) for i in range(start, stop, step)]
+
+        if index >= 0:
+            if index >= len(self):
+                raise IndexError(f'{self.__class__.__name__} object index out of range')
+        else:
+            if index < - len(self):
+                raise IndexError(f'{self.__class__.__name__} object index out of range')
+            index += len(self)
+
+        return self.get_example(index)
+
+    def get_example(self, i: int) -> Any:
+        raise NotImplementedError
+
+    def __len__(self) -> int:
+        raise NotImplementedError
+
+
+class IndexedConcat(IndexedMixin):
     def __init__(self, *datasets: List[Sequence[Any]]) -> None:
         self._datasets = datasets
         self._offsets = None
         self._length = None
+        self._ready = False
 
-    def _initialize_offsets(self) -> None:
+    def _prepare(self) -> None:
+        if self._ready:
+            return
         self._lengths = list(accumulate(len(d) for d in self._datasets))
         self._offsets = [0] + self._lengths[:-1]
+        self._length = self._lengths[-1]
+        self._ready = True
 
     def __iter__(self) -> Iterator[Any]:
         for d in self._datasets:
             yield from d
 
-    def __getitem__(self, index: int) -> Any:
-        if self._offsets is None:
-            self._initialize_offsets()
-        if index < 0 or len(self) <= index:
-            raise IndexError('RandomAccessConcat object index out of range')
-        j = bisect.bisect_right(self._lengths, index)
-        return self._datasets[j][index - self._offsets[j]]
+    def __getitem__(self, index: Union[int, slice]) -> Union[Any, List[Any]]:
+        self._prepare()
+        return super().__getitem__(index)
+
+    def get_example(self, i: int) -> Any:
+        j = bisect.bisect_right(self._lengths, i)
+        return self._datasets[j][i - self._offsets[j]]
 
     def __len__(self) -> int:
-        if self._offsets is None:
-            self._initialize_offsets()
-        if self._length is None:
-            self._length = self._lengths[-1]
+        self._prepare()
         return self._length
 
 
-class RandomAccessZip:
+class IndexedZip(IndexedMixin):
     def __init__(self, *datasets: List[Sequence[Any]]) -> None:
         self._datasets = datasets
         self._length = None
@@ -45,10 +70,8 @@ class RandomAccessZip:
     def __iter__(self) -> Iterator[Tuple[Any]]:
         yield from zip(*self._datasets)
 
-    def __getitem__(self, index: int) -> Tuple[Any]:
-        if index < 0 or len(self) <= index:
-            raise IndexError('RandomAccessZip object index out of range')
-        return tuple(d[index] for d in self._datasets)
+    def get_example(self, i: int) -> Tuple[Any]:
+        return tuple(d[i] for d in self._datasets)
 
     def __len__(self) -> int:
         if self._length is None:
@@ -56,7 +79,7 @@ class RandomAccessZip:
         return self._length
 
 
-class Dataset:
+class Dataset(IndexedMixin):
     def __init__(self,
                  dataset: Sequence[Any]) -> None:
         self._dataset = dataset
@@ -64,12 +87,6 @@ class Dataset:
 
     def __iter__(self) -> Iterator[Any]:
         yield from self._dataset
-
-    def __getitem__(self, index: Union[int, slice]) -> Any:
-        if isinstance(index, slice):
-            start, stop, step = index.indices(len(self))
-            return [self.get_example(i) for i in range(start, stop, step)]
-        return self.get_example(index)
 
     def __len__(self) -> int:
         if self._length is None:
@@ -117,14 +134,14 @@ class ConcatDataset(Dataset):
     def __init__(self, *datasets: List[Dataset]) -> None:
         assert all(isinstance(d, Dataset) for d in datasets)
 
-        super().__init__(RandomAccessConcat(*datasets))
+        super().__init__(IndexedConcat(*datasets))
 
 
 class ZipDataset(Dataset):
     def __init__(self, *datasets: List[Dataset]) -> None:
         assert all(isinstance(d, Dataset) for d in datasets)
 
-        super().__init__(RandomAccessZip(*datasets))
+        super().__init__(IndexedZip(*datasets))
 
 
 class MapDataset(Dataset):

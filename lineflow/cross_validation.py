@@ -30,16 +30,7 @@ class SubDataset(Dataset):
             yield self._dataset[index]
 
     def get_example(self, i: int) -> Any:
-        if i >= 0:
-            if i >= self._size:
-                raise IndexError('dataset index out of range')
-            index = self._start + i
-        else:
-            if i < -self._size:
-                raise IndexError('dataset index out of range')
-            index = self._end + i
-
-        return self._dataset[self._indices[index]]
+        return self._dataset[self._indices[self._start + i]]
 
 
 def split_dataset(dataset: Dataset,

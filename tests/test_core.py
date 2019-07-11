@@ -4,27 +4,40 @@ import itertools
 
 import lineflow
 from lineflow import Dataset
+from lineflow.core import IndexedMixin, IndexedConcat, IndexedZip
 from lineflow.core import ConcatDataset, ZipDataset
-from lineflow.core import RandomAccessConcat, RandomAccessZip
 
 
-class RandomAccessConcatTestCase(TestCase):
+class IndexedMixinTestCase(TestCase):
+
+    def test_get_example(self):
+        with self.assertRaises(NotImplementedError):
+            IndexedMixin().get_example(0)
+
+    def test_dunder_len(self):
+        with self.assertRaises(NotImplementedError):
+            len(IndexedMixin())
+
+
+class IndexedConcatTestCase(TestCase):
 
     def setUp(self):
         self.n = 5
         self.base = range(100)
-        self.data = RandomAccessConcat(*[self.base for _ in range(5)])
+        self.data = IndexedConcat(*[self.base for _ in range(5)])
 
-    def test_init(self):
+    def test_dunder_init(self):
         self.assertEqual(len(self.data._datasets), self.n)
         self.assertIsNone(self.data._offsets)
         self.assertIsNone(self.data._length)
+        self.assertFalse(self.data._ready)
 
-    def test_iter(self):
+    def test_dunder_iter(self):
         for x, y in zip(self.data, list(self.base) * self.n):
             self.assertEqual(x, y)
         self.assertIsNone(self.data._offsets)
         self.assertIsNone(self.data._length)
+        self.assertFalse(self.data._ready)
 
     def test_supports_random_access_lazily(self):
         self.assertIsNone(self.data._offsets)
@@ -44,18 +57,18 @@ class RandomAccessConcatTestCase(TestCase):
         self.assertEqual(self.data._length, len(self.data))
 
 
-class RandomAccessZipTestCase(TestCase):
+class IndexedZipTestCase(TestCase):
 
     def setUp(self):
         self.n = 5
         self.base = range(100)
-        self.data = RandomAccessZip(*[self.base for _ in range(5)])
+        self.data = IndexedZip(*[self.base for _ in range(5)])
 
-    def test_init(self):
+    def test_dunder_init(self):
         self.assertEqual(len(self.data._datasets), self.n)
         self.assertIsNone(self.data._length)
 
-    def test_iter(self):
+    def test_dunder_iter(self):
         for x, y in zip(self.data, self.base):
             self.assertEqual(x, tuple([y] * self.n))
         self.assertIsNone(self.data._length)
@@ -80,7 +93,7 @@ class DatasetTestCase(TestCase):
         self.base = range(100)
         self.data = Dataset(self.base)
 
-    def test_getitem(self):
+    def test_dunder_getitem(self):
         self.assertSequenceEqual(self.data, self.base)
 
     def test_supports_slicing(self):
@@ -89,10 +102,10 @@ class DatasetTestCase(TestCase):
         self.assertListEqual(self.data[slice1], list(self.base[slice1]))
         self.assertListEqual(self.data[slice2], list(self.base[slice2]))
 
-    def test_len(self):
+    def test_dunder_len(self):
         self.assertEqual(len(self.data), len(self.base))
 
-    def test_add(self):
+    def test_dunder_add(self):
         data = self.data + self.data + self.data
         expected = list(self.base) * 3
         self.assertSequenceEqual(data, expected)
@@ -246,7 +259,7 @@ class LineflowConcatTestCase(TestCase):
 
     def test_returns_concat_dataset(self):
         self.assertIsInstance(self.data, ConcatDataset)
-        self.assertIsInstance(self.data._dataset, RandomAccessConcat)
+        self.assertIsInstance(self.data._dataset, IndexedConcat)
 
     def test_keeps_original_dataset_after_multiple_maps(self):
         def f(x): return x
@@ -254,7 +267,7 @@ class LineflowConcatTestCase(TestCase):
         data = self.data
         for i in range(100):
             data = data.map(f)
-            self.assertIsInstance(data._dataset, RandomAccessConcat)
+            self.assertIsInstance(data._dataset, IndexedConcat)
             self.assertEqual(len(data._funcs), i + 1)
 
     def test_supports_random_access(self):
@@ -270,7 +283,7 @@ class LineflowZipTestCase(TestCase):
 
     def test_returns_zip_dataset(self):
         self.assertIsInstance(self.data, ZipDataset)
-        self.assertIsInstance(self.data._dataset, RandomAccessZip)
+        self.assertIsInstance(self.data._dataset, IndexedZip)
 
     def test_keeps_original_dataset_after_multiple_maps(self):
         def f(x): return x
@@ -278,7 +291,7 @@ class LineflowZipTestCase(TestCase):
         data = self.data
         for i in range(100):
             data = data.map(f)
-            self.assertIsInstance(data._dataset, RandomAccessZip)
+            self.assertIsInstance(data._dataset, IndexedZip)
             self.assertEqual(len(data._funcs), i + 1)
 
     def test_supports_random_access(self):
