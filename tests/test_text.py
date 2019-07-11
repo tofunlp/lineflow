@@ -4,7 +4,7 @@ import tempfile
 import easyfile
 
 import lineflow
-from lineflow.core import RandomAccessConcat, RandomAccessZip
+from lineflow.core import IndexedConcat, IndexedZip
 from lineflow import TextDataset, CsvDataset
 
 
@@ -27,13 +27,14 @@ class TextDatasetTestCase(TestCase):
         lines = self.lines
 
         data = TextDataset(fp.name)
+        self.assertEqual(data._length, None)
+
         for x, y in zip(data, lines):
             self.assertEqual(x, y)
 
         for i, y in enumerate(lines):
             self.assertEqual(data[i], y)
 
-        self.assertEqual(data._length, None)
         self.assertEqual(len(data), len(lines))
         self.assertEqual(data._length, len(lines))
         # check if length is cached
@@ -60,8 +61,8 @@ class TextDatasetTestCase(TestCase):
             self.assertTupleEqual(data[j], (y, y))
         self.assertEqual(len(data), len(lines))
         self.assertEqual(data._length, len(lines))
-        self.assertIsInstance(data._dataset, RandomAccessZip)
-        self.assertIsInstance(data.map(lambda x: x)._dataset, RandomAccessZip)
+        self.assertIsInstance(data._dataset, IndexedZip)
+        self.assertIsInstance(data.map(lambda x: x)._dataset, IndexedZip)
 
     def test_concats_multiple_files(self):
         fp = self.fp
@@ -76,8 +77,8 @@ class TextDatasetTestCase(TestCase):
         self.assertEqual(data._length, len(lines) * 2)
 
         self.assertEqual(data[len(data) - 1], lines[-1])
-        self.assertIsInstance(data._dataset, RandomAccessConcat)
-        self.assertIsInstance(data.map(lambda x: x)._dataset, RandomAccessConcat)
+        self.assertIsInstance(data._dataset, IndexedConcat)
+        self.assertIsInstance(data.map(lambda x: x)._dataset, IndexedConcat)
 
     def test_raises_value_error_with_invalid_mode(self):
         with self.assertRaises(ValueError):

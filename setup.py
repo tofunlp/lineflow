@@ -25,8 +25,4 @@ setup(
     ],
     install_requires=['easyfile'],
     tests_require=['pytest'],
-    extras_require={
-        'allennlp': ['allennlp'],
-        'torchtext': ['torchtext']
-    },
 )
