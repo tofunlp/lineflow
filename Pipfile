@@ -11,6 +11,4 @@ autopep8 = "*"
 pytest-cov = "*"
 
 [packages]
-allennlp = "*"
-torchtext = "*"
 easyfile = "*"
