@@ -44,10 +44,8 @@ class DatasetMixin(metaclass=ABCMeta):
 
     @classmethod
     def __subclasshook__(cls, C):
-        print('hoge')
         if cls is DatasetMixin:
             return _check_methods(C, '__iter__', 'get_example', '__len__')
-        print('fuga')
         return NotImplemented
 
 
