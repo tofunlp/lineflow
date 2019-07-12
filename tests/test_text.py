@@ -4,7 +4,6 @@ import tempfile
 import easyfile
 
 import lineflow
-from lineflow.core import IndexedConcat, IndexedZip
 from lineflow import TextDataset, CsvDataset
 
 
@@ -48,7 +47,7 @@ class TextDatasetTestCase(TestCase):
             self.assertEqual(x, y.split())
 
         self.assertIsInstance(data, lineflow.core.MapDataset)
-        self.assertIsInstance(data._dataset, easyfile.TextFile)
+        self.assertIsInstance(data._dataset, TextDataset)
 
     def test_zips_multiple_files(self):
         fp = self.fp
@@ -61,8 +60,8 @@ class TextDatasetTestCase(TestCase):
             self.assertTupleEqual(data[j], (y, y))
         self.assertEqual(len(data), len(lines))
         self.assertEqual(data._length, len(lines))
-        self.assertIsInstance(data._dataset, IndexedZip)
-        self.assertIsInstance(data.map(lambda x: x)._dataset, IndexedZip)
+        self.assertIsInstance(data._dataset, lineflow.core.ZipDataset)
+        self.assertIsInstance(data.map(lambda x: x)._dataset, TextDataset)
 
     def test_concats_multiple_files(self):
         fp = self.fp
@@ -77,8 +76,8 @@ class TextDatasetTestCase(TestCase):
         self.assertEqual(data._length, len(lines) * 2)
 
         self.assertEqual(data[len(data) - 1], lines[-1])
-        self.assertIsInstance(data._dataset, IndexedConcat)
-        self.assertIsInstance(data.map(lambda x: x)._dataset, IndexedConcat)
+        self.assertIsInstance(data._dataset, lineflow.core.ConcatDataset)
+        self.assertIsInstance(data.map(lambda x: x)._dataset, TextDataset)
 
     def test_raises_value_error_with_invalid_mode(self):
         with self.assertRaises(ValueError):
@@ -101,15 +100,15 @@ class CsvDatasetTestCase(TestCase):
     def tearDown(self):
         self.fp.close()
 
-    def test_keeps_original_dataset(self):
+    def test_loads_csv_with_header(self):
         data = CsvDataset(self.fp.name, header=True)
-        for i in range(100):
-            data = data.map(lambda x: x)
-            self.assertIsInstance(data._dataset, easyfile.CsvFile)
-            self.assertEqual(len(data._funcs), i + 1)
+        self.assertIsInstance(data._dataset, easyfile.CsvFile)
+        data = data.map(dict)
+        header = self.lines[0].split(',')
+        expected = [dict(zip(header, l.split(','))) for l in self.lines[1:]]
+        self.assertSequenceEqual(data, expected)
 
+    def test_loads_csv_without_header(self):
         data = CsvDataset(self.fp.name)
-        for i in range(100):
-            data = data.map(lambda x: x)
-            self.assertIsInstance(data._dataset, easyfile.CsvFile)
-            self.assertEqual(len(data._funcs), i + 1)
+        self.assertIsInstance(data._dataset, easyfile.CsvFile)
+        self.assertSequenceEqual(data, [l.split(',') for l in self.lines])

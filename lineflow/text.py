@@ -3,7 +3,7 @@ from typing import Union, List
 import easyfile
 
 from lineflow import Dataset
-from lineflow.core import IndexedConcat, IndexedZip
+from lineflow.core import ConcatDataset, ZipDataset
 
 
 class TextDataset(Dataset):
@@ -15,9 +15,9 @@ class TextDataset(Dataset):
             dataset = easyfile.TextFile(paths, encoding)
         elif isinstance(paths, list):
             if mode == 'zip':
-                dataset = IndexedZip(*[easyfile.TextFile(p, encoding) for p in paths])
+                dataset = ZipDataset(*[easyfile.TextFile(p, encoding) for p in paths])
             elif mode == 'concat':
-                dataset = IndexedConcat(*[easyfile.TextFile(p, encoding) for p in paths])
+                dataset = ConcatDataset(*[easyfile.TextFile(p, encoding) for p in paths])
             else:
                 raise ValueError(f"only 'zip' and 'concat' are valid for 'mode', but '{mode}' is given.")
 
