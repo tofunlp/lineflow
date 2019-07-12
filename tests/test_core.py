@@ -4,27 +4,76 @@ import itertools
 
 import lineflow
 from lineflow import Dataset
-from lineflow.core import IndexedMixin, IndexedConcat, IndexedZip
+from lineflow.core import DatasetMixin
 from lineflow.core import ConcatDataset, ZipDataset
 
 
-class IndexedMixinTestCase(TestCase):
+class DatasetMixinMixinTestCase(TestCase):
+
+    def test_acts_list(self):
+        self.assertIsInstance([], DatasetMixin)
+
+    def test_acts_tuple(self):
+        self.assertIsInstance((), DatasetMixin)
+
+    def test_acts_range(self):
+        self.assertIsInstance(range(0), DatasetMixin)
+
+    def test_dunder_iter(self):
+        class ImplementedIter(DatasetMixin):
+            def __iter__(self):
+                return super(ImplementedIter, self).__iter__()
+
+            def get_example(self): ...
+
+            def __len__(self): ...
+
+        d = ImplementedIter()
+        self.assertListEqual([], list(d))
 
     def test_get_example(self):
-        with self.assertRaises(NotImplementedError):
-            IndexedMixin().get_example(0)
+        class ImplementedGetExample(DatasetMixin):
+            def __iter__(self): ...
+
+            def get_example(self, i):
+                return super(ImplementedGetExample, self).get_example(i)
+
+            def __len__(self):
+                return 1
+
+        d = ImplementedGetExample()
+        with self.assertRaises(IndexError):
+            d[0]
 
     def test_dunder_len(self):
-        with self.assertRaises(NotImplementedError):
-            len(IndexedMixin())
+        class ImplementedLen(DatasetMixin):
+            def __iter__(self): ...
+
+            def get_example(self, i): ...
+
+            def __len__(self):
+                return super(ImplementedLen, self).__len__()
+
+        d = ImplementedLen()
+        self.assertEqual(len(d), 0)
+
+    def test_dunder_subclasshook(self):
+        class Dummy(DatasetMixin):
+            def __iter__(self): ...
+
+            def get_example(self, i): ...
+
+            def __len__(self): ...
+        self.assertEqual(Dummy.__subclasshook__(Dummy),
+                         NotImplemented)
 
 
-class IndexedConcatTestCase(TestCase):
+class ConcatDatasetTestCase(TestCase):
 
     def setUp(self):
         self.n = 5
         self.base = range(100)
-        self.data = IndexedConcat(*[self.base for _ in range(5)])
+        self.data = ConcatDataset(*[self.base for _ in range(5)])
 
     def test_dunder_init(self):
         self.assertEqual(len(self.data._datasets), self.n)
@@ -57,12 +106,12 @@ class IndexedConcatTestCase(TestCase):
         self.assertEqual(self.data._length, len(self.data))
 
 
-class IndexedZipTestCase(TestCase):
+class ZipDatasetTestCase(TestCase):
 
     def setUp(self):
         self.n = 5
         self.base = range(100)
-        self.data = IndexedZip(*[self.base for _ in range(5)])
+        self.data = ZipDataset(*[self.base for _ in range(5)])
 
     def test_dunder_init(self):
         self.assertEqual(len(self.data._datasets), self.n)
@@ -109,6 +158,7 @@ class DatasetTestCase(TestCase):
         data = self.data + self.data + self.data
         expected = list(self.base) * 3
         self.assertSequenceEqual(data, expected)
+        self.assertIsInstance(data, ConcatDataset)
 
     def test_map(self):
         def f(x): return x ** 2
@@ -117,19 +167,18 @@ class DatasetTestCase(TestCase):
             self.data.map(f),
             list(map(f, self.base)))
 
-    def test_keeps_original_dataset_after_multiple_maps(self):
-        def f(x): return x
+    def test_supports_multiple_maps(self):
+        def f(x): return x + 1
 
-        data = self.data
+        prev_data = self.data
         for i in range(100):
-            data = data.map(f)
-            self.assertEqual(data._dataset, self.base)
-            self.assertEqual(len(data._funcs), i + 1)
+            data = prev_data.map(f)
+            self.assertEqual(data._dataset, prev_data)
+            self.assertIs(data._map_func, f)
+            prev_data = data
 
-    def test_supports_method_chain(self):
-        data = self.data.map(lambda x: x ** 2).map(lambda x: x / 2)
         self.assertSequenceEqual(
-            data, [x ** 2 / 2 for x in self.base])
+            data, [x + 100 for x in self.base])
 
     def test_all(self):
         self.assertListEqual(self.data.all(), list(self.base))
@@ -259,16 +308,6 @@ class LineflowConcatTestCase(TestCase):
 
     def test_returns_concat_dataset(self):
         self.assertIsInstance(self.data, ConcatDataset)
-        self.assertIsInstance(self.data._dataset, IndexedConcat)
-
-    def test_keeps_original_dataset_after_multiple_maps(self):
-        def f(x): return x
-
-        data = self.data
-        for i in range(100):
-            data = data.map(f)
-            self.assertIsInstance(data._dataset, IndexedConcat)
-            self.assertEqual(len(data._funcs), i + 1)
 
     def test_supports_random_access(self):
         self.assertSequenceEqual(self.data, list(self.base) * self.n)
@@ -283,16 +322,6 @@ class LineflowZipTestCase(TestCase):
 
     def test_returns_zip_dataset(self):
         self.assertIsInstance(self.data, ZipDataset)
-        self.assertIsInstance(self.data._dataset, IndexedZip)
-
-    def test_keeps_original_dataset_after_multiple_maps(self):
-        def f(x): return x
-
-        data = self.data
-        for i in range(100):
-            data = data.map(f)
-            self.assertIsInstance(data._dataset, IndexedZip)
-            self.assertEqual(len(data._funcs), i + 1)
 
     def test_supports_random_access(self):
         self.assertSequenceEqual(self.data, list(zip(*[self.base for _ in range(self.n)])))
