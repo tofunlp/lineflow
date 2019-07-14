@@ -82,6 +82,15 @@ class Dataset(DatasetMixin):
     def map(self, map_func: Callable[[Any], Any]) -> 'MapDataset':
         return MapDataset(self, map_func)
 
+    def flat_map(self, map_func: Callable[[Any], Any]) -> 'IterableDataset':
+        return IterableDataset(lineflow_flat_map(map_func, self, lazy=True))
+
+    def filter(self, predicate: Callable[[Any], bool]) -> 'IterableDataset':
+        return IterableDataset(lineflow_filter(predicate, self, lazy=True))
+
+    def window(self, window_size: int, shift: int = None) -> 'IterableDataset':
+        return IterableDataset(lineflow_window(self, window_size, shift, lazy=True))
+
     def all(self) -> List[Any]:
         return list(self)
 
@@ -105,6 +114,32 @@ class Dataset(DatasetMixin):
             with path.open('wb') as f:
                 pickle.dump(cache, f)
         return CacheDataset(cache)
+
+
+class IterableDataset(Dataset):
+    def __init__(self, iterable: Iterable) -> None:
+        self._dataset = None
+        self._length = None
+        self._iterable = iterable
+        self._ready = False
+
+    def _prepare(self) -> None:
+        if self._ready:
+            return
+        self._dataset = list(self._iterable)
+        self._length = len(self._dataset)
+        self._ready = True
+
+    def __iter__(self) -> Iterator[Any]:
+        yield from self._iterable
+
+    def get_example(self, i: int) -> Any:
+        self._prepare()
+        return super(IterableDataset, self).get_example(i)
+
+    def __len__(self) -> int:
+        self._prepare()
+        return super(IterableDataset, self).__len__()
 
 
 class ConcatDataset(Dataset):
