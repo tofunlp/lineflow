@@ -5,7 +5,7 @@ import itertools
 import lineflow
 from lineflow import Dataset
 from lineflow.core import DatasetMixin
-from lineflow.core import ConcatDataset, ZipDataset
+from lineflow.core import IterableDataset, ConcatDataset, ZipDataset
 
 
 class DatasetMixinMixinTestCase(TestCase):
@@ -134,6 +134,23 @@ class ZipDatasetTestCase(TestCase):
         self.assertIsNone(self.data._length)
         self.assertEqual(len(self.data), len(self.base))
         self.assertEqual(self.data._length, len(self.data))
+
+
+class IterableDatasetTestCase(TestCase):
+
+    def setUp(self):
+        self.base = range(100)
+        self.data = IterableDataset(iter(self.base))
+
+    def test_dunder_init(self):
+        self.assertIsNone(self.data._dataset)
+        self.assertIsNone(self.data._length)
+        self.assertFalse(self.data._ready)
+
+    def test_dunder_iter(self):
+        for _ in range(100):
+            for x, y in zip(self.data, self.base):
+                self.assertEqual(x, y)
 
 
 class DatasetTestCase(TestCase):
