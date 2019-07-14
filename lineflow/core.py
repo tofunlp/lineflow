@@ -218,27 +218,26 @@ def lineflow_window(
     shift = shift or window_size
 
     def generator(dataset, window_size, shift):
+        iterator = iter(dataset)
         window = deque([], window_size)
         append = window.append
 
-        skip = 0
-        for i, x in enumerate(dataset):
+        for _, x in zip(range(window_size), iterator):
             append(x)
-            if skip:
-                skip -= 1
-                continue
-            elif len(window) == window_size:
-                yield tuple(window)
-                skip = shift - 1
+        yield tuple(window)
 
-        if skip:
-            popleft = window.popleft
-            skip += 1
-            while skip:
-                popleft()
-                skip -= 1
-            if window:
+        i = 0
+        for x in iterator:
+            append(x)
+            i = (i + 1) % shift
+            if i % shift == 0:
                 yield tuple(window)
+
+        if (i % shift) and (shift - i < window_size):
+            popleft = window.popleft
+            for _ in range(shift - i):
+                popleft()
+            yield tuple(window)
 
     iterator = generator(dataset, window_size, shift)
     if lazy:
