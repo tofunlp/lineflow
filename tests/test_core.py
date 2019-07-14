@@ -167,6 +167,25 @@ class DatasetTestCase(TestCase):
             self.data.map(f),
             list(map(f, self.base)))
 
+    def test_filter(self):
+        def f(x): return x % 2 == 0
+
+        self.assertSequenceEqual(
+            self.data.filter(f),
+            list(filter(f, self.base)))
+
+    def test_flat_map(self):
+        def f(x): return [x]
+
+        self.assertSequenceEqual(
+            self.data.flat_map(f),
+            list(itertools.chain.from_iterable(map(f, self.base))))
+
+    def test_window(self):
+        self.assertSequenceEqual(
+            list(itertools.chain.from_iterable(self.data.window(3))),
+            self.base)
+
     def test_supports_multiple_maps(self):
         def f(x): return x + 1
 
