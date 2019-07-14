@@ -82,6 +82,15 @@ class Dataset(DatasetMixin):
     def map(self, map_func: Callable[[Any], Any]) -> 'MapDataset':
         return MapDataset(self, map_func)
 
+    def flat_map(self, map_func: Callable[[Any], Any]) -> 'IterableDataset':
+        return IterableDataset(lineflow_flat_map(map_func, self, lazy=True))
+
+    def filter(self, predicate: Callable[[Any], bool]) -> 'IterableDataset':
+        return IterableDataset(lineflow_filter(predicate, self, lazy=True))
+
+    def window(self, window_size: int, shift: int = None) -> 'IterableDataset':
+        return IterableDataset(lineflow_window(self, window_size, shift, lazy=True))
+
     def all(self) -> List[Any]:
         return list(self)
 
