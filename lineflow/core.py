@@ -131,7 +131,16 @@ class IterableDataset(Dataset):
         self._ready = True
 
     def __iter__(self) -> Iterator[Any]:
-        yield from self._iterable
+        if self._ready:
+            yield from self._dataset
+        else:
+            dataset = []
+            for x in self._iterable:
+                dataset.append(x)
+                yield x
+            self._dataset = dataset
+            self._length = len(self._dataset)
+            self._ready = True
 
     def get_example(self, i: int) -> Any:
         self._prepare()
