@@ -1,6 +1,5 @@
-import os.path as osp
-import pickle
 from collections import Counter
+from functools import partial
 import random
 
 import torch
@@ -74,47 +73,30 @@ def to_dict(x):
 
 @lf.apply('en')
 @lf.apply('ja')
-def preprocess(x):
+def tokenize(x):
     return [START_TOKEN] + x.split() + [END_TOKEN]
 
 
-def build_vocab(tokens, cache='vocab.pkl', max_size=50000):
-    if not osp.isfile(cache):
-        counter = Counter(tokens)
-        words, _ = zip(*counter.most_common(max_size))
-        words = [PAD_TOKEN, UNK_TOKEN] + list(words)
-        token_to_index = dict(zip(words, range(len(words))))
-        if START_TOKEN not in token_to_index:
-            token_to_index[START_TOKEN] = len(token_to_index)
-            words += [START_TOKEN]
-        if END_TOKEN not in token_to_index:
-            token_to_index[END_TOKEN] = len(token_to_index)
-            words += [END_TOKEN]
-        with open(cache, 'wb') as f:
-            pickle.dump((token_to_index, words), f)
-    else:
-        with open(cache, 'rb') as f:
-            token_to_index, words = pickle.load(f)
-
-    return token_to_index, words
+def build_vocab(tokens):
+    counter = Counter(tokens)
+    words, _ = zip(*counter.most_common())
+    words = [PAD_TOKEN, UNK_TOKEN] + list(words)
+    return dict(zip(words, range(len(words))))
 
 
 def get_indexer(key, token_to_index, unk_index):
-    @lf.apply(key)
-    def indexing(x):
+    def indexer(token_to_index, unk_index, x):
         return [token_to_index.get(token, unk_index) for token in x]
-    return indexing
+    return lf.apply(key)(partial(indexer, token_to_index, unk_index))
 
 
-def get_collate_fn(pad_index):
-    def f(batch):
-        src, tgt = zip(*((x['en'], x['ja']) for x in batch))
-        src_max_length = max(len(x) for x in src)
-        tgt_max_length = max(len(y) for y in tgt)
-        padded_src = [x + [pad_index] * (src_max_length - len(x)) for x in src]
-        padded_tgt = [y + [IGNORE_INDEX] * (tgt_max_length - len(y)) for y in tgt]
-        return torch.LongTensor(padded_src), torch.LongTensor(padded_tgt)
-    return f
+def collate(pad_index, batch):
+    src, tgt = zip(*((x['en'], x['ja']) for x in batch))
+    src_max_length = max(len(x) for x in src)
+    tgt_max_length = max(len(y) for y in tgt)
+    padded_src = [x + [pad_index] * (src_max_length - len(x)) for x in src]
+    padded_tgt = [y + [IGNORE_INDEX] * (tgt_max_length - len(y)) for y in tgt]
+    return torch.LongTensor(padded_src), torch.LongTensor(padded_tgt)
 
 
 if __name__ == '__main__':
@@ -122,27 +104,22 @@ if __name__ == '__main__':
     train = lfds.SmallParallelEnJa('train').map(to_dict)
     validation = lfds.SmallParallelEnJa('dev').map(to_dict)
 
-    train = train.map(preprocess)
-    validation = validation.map(preprocess)
+    train = train.map(tokenize)
+    validation = validation.map(tokenize)
 
-    en_tokens = lf.flat_map(lambda x: x['en'],
-                            train + validation,
-                            lazy=True)
-    ja_tokens = lf.flat_map(lambda x: x['ja'],
-                            train + validation,
-                            lazy=True)
+    en_tokens = (train + validation).flat_map(lambda x: x['en'])
+    ja_tokens = (train + validation).flat_map(lambda x: x['ja'])
     print('Building vocabulary...')
-    en_token_to_index, _ = build_vocab(en_tokens, 'en.vocab')
-    ja_token_to_index, _ = build_vocab(ja_tokens, 'ja.vocab')
-    print(f'Vocab Size: {len(en_token_to_index)}')
-    print(f'Vocab Size: {len(ja_token_to_index)}')
+    en_token_to_index = build_vocab(en_tokens)
+    ja_token_to_index = build_vocab(ja_tokens)
 
     en_unk_index = en_token_to_index[UNK_TOKEN]
     ja_unk_index = ja_token_to_index[UNK_TOKEN]
 
-    train = train \
-        .map(get_indexer('en', en_token_to_index, en_token_to_index)) \
-        .map(get_indexer('ja', ja_token_to_index, ja_token_to_index))
+    en_indexer = get_indexer('en', en_token_to_index, en_unk_index)
+    ja_indexer = get_indexer('ja', ja_token_to_index, ja_unk_index)
+
+    train = train.map(en_indexer).map(ja_indexer)
 
     pad_index = en_token_to_index[PAD_TOKEN]
 
@@ -155,7 +132,7 @@ if __name__ == '__main__':
             SortedSampler(train, lambda x: - len(x['en']), batch_size * pool_size),
             batch_size, False, pool_size),
         num_workers=4,
-        collate_fn=get_collate_fn(pad_index))
+        collate_fn=partial(collate, pad_index))
 
     for batch in tqdm(loader):
         ...
