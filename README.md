@@ -103,6 +103,16 @@ train = lfds.MsrParaphrase('train')
 test = lfds.MsrParaphrase('test')
 ```
 
+[Penn Treebank](https://catalog.ldc.upenn.edu/docs/LDC95T7/cl93.html)
+
+```
+import lineflow.datasets as lfds
+
+train = lfds.PennTreebank('train')
+dev = lfds.PennTreebank('dev')
+test = lfds.PennTreebank('test')
+```
+
 [small_parallel_enja](https://github.com/odashi/small_parallel_enja):
 
 ```py
