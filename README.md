@@ -41,36 +41,33 @@ ds.map(lambda x: x.split()).first()  # ["i", "'m", "a", "line", "1", "."]
 
 ## Example
 
-- Please check out the [examples/small\_parallel\_enja\_pytorch.py](https://github.com/yasufumy/lineflow/blob/master/examples/small_parallel_enja_pytorch.py) to see how to tokenize a sentence, build vocabulary, and do indexing.
-- Also check out the other [examples](https://github.com/yasufumy/lineflow/tree/master/examples) to see how to use Lineflow.
+- Please check out the [examples](https://github.com/yasufumy/lineflow/tree/master/examples) to see how to use Lineflow, especially for tokenization, building vocabulary, and indexing.
 
-Load the predefined dataset:
+Load Penn Treebank:
 
 ```py
 >>> import lineflow.datasets as lfds
->>> train = lfds.SmallParallelEnJa('train')
+>>> train = lfds.PennTreebank('train')
 >>> train.first()
-("i can 't tell who will arrive first .", '誰 が 一番 に 着 く か 私 に は 分か り ま せ ん 。')
+' aer banknote berlitz calloway centrust cluett fromstein gitano guterman hydro-quebec ipo kia memotec mlx nahb punts rake regatta rubens sim snack-food ssangyong swapo wachter '
 ```
 
 Split the sentence to the words:
 
 ```py
 >>> # continuing from above
->>> train = train.map(lambda x: (x[0].split(), x[1].split()))
+>>> train = train.map(str.split)
 >>> train.first()
-(['i', 'can', "'t", 'tell', 'who', 'will', 'arrive', 'first', '.'],
- ['誰', 'が', '一番', 'に', '着', 'く', 'か', '私', 'に', 'は', '分か', 'り', 'ま', 'せ', 'ん', '。'])
+['aer', 'banknote', 'berlitz', 'calloway', 'centrust', 'cluett', 'fromstein', 'gitano', 'guterman', 'hydro-quebec', 'ipo', 'kia', 'memotec', 'mlx', 'nahb', 'punts', 'rake', 'regatta', 'rubens', 'sim', 'snack-food', 'ssangyong', 'swapo', 'wachter']
 ```
 
 Obtain words in dataset:
 
 ```py
 >>> # continuing from above
->>> import lineflow as lf
->>> en_tokens = lf.flat_map(lambda x: x[0], train)
->>> en_tokens[:5] # This is useful to build vocabulary.
-['i', 'can', "'t", 'tell', 'who']
+>>> words = train.flat_map(lambda x: x)
+>>> words.take(5) # This is useful to build vocabulary.
+['aer', 'banknote', 'berlitz', 'calloway', 'centrust']
 ```
 
 ## Datasets
@@ -105,7 +102,7 @@ test = lfds.MsrParaphrase('test')
 
 [Penn Treebank](https://catalog.ldc.upenn.edu/docs/LDC95T7/cl93.html)
 
-```
+```py
 import lineflow.datasets as lfds
 
 train = lfds.PennTreebank('train')
