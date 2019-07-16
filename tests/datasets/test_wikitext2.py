@@ -4,7 +4,7 @@ import tempfile
 
 
 from lineflow.datasets import WikiText2
-from lineflow.datasets.wikitext2 import TRAIN_URL, VALID_URL, TEST_URL
+from lineflow.datasets.wikitext2 import TRAIN_URL, DEV_URL, TEST_URL
 
 
 class WikiTextTestCase(TestCase):
@@ -29,8 +29,8 @@ class WikiTextTestCase(TestCase):
         self.cached_download_mock.assert_called_once_with(TRAIN_URL)
 
     def test_returns_valid_set(self):
-        WikiText2(split='valid')
-        self.cached_download_mock.assert_called_once_with(VALID_URL)
+        WikiText2(split='dev')
+        self.cached_download_mock.assert_called_once_with(DEV_URL)
 
     def test_returns_test_set(self):
         WikiText2(split='test')
