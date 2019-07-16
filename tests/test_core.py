@@ -152,6 +152,19 @@ class IterableDatasetTestCase(TestCase):
             for x, y in zip(self.data, self.base):
                 self.assertEqual(x, y)
 
+    def test_dunder_iter_after_prepare(self):
+        self.data._prepare()
+        for _ in range(100):
+            for x, y in zip(self.data, self.base):
+                self.assertEqual(x, y)
+
+    def test_dunder_len(self):
+        self.assertFalse(self.data._ready)
+        self.assertIsNone(self.data._length)
+        self.assertEqual(len(self.data), len(self.base))
+        self.assertEquals(self.data._length, len(self.base))
+        self.assertTrue(self.data._ready)
+
 
 class DatasetTestCase(TestCase):
 

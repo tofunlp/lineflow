@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod
 from _collections_abc import _check_methods
 import pickle
 from pathlib import Path
-from itertools import accumulate, chain, islice
+from itertools import accumulate, chain, islice, tee
 from collections import deque
 import bisect
 
@@ -134,13 +134,8 @@ class IterableDataset(Dataset):
         if self._ready:
             yield from self._dataset
         else:
-            dataset = []
-            for x in self._iterable:
-                dataset.append(x)
-                yield x
-            self._dataset = dataset
-            self._length = len(self._dataset)
-            self._ready = True
+            iterable, self._iterable = tee(self._iterable)
+            yield from iterable
 
     def get_example(self, i: int) -> Any:
         self._prepare()
