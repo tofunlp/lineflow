@@ -1,6 +1,7 @@
 import os.path as osp
 import pickle
 from collections import Counter
+from functools import partial
 
 import torch
 from torch.utils.data import DataLoader
@@ -9,7 +10,6 @@ import spacy
 
 from tqdm import tqdm
 
-import lineflow as lf
 import lineflow.datasets as lfds
 
 
@@ -51,29 +51,23 @@ def build_vocab(tokens, cache='vocab.pkl', max_size=50000):
 
 
 def postprocess(token_to_index,
-                unk_index):
-    def f(x):
-        token_index = [token_to_index.get(token, unk_index) for token in x[0]]
-        return token_index, x[1]
-    return f
+                unk_index, x):
+    token_index = [token_to_index.get(token, unk_index) for token in x[0]]
+    return token_index, x[1]
 
 
-def get_collate_fn(pad_index):
-    def f(batch):
-        indices, labels = zip(*batch)
-        max_length = max(len(x) for x in indices)
-        padded = [x + [pad_index] * (max_length - len(x)) for x in indices]
-        return torch.LongTensor(padded), torch.LongTensor(labels)
-    return f
+def collate_fn(pad_index, batch):
+    indices, labels = zip(*batch)
+    max_length = max(len(x) for x in indices)
+    padded = [x + [pad_index] * (max_length - len(x)) for x in indices]
+    return torch.LongTensor(padded), torch.LongTensor(labels)
 
 
 if __name__ == '__main__':
     print('Reading...')
     train = lfds.Imdb('train').map(preprocess)
 
-    tokens = lf.flat_map(lambda x: x[0],
-                         train,
-                         lazy=True)
+    tokens = train.flat_map(lambda x: x[0])
     print('Building vocabulary...')
     token_to_index, _ = build_vocab(tokens, 'vocab.pkl')
     print(f'Vocab Size: {len(token_to_index)}')
@@ -83,11 +77,11 @@ if __name__ == '__main__':
 
     loader = DataLoader(
         train
-        .map(postprocess(token_to_index, unk_index))
+        .map(partial(postprocess, token_to_index, unk_index))
         .save('imdb.train.cache'),
         batch_size=32,
         num_workers=4,
-        collate_fn=get_collate_fn(pad_index))
+        collate_fn=partial(collate_fn, pad_index))
 
     for batch in tqdm(loader):
         ...
