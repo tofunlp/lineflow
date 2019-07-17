@@ -162,7 +162,7 @@ class IterableDatasetTestCase(TestCase):
         self.assertFalse(self.data._ready)
         self.assertIsNone(self.data._length)
         self.assertEqual(len(self.data), len(self.base))
-        self.assertEquals(self.data._length, len(self.base))
+        self.assertEqual(self.data._length, len(self.base))
         self.assertTrue(self.data._ready)
 
 
