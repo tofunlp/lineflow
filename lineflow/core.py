@@ -1,6 +1,6 @@
 from typing import Any, Union, Callable, List, Tuple, Iterator, Iterable
 from abc import ABCMeta, abstractmethod
-from _collections_abc import _check_methods
+from _collections_abc import _check_methods, Sequence
 import pickle
 from pathlib import Path
 from itertools import accumulate, chain, islice, tee
@@ -49,15 +49,18 @@ class DatasetMixin(metaclass=ABCMeta):
         return NotImplemented
 
 
-DatasetMixin.register(list)
-DatasetMixin.register(str)
-DatasetMixin.register(tuple)
-DatasetMixin.register(range)
+DatasetMixin.register(Sequence)
 DatasetMixin.register(easyfile.TextFile)
 DatasetMixin.register(easyfile.CsvFile)
 
 
 class Dataset(DatasetMixin):
+    """Dataset wrapping ``DatasetMixin`` object.
+
+    Args:
+        dataset (DatasetMixin): ``Sequence``, ``easyfile.TextFile``, or ``easyfile.CsvFile`` object.
+    """
+
     def __init__(self,
                  dataset: DatasetMixin) -> None:
         assert isinstance(dataset, DatasetMixin)
