@@ -18,7 +18,11 @@ class MsrParaphrase(Dataset):
         else:
             raise ValueError(f"only 'train' and 'test' are valid for 'split', but '{split}' is given.")
 
-        dataset = easyfile.CsvFile(path, encoding='utf-8', header=True, delimiter='\t')
-        dataset._header = ('quality', 'id1', 'id2', 'string1', 'string2')
+        fieldnames = ('quality', 'id1', 'id2', 'string1', 'string2')
+        dataset = easyfile.CsvFile(path,
+                                   encoding='utf-8',
+                                   header=True,
+                                   delimiter='\t',
+                                   fieldnames=fieldnames)
 
         super().__init__(dataset)
