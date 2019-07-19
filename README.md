@@ -97,6 +97,26 @@ train = lfds.PennTreebank('train')
 dev = lfds.PennTreebank('dev')
 test = lfds.PennTreebank('test')
 ```
+#### [WikiText-103](https://blog.einstein.ai/the-wikitext-long-term-dependency-language-modeling-dataset/)
+
+Loads the WikiText-103 dataset:
+
+```py
+import lineflow.datasets as lfds
+
+train = lfds.WikiText103('train')
+dev = lfds.WikiText103('dev')
+test = lfds.WikiText103('test')
+```
+
+This dataset is preprossed, so you can tokenize each line with `str.split`:
+
+```py
+>>> import lineflow.datasets as lfds
+>>> train = lfds.WikiText103('train').flat_map(lambda x: x.split() + ['<eos>'])
+>>> train.take(5)
+['<eos>', '=', 'Valkyria', 'Chronicles', 'III']
+```
 
 #### [WikiText-2](https://blog.einstein.ai/the-wikitext-long-term-dependency-language-modeling-dataset/) (Added by [@sobamchan](https://github.com/sobamchan), thanks.)
 
@@ -116,7 +136,7 @@ This dataset is preprossed, so you can tokenize each line with `str.split`:
 >>> import lineflow.datasets as lfds
 >>> train = lfds.WikiText2('train').flat_map(lambda x: x.split() + ['<eos>'])
 >>> train.take(5)
-['Senjō', 'no', 'Valkyria', '3', ':']
+['<eos>', '=', 'Valkyria', 'Chronicles', 'III']
 ```
 
 ### Machine Translation

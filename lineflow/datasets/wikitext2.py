@@ -4,9 +4,9 @@ from lineflow.download import cached_download
 from lineflow import Dataset
 
 
-TRAIN_URL = 'https://raw.githubusercontent.com/sobamchan/wikitext-2/master/train.txt'
-DEV_URL = 'https://raw.githubusercontent.com/sobamchan/wikitext-2/master/valid.txt'
-TEST_URL = 'https://raw.githubusercontent.com/sobamchan/wikitext-2/master/test.txt'
+TRAIN_URL = 'https://raw.githubusercontent.com/sobamchan/wikitext-2/master/train.raw.txt'
+DEV_URL = 'https://raw.githubusercontent.com/sobamchan/wikitext-2/master/valid.raw.txt'
+TEST_URL = 'https://raw.githubusercontent.com/sobamchan/wikitext-2/master/test.raw.txt'
 
 
 class WikiText2(Dataset):
