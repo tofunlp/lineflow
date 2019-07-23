@@ -83,27 +83,86 @@ class Dataset(DatasetMixin):
         return ConcatDataset(self, other)
 
     def map(self, map_func: Callable[[Any], Any]) -> 'MapDataset':
+        """Applies a function across the examples of this dataset.
+
+        Args:
+            map_func (Callable[[Any], Any]): A function to apply.
+
+        Returns ('MapDataset'):
+            The dataset applied the function.
+        """
         return MapDataset(self, map_func)
 
     def flat_map(self, map_func: Callable[[Any], Any]) -> 'IterableDataset':
+        """Applies a function across the examples of this dataset and then flattens the result.
+
+        Args:
+            map_func (Callable[[Any], Any]): A function to apply.
+
+        Returns ('IterableDataset'):
+            The dataset applied the function and flattened.
+        """
         return IterableDataset(lineflow_flat_map(map_func, self, lazy=True))
 
     def filter(self, predicate: Callable[[Any], bool]) -> 'IterableDataset':
+        """Filters this dataset by a predicate function.
+
+        Args:
+            predicate (Callable[[Any], bool]): A predicate function.
+
+        Returns ('IterableDataset'):
+            The dataset containing the examples for which ``predicate`` returns ``True``.
+        """
         return IterableDataset(lineflow_filter(predicate, self, lazy=True))
 
     def window(self, window_size: int, shift: int = None) -> 'IterableDataset':
+        """Combines input examples into a dataset of windows.
+
+        Args:
+            window_size (int): the number of examples of the input dataset to combine into a window.
+            shift (int, optional): The forward shift of the sliding window in each iteration.
+
+        Returns ('IterableDataset'):
+            The dataset of windows.
+        """
         return IterableDataset(lineflow_window(self, window_size, shift, lazy=True))
 
     def all(self) -> List[Any]:
+        """Takes all examples from the dataset.
+
+        Returns (List[Any]):
+            The list of the examples in the dataset.
+        """
         return list(self)
 
     def take(self, n: int) -> List[Any]:
+        """Takes the first n examples from the dataset.
+
+        Args:
+            n (int): the number of examples to take.
+
+        Returns (List[Any]):
+            The list of the ``n`` examples.
+        """
         return list(islice(self, n))
 
     def first(self) -> Any:
+        """Takes the first example from the dataset.
+
+        Returns (Any):
+            The first example in the dataset.
+        """
         return next(iter(self))
 
     def save(self, filename: str) -> 'CacheDataset':
+        """Evaluates the datasets and save it as pickle.
+
+        Args:
+            filename (str): The name of the pickle file.
+
+        Returns ('CacheDataset'):
+            The evaluated dataset.
+        """
         path = Path(filename)
         if path.exists():
             print(f'Loading data from {filename}...')
