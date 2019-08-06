@@ -1,78 +1,47 @@
-from unittest import TestCase
-from unittest.mock import patch
 import tempfile
-from pathlib import Path
+import shutil
+from unittest import TestCase
+from unittest import mock
 
-
-from lineflow.download import get_cache_root
-from lineflow.datasets import Imdb
-from lineflow.datasets.imdb import IMDB_URL
+from lineflow import download
+from lineflow.datasets.imdb import Imdb, get_imdb
 
 
 class ImdbTestCase(TestCase):
 
     def setUp(self):
-        cache_fp = tempfile.NamedTemporaryFile()
-        self.cache_fp = cache_fp
-
-        cached_download_patcher = patch('lineflow.datasets.imdb.cached_download')
-        cached_download_mock = cached_download_patcher.start()
-        cached_download_mock.side_effect = lambda url: cache_fp.name
-        self.cached_download_patcher = cached_download_patcher
-        self.cached_download_mock = cached_download_mock
-
-        tarfile_patcher = patch('lineflow.datasets.imdb.tarfile')
-        tarfile_mock = tarfile_patcher.start()
-        self.tarfile_patcher = tarfile_patcher
-        self.tarfile_mock = tarfile_mock
-
-        exists_patcher = patch('lineflow.datasets.imdb.Path.exists')
-        exists_mock = exists_patcher.start()
-        exists_mock.return_value = True
-        self.exists_patcher = exists_patcher
-        self.exists_mock = exists_mock
-
-        self.cache_dir = Path(get_cache_root())
-
-        data_fp = tempfile.NamedTemporaryFile()
-        self.data_fp = data_fp
-        glob_patcher = patch('lineflow.datasets.imdb.Path.glob')
-        glob_mock = glob_patcher.start()
-        glob_mock.return_value = [Path(data_fp.name)]
-        self.glob_patcher = glob_patcher
-        self.glob_mock = glob_mock
+        self.default_cache_root = download.get_cache_root()
+        self.temp_dir = tempfile.mkdtemp()
+        download.set_cache_root(self.temp_dir)
 
     def tearDown(self):
-        self.cache_fp.close()
-        self.cached_download_patcher.stop()
-        self.tarfile_patcher.stop()
-        self.exists_patcher.stop()
-        self.data_fp.close()
-        self.glob_patcher.stop()
+        download.set_cache_root(self.default_cache_root)
+        shutil.rmtree(self.temp_dir)
 
-    def test_returns_train_set(self):
-        ds = Imdb(split='train')
-        self.cached_download_mock.assert_called_once_with(IMDB_URL)
-        self.glob_mock.assert_called_with('*.txt')
-        self.assertEqual(self.glob_mock.call_count, 2)
-        expected = ('', 1)
-        for x in ds:
-            self.assertTupleEqual(x, expected)
+    def test_get_imdb(self):
+        raw = get_imdb()
+        # train
+        self.assertIn('train', raw)
+        self.assertEqual(len(raw['train']), 25_000)
+        # test
+        self.assertIn('test', raw)
+        self.assertEqual(len(raw['test']), 25_000)
 
-    def test_returns_test_set(self):
-        ds = Imdb(split='test')
-        self.cached_download_mock.assert_called_once_with(IMDB_URL)
-        self.glob_mock.assert_called_with('*.txt')
-        self.assertEqual(self.glob_mock.call_count, 2)
-        expected = ('', 1)
-        for x in ds:
-            self.assertTupleEqual(x, expected)
+    def test_get_imdb_twice(self):
+        get_imdb()
+        with mock.patch('lineflow.datasets.imdb.pickle', autospec=True) as mock_pickle:
+            get_imdb()
+        mock_pickle.dump.assert_not_called()
+        self.assertEqual(mock_pickle.load.call_count, 1)
+
+    def test_loads_each_split(self):
+        train = Imdb(split='train')
+        self.assertEqual(len(train), 25_000)
+        self.assertEqual(train[0][1], 0)
+        test = Imdb(split='test')
+        self.assertEqual(len(test), 25_000)
+        self.assertEqual(test[0][1], 0)
 
     def test_raises_value_error_with_invalid_split(self):
         with self.assertRaises(ValueError):
             Imdb(split='invalid_split')
-
-    def test_expands_tarfile(self):
-        self.exists_mock.return_value = False
-        Imdb(split='train')
-        self.tarfile_mock.open.return_value.extractall.assert_called_once_with(self.cache_dir)
