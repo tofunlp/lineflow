@@ -8,8 +8,8 @@ from urllib import request
 
 
 _cache_root = os.environ.get(
-    'LINEFLOW_CACHE_ROOT',
-    os.path.join(os.path.expanduser('~'), '.lineflow', 'cache'))
+    'LINEFLOW_ROOT',
+    os.path.join(os.path.expanduser('~'), '.lineflow'))
 
 
 @contextlib.contextmanager
@@ -66,3 +66,23 @@ def cached_download(url: str) -> str:
         shutil.move(temp_path, cache_path)
 
     return cache_path
+
+
+def cache_or_load_file(path, creator, loader):
+    if os.path.exists(path):
+        return loader(path)
+
+    try:
+        os.makedirs(_cache_root)
+    except OSError:
+        if not os.path.isdir(_cache_root):
+            raise RuntimeError('cannot create cache directory')
+
+    with tempdir() as temp_dir:
+        filename = os.path.basename(path)
+        temp_path = os.path.join(temp_dir, filename)
+        content = creator(temp_path)
+        if not os.path.exists(path):
+            shutil.move(temp_path, path)
+
+    return content
