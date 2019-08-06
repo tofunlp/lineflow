@@ -1,38 +1,61 @@
+import os
+import io
 import json
+import pickle
 
-import easyfile
-
-from lineflow.download import cached_download
-from lineflow.core import MapDataset
-
-
-TRAIN_V1_URL = 'https://github.com/yasufumy/SQuAD_JSONL/blob/master/dataset/train-v1.1.jsonl?raw=true'
-DEV_V1_URL = 'https://raw.githubusercontent.com/yasufumy/SQuAD_JSONL/master/dataset/dev-v1.1.jsonl'
-
-TRAIN_V2_URL = 'https://github.com/yasufumy/SQuAD_JSONL/blob/master/dataset/train-v2.0.jsonl?raw=true'
-DEV_V2_URL = 'https://raw.githubusercontent.com/yasufumy/SQuAD_JSONL/master/dataset/dev-v2.0.jsonl'
+from lineflow import download
+from lineflow.core import Dataset
 
 
-class Squad(MapDataset):
+def get_squad(version):
+    version_str = 'v1.1' if version == 1 else 'v2.0'
+
+    train_url = f'https://raw.githubusercontent.com/rajpurkar/SQuAD-explorer/master/dataset/train-{version_str}.json'
+    dev_url = f'https://raw.githubusercontent.com/rajpurkar/SQuAD-explorer/master/dataset/dev-{version_str}.json'
+    root = download.get_cache_directory(os.path.join('datasets', 'squad'))
+
+    def creator(path):
+        train_path = download.cached_download(train_url)
+        dev_path = download.cached_download(dev_url)
+
+        dataset = {}
+        for split in ('train', 'dev'):
+            data_path = train_path if split == 'train' else dev_path
+            with io.open(data_path, 'rt', encoding='utf-8') as f:
+                data = json.load(f)['data']
+            temp = []
+            for x in data:
+                title = x['title']
+                for paragraph in x['paragraphs']:
+                    context = paragraph['context']
+                    for qa in paragraph['qas']:
+                        qa['title'] = title
+                        qa['context'] = context
+                        temp.append(qa)
+            dataset[split] = temp
+
+        with io.open(path, 'wb') as f:
+            pickle.dump(dataset, f)
+        return dataset
+
+    def loader(path):
+        with io.open(path, 'rb') as f:
+            return pickle.load(f)
+
+    pkl_path = os.path.join(root, f'squad.{version_str}.pkl')
+    return download.cache_or_load_file(pkl_path, creator, loader)
+
+
+class Squad(Dataset):
     def __init__(self,
                  split: str = 'train',
                  version: int = 1) -> None:
-        if version == 1:
-            train_url = TRAIN_V1_URL
-            dev_url = DEV_V1_URL
-        elif version == 2:
-            train_url = TRAIN_V2_URL
-            dev_url = DEV_V2_URL
-        else:
+        if version != 1 and version != 2:
             raise ValueError(f"only 1 and 2 are valid for 'version', but {version} is given.")
 
-        if split == 'train':
-            path = cached_download(train_url)
-        elif split == 'dev':
-            path = cached_download(dev_url)
-        else:
+        if split not in ('train', 'dev'):
             raise ValueError(f"only 'train' and 'dev' are valid for 'split', but '{split}' is given.")
 
-        dataset = easyfile.TextFile(path)
+        raw = get_squad(version)
 
-        super().__init__(dataset, json.loads)
+        super().__init__(raw[split])
