@@ -1,46 +1,46 @@
+import os
+import io
 import tarfile
-from pathlib import Path
+import pickle
 
-from lineflow.download import cached_download
-from lineflow.download import get_cache_directory
-from lineflow.datasets import Seq2SeqDataset
+import easyfile
 
-
-CNN_DAILYMAIL_URL = 'https://s3.amazonaws.com/opennmt-models/Summary/cnndm.tar.gz'
-
-TRAIN_SOURCE_NAME = 'train.txt.src'
-TRAIN_TARGET_NAME = 'train.txt.tgt.tagged'
-
-VAL_SOURCE_NAME = 'val.txt.src'
-VAL_TARGET_NAME = 'val.txt.tgt.tagged'
-
-TEST_SOURCE_NAME = 'test.txt.src'
-TEST_TARGET_NAME = 'test.txt.tgt.tagged'
-
-ALL = (TRAIN_SOURCE_NAME, TRAIN_TARGET_NAME,
-       VAL_SOURCE_NAME, VAL_TARGET_NAME,
-       TEST_SOURCE_NAME, TEST_TARGET_NAME)
+from lineflow.core import ZipDataset
+from lineflow import download
 
 
-class CnnDailymail(Seq2SeqDataset):
+def get_cnn_dailymail():
+
+    url = 'https://s3.amazonaws.com/opennmt-models/Summary/cnndm.tar.gz'
+    root = download.get_cache_directory(os.path.join('datasets', 'cnndm'))
+
+    def creator(path):
+        archive_path = download.cached_download(url)
+        with tarfile.open(archive_path, 'r') as archive:
+            archive.extractall(root)
+
+        dataset = {}
+        for split in ('train', 'dev', 'test'):
+            dataset[split] = tuple(easyfile.TextFile(
+                os.path.join(root, filename.format(split if split != 'dev' else 'val')))
+                for filename in ('{}.txt.src', '{}.txt.tgt.tagged'))
+
+        with io.open(path, 'wb') as f:
+            pickle.dump(dataset, f)
+        return dataset
+
+    def loader(path):
+        with io.open(path, 'rb') as f:
+            return pickle.load(f)
+
+    pkl_path = os.path.join(root, 'cnndm.pkl')
+    return download.cache_or_load_file(pkl_path, creator, loader)
+
+
+class CnnDailymail(ZipDataset):
     def __init__(self, split: str = 'train') -> None:
-        path = cached_download(CNN_DAILYMAIL_URL)
-        tf = tarfile.open(path, 'r')
-        cache_dir = Path(get_cache_directory('cnndm'))
-        if not all((cache_dir / p).exists() for p in ALL):
-            print(f'Extracting from {path}...')
-            tf.extractall(cache_dir)
-
-        if split == 'train':
-            src_path = cache_dir / TRAIN_SOURCE_NAME
-            tgt_path = cache_dir / TRAIN_TARGET_NAME
-        elif split == 'dev':
-            src_path = cache_dir / VAL_SOURCE_NAME
-            tgt_path = cache_dir / VAL_TARGET_NAME
-        elif split == 'test':
-            src_path = cache_dir / TEST_SOURCE_NAME
-            tgt_path = cache_dir / TEST_TARGET_NAME
-        else:
+        if split not in ('train', 'dev', 'test'):
             raise ValueError(f"only 'train', 'dev' and 'test' are valid for 'split', but '{split}' is given.")
 
-        super().__init__(source_file_path=str(src_path), target_file_path=str(tgt_path))
+        raw = get_cnn_dailymail()
+        super(CnnDailymail, self).__init__(*raw[split])
