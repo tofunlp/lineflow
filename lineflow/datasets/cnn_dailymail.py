@@ -1,3 +1,4 @@
+from typing import Dict, Tuple
 import os
 import io
 import tarfile
@@ -9,7 +10,7 @@ from lineflow.core import ZipDataset
 from lineflow import download
 
 
-def get_cnn_dailymail():
+def get_cnn_dailymail() -> Dict[str, Tuple[easyfile.TextFile]]:
 
     url = 'https://s3.amazonaws.com/opennmt-models/Summary/cnndm.tar.gz'
     root = download.get_cache_directory(os.path.join('datasets', 'cnndm'))

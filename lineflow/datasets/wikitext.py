@@ -1,3 +1,4 @@
+from typing import Dict
 import os
 import io
 import zipfile
@@ -9,7 +10,7 @@ from lineflow.core import Dataset
 from lineflow import download
 
 
-def get_wikitext(name):
+def get_wikitext(name: str) -> Dict[str, easyfile.TextFile]:
 
     url = f'https://s3.amazonaws.com/research.metamind.io/wikitext/{name}-v1.zip'
     root = download.get_cache_directory(os.path.join('datasets'))

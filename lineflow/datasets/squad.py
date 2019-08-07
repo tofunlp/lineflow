@@ -1,13 +1,14 @@
+from typing import Dict, List
 import os
 import io
 import json
 import pickle
 
+from lineflow import Dataset
 from lineflow import download
-from lineflow.core import Dataset
 
 
-def get_squad(version):
+def get_squad(version: int) -> Dict[str, List]:
     version_str = 'v1.1' if version == 1 else 'v2.0'
 
     train_url = f'https://raw.githubusercontent.com/rajpurkar/SQuAD-explorer/master/dataset/train-{version_str}.json'

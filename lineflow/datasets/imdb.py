@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Dict, List, Tuple
 import io
 import os
 import pickle
@@ -8,7 +8,7 @@ from lineflow.core import MapDataset
 from lineflow import download
 
 
-def get_imdb():
+def get_imdb() -> Dict[str, List[str]]:
 
     url = 'https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz'
     root = download.get_cache_directory(os.path.join('datasets'))
