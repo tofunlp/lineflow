@@ -1,29 +1,43 @@
-from lineflow.download import cached_download
-from lineflow.datasets import Seq2SeqDataset
+from typing import Dict, List, Tuple
+import os
+import io
+import pickle
+
+from lineflow import Dataset
+from lineflow import download
 
 
-TRAIN_EN_URL = 'https://raw.githubusercontent.com/odashi/small_parallel_enja/master/train.en'
-TRAIN_JA_URL = 'https://raw.githubusercontent.com/odashi/small_parallel_enja/master/train.ja'
+def get_small_parallel_enja() -> Dict[str, Tuple[List[str]]]:
 
-DEV_EN_URL = 'https://raw.githubusercontent.com/odashi/small_parallel_enja/master/dev.en'
-DEV_JA_URL = 'https://raw.githubusercontent.com/odashi/small_parallel_enja/master/dev.ja'
+    en_url = 'https://raw.githubusercontent.com/odashi/small_parallel_enja/master/{}.en'
+    ja_url = 'https://raw.githubusercontent.com/odashi/small_parallel_enja/master/{}.ja'
+    root = download.get_cache_directory(os.path.join('datasets', 'small_parallel_enja'))
 
-TEST_EN_URL = 'https://raw.githubusercontent.com/odashi/small_parallel_enja/master/test.en'
-TEST_JA_URL = 'https://raw.githubusercontent.com/odashi/small_parallel_enja/master/test.ja'
+    def creator(path):
+        dataset = {}
+        for split in ('train', 'dev', 'test'):
+            en_path = download.cached_download(en_url.format(split))
+            ja_path = download.cached_download(ja_url.format(split))
+            with io.open(en_path, 'rt') as en, io.open(ja_path, 'rt') as ja:
+                dataset[split] = [(x.rstrip(os.linesep), y.rstrip(os.linesep))
+                                  for x, y in zip(en, ja)]
+
+        with io.open(path, 'wb') as f:
+            pickle.dump(dataset, f)
+        return dataset
+
+    def loader(path):
+        with io.open(path, 'rb') as f:
+            return pickle.load(f)
+
+    pkl_path = os.path.join(root, 'enja.pkl')
+    return download.cache_or_load_file(pkl_path, creator, loader)
 
 
-class SmallParallelEnJa(Seq2SeqDataset):
+class SmallParallelEnJa(Dataset):
     def __init__(self, split: str = 'train') -> None:
-        if split == 'train':
-            en_path = cached_download(TRAIN_EN_URL)
-            ja_path = cached_download(TRAIN_JA_URL)
-        elif split == 'dev':
-            en_path = cached_download(DEV_EN_URL)
-            ja_path = cached_download(DEV_JA_URL)
-        elif split == 'test':
-            en_path = cached_download(TEST_EN_URL)
-            ja_path = cached_download(TEST_JA_URL)
-        else:
+        if split not in ('train', 'dev', 'test'):
             raise ValueError(f"only 'train', 'dev' and 'test' are valid for 'split', but '{split}' is given.")
 
-        super().__init__(source_file_path=en_path, target_file_path=ja_path)
+        raw = get_small_parallel_enja()
+        super().__init__(raw[split])
