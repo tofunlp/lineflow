@@ -18,13 +18,17 @@ def get_cnn_dailymail() -> Dict[str, Tuple[easyfile.TextFile]]:
     def creator(path):
         archive_path = download.cached_download(url)
         with tarfile.open(archive_path, 'r') as archive:
+            print(f'Extracting to {root}')
             archive.extractall(root)
 
         dataset = {}
         for split in ('train', 'dev', 'test'):
-            dataset[split] = tuple(easyfile.TextFile(
-                os.path.join(root, filename.format(split if split != 'dev' else 'val')))
-                for filename in ('{}.txt.src', '{}.txt.tgt.tagged'))
+            src_path = f'{split if split != "dev" else "val"}.txt.src'
+            tgt_path = f'{split if split != "dev" else "val"}.txt.tgt.tagged'
+            dataset[split] = tuple(
+                easyfile.TextFile(os.path.join(root, src_path)),
+                easyfile.TextFile(os.path.join(root, tgt_path))
+            )
 
         with io.open(path, 'wb') as f:
             pickle.dump(dataset, f)
