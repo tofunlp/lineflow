@@ -1,55 +1,38 @@
-from unittest import TestCase
-from unittest.mock import patch
 import tempfile
+import shutil
+from unittest import TestCase
+from unittest import mock
 
-
-from lineflow.datasets import SmallParallelEnJa
-from lineflow.datasets.small_parallel_enja import TRAIN_EN_URL, TRAIN_JA_URL
-from lineflow.datasets.small_parallel_enja import DEV_EN_URL, DEV_JA_URL
-from lineflow.datasets.small_parallel_enja import TEST_EN_URL, TEST_JA_URL
+from lineflow import download
+from lineflow.datasets.small_parallel_enja import SmallParallelEnJa, get_small_parallel_enja
 
 
 class SmallParallelEnJaTestCase(TestCase):
 
     def setUp(self):
-        en_fp = tempfile.NamedTemporaryFile()
-        en_fp.write(b'This is English .')
-        en_fp.seek(0)
-        ja_fp = tempfile.NamedTemporaryFile()
-        ja_fp.write(b'This is Japanese .')
-        ja_fp.seek(0)
-        self.en_fp = en_fp
-        self.ja_fp = ja_fp
-
-        cached_download_patcher = patch('lineflow.datasets.small_parallel_enja.cached_download')
-        cached_download_mock = cached_download_patcher.start()
-        cached_download_mock.side_effect = lambda url: en_fp.name if '.en' in url else ja_fp.name
-
-        self.cached_download_patcher = cached_download_patcher
-        self.cached_download_mock = cached_download_mock
+        self.default_cache_root = download.get_cache_root()
+        self.temp_dir = tempfile.mkdtemp()
+        download.set_cache_root(self.temp_dir)
 
     def tearDown(self):
-        self.en_fp.close()
-        self.ja_fp.close()
-        self.cached_download_patcher.stop()
+        download.set_cache_root(self.default_cache_root)
+        shutil.rmtree(self.temp_dir)
 
-    def test_returns_train_set(self):
-        train = SmallParallelEnJa(split='train')
-        expected = [((url,),) for url in (TRAIN_EN_URL, TRAIN_JA_URL)]
-        self.assertListEqual(self.cached_download_mock.call_args_list, expected)
-        self.assertEqual(len(train), 1)
+    def test_get_small_parallel_enja(self):
+        raw = get_small_parallel_enja()
+        params = [('train', 50_000), ('dev', 500), ('test', 500)]
+        for key, size in params:
+            with self.subTest(key=key, size=size):
+                self.assertIn(key, raw)
+                self.assertEqual(len(raw[key]), size)
+                self.assertEqual(len(SmallParallelEnJa(split=key)), size)
 
-    def test_returns_dev_set(self):
-        dev = SmallParallelEnJa(split='dev')
-        expected = [((url,),) for url in (DEV_EN_URL, DEV_JA_URL)]
-        self.assertListEqual(self.cached_download_mock.call_args_list, expected)
-        self.assertEqual(len(dev), 1)
-
-    def test_returns_test_set(self):
-        test = SmallParallelEnJa(split='test')
-        expected = [((url,),) for url in (TEST_EN_URL, TEST_JA_URL)]
-        self.assertListEqual(self.cached_download_mock.call_args_list, expected)
-        self.assertEqual(len(test), 1)
+    def test_get_small_parallel_enja_twice(self):
+        get_small_parallel_enja()
+        with mock.patch('lineflow.datasets.small_parallel_enja.pickle', autospec=True) as mock_pickle:
+            get_small_parallel_enja()
+        mock_pickle.dump.assert_not_called()
+        mock_pickle.load.assert_called_once()
 
     def test_raises_value_error_with_invalid_split(self):
         with self.assertRaises(ValueError):
