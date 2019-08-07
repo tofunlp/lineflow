@@ -24,7 +24,6 @@ def get_wikitext(name: str) -> Dict[str, easyfile.TextFile]:
         dataset = {}
         for split in ('train', 'dev', 'test'):
             filename = 'wiki.{}.tokens'.format(split if split != 'dev' else 'valid')
-            print(f'Processing {filename}...')
             dataset[split] = easyfile.TextFile(os.path.join(root, name, filename))
 
         with io.open(path, 'wb') as f:
