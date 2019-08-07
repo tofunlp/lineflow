@@ -25,7 +25,7 @@ def get_cnn_dailymail() -> Dict[str, Tuple[easyfile.TextFile]]:
         for split in ('train', 'dev', 'test'):
             src_path = f'{split if split != "dev" else "val"}.txt.src'
             tgt_path = f'{split if split != "dev" else "val"}.txt.tgt.tagged'
-            dataset[split] = tuple(
+            dataset[split] = (
                 easyfile.TextFile(os.path.join(root, src_path)),
                 easyfile.TextFile(os.path.join(root, tgt_path))
             )
