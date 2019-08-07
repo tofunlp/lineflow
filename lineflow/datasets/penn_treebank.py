@@ -1,24 +1,40 @@
-import easyfile
+from typing import Dict, List
+import os
+import io
+import pickle
 
 from lineflow import Dataset
-from lineflow.download import cached_download
+from lineflow import download
 
 
-TRAIN_URL = 'https://raw.githubusercontent.com/wojzaremba/lstm/master/data/ptb.train.txt'
-DEV_URL = 'https://raw.githubusercontent.com/wojzaremba/lstm/master/data/ptb.valid.txt'
-TEST_URL = 'https://raw.githubusercontent.com/wojzaremba/lstm/master/data/ptb.test.txt'
+def get_penn_treebank() -> Dict[str, List[str]]:
+
+    url = 'https://raw.githubusercontent.com/wojzaremba/lstm/master/data/ptb.{}.txt'
+    root = download.get_cache_directory(os.path.join('datasets', 'ptb'))
+
+    def creator(path):
+        dataset = {}
+        for split in ('train', 'dev', 'test'):
+            data_path = download.cached_download(url.format(split if split != 'dev' else 'valid'))
+            with io.open(data_path, 'rt') as f:
+                dataset[split] = [line.rstrip(os.linesep) for line in f]
+
+        with io.open(path, 'wb') as f:
+            pickle.dump(dataset, f)
+        return dataset
+
+    def loader(path):
+        with io.open(path, 'rb') as f:
+            return pickle.load(f)
+
+    pkl_path = os.path.join(root, 'ptb.pkl')
+    return download.cache_or_load_file(pkl_path, creator, loader)
 
 
 class PennTreebank(Dataset):
     def __init__(self, split: str = 'train') -> None:
-        if split == 'train':
-            path = cached_download(TRAIN_URL)
-        elif split == 'dev':
-            path = cached_download(DEV_URL)
-        elif split == 'test':
-            path = cached_download(TEST_URL)
-        else:
-            raise ValueError(f"only 'train', 'dev', and 'test' are valid for 'split', but '{split} is given.'")
+        if split not in ('train', 'dev', 'test'):
+            raise ValueError(f"only 'train', 'dev' and 'test' are valid for 'split', but '{split}' is given.")
 
-        dataset = easyfile.TextFile(path)
-        super(PennTreebank, self).__init__(dataset)
+        raw = get_penn_treebank()
+        super(PennTreebank, self).__init__(raw[split])

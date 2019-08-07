@@ -1,40 +1,38 @@
-from unittest import TestCase
-from unittest.mock import patch
 import tempfile
+import shutil
+from unittest import TestCase
+from unittest import mock
 
-
-from lineflow.datasets import PennTreebank
-from lineflow.datasets.penn_treebank import TRAIN_URL, DEV_URL, TEST_URL
+from lineflow import download
+from lineflow.datasets.penn_treebank import PennTreebank, get_penn_treebank
 
 
 class PennTreebankTestCase(TestCase):
 
     def setUp(self):
-        fp = tempfile.NamedTemporaryFile()
-        self.fp = fp
-
-        cached_download_patcher = patch('lineflow.datasets.penn_treebank.cached_download')
-        cached_download_mock = cached_download_patcher.start()
-        cached_download_mock.side_effect = lambda url: fp.name
-
-        self.cached_download_patcher = cached_download_patcher
-        self.cached_download_mock = cached_download_mock
+        self.default_cache_root = download.get_cache_root()
+        self.temp_dir = tempfile.mkdtemp()
+        download.set_cache_root(self.temp_dir)
 
     def tearDown(self):
-        self.fp.close()
-        self.cached_download_patcher.stop()
+        download.set_cache_root(self.default_cache_root)
+        shutil.rmtree(self.temp_dir)
 
-    def test_returns_train_set(self):
-        PennTreebank(split='train')
-        self.cached_download_mock.assert_called_once_with(TRAIN_URL)
+    def test_get_penn_treebank(self):
+        raw = get_penn_treebank()
+        params = [('train', 42_068), ('dev', 3_370), ('test', 3_761)]
+        for key, size in params:
+            with self.subTest(key=key, size=size):
+                self.assertIn(key, raw)
+                self.assertEqual(len(raw[key]), size)
+                self.assertEqual(len(PennTreebank(split=key)), size)
 
-    def test_returns_valid_set(self):
-        PennTreebank(split='dev')
-        self.cached_download_mock.assert_called_once_with(DEV_URL)
-
-    def test_returns_test_set(self):
-        PennTreebank(split='test')
-        self.cached_download_mock.assert_called_once_with(TEST_URL)
+    def test_get_penn_treebank_twice(self):
+        get_penn_treebank()
+        with mock.patch('lineflow.datasets.penn_treebank.pickle', autospect=True) as mock_pickle:
+            get_penn_treebank()
+        mock_pickle.dump.assert_not_called()
+        mock_pickle.load.assert_called_once()
 
     def test_raises_value_error_with_invalid_split(self):
         with self.assertRaises(ValueError):

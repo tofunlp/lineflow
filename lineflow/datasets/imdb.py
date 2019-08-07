@@ -1,45 +1,58 @@
-from typing import Tuple
+from typing import Dict, List, Tuple
+import io
+import os
+import pickle
 import tarfile
-from pathlib import Path
-from itertools import chain
 
-from lineflow.download import cached_download
-from lineflow.download import get_cache_root
 from lineflow.core import MapDataset
+from lineflow import download
 
 
-IMDB_URL = 'https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz'
+def get_imdb() -> Dict[str, List[str]]:
 
-TRAIN_DIR = 'aclImdb/train'
-TEST_DIR = 'aclImdb/test'
+    url = 'https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz'
+    root = download.get_cache_directory(os.path.join('datasets'))
 
-ALL = (TRAIN_DIR, TEST_DIR)
+    def creator(path):
+        archive_path = download.cached_download(url)
+        with tarfile.open(archive_path, 'r') as archive:
+            print(f'Extracting to {root}...')
+            archive.extractall(root)
+
+        extracted_path = os.path.join(root, 'aclImdb')
+
+        dataset = {}
+        for split in ('train', 'test'):
+            pos_path = os.path.join(extracted_path, split, 'pos')
+            neg_path = os.path.join(extracted_path, split, 'neg')
+            dataset[split] = [x.path for x in os.scandir(pos_path)
+                              if x.is_file() and x.name.endswith('.txt')] + \
+                             [x.path for x in os.scandir(neg_path)
+                              if x.is_file() and x.name.endswith('.txt')]
+
+        with io.open(path, 'wb') as f:
+            pickle.dump(dataset, f)
+        return dataset
+
+    def loader(path):
+        with io.open(path, 'rb') as f:
+            return pickle.load(f)
+
+    pkl_path = os.path.join(root, 'aclImdb', 'imdb.pkl')
+    return download.cache_or_load_file(pkl_path, creator, loader)
 
 
 class Imdb(MapDataset):
     def __init__(self, split: str = 'train') -> None:
-        path = cached_download(IMDB_URL)
-        tf = tarfile.open(path, 'r')
-        cache_dir = Path(get_cache_root())
-        if not all((cache_dir / p).exists() for p in ALL):
-            print(f'Extracting from {path}...')
-            tf.extractall(cache_dir)
-
-        if split == 'train':
-            pos_dir = f'{cache_dir / TRAIN_DIR}/pos'
-            neg_dir = f'{cache_dir / TRAIN_DIR}/neg'
-        elif split == 'test':
-            pos_dir = f'{cache_dir / TEST_DIR}/pos'
-            neg_dir = f'{cache_dir / TEST_DIR}/neg'
-        else:
+        if split not in ('train', 'test'):
             raise ValueError(f"only 'train' and 'test' are valid for 'split', but '{split}' is given.")
 
-        path = list(chain(Path(pos_dir).glob('*.txt'),
-                          Path(neg_dir).glob('*.txt')))
+        raw = get_imdb()
 
-        def map_func(x: Path) -> Tuple[str, int]:
-            string = x.read_text()
-            label = 0 if 'pos' in str(x) else 1
+        def map_func(x: str) -> Tuple[str, int]:
+            with io.open(x, 'rt', encoding='utf-8') as f:
+                string = f.read()
+            label = 0 if 'pos' in x else 1
             return (string, label)
 
-        super().__init__(path, map_func)
+        super().__init__(raw[split], map_func)

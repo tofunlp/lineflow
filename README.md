@@ -181,11 +181,12 @@ The item in this dataset as follows:
 >>> import lineflow.datasets as lfds
 >>> train = lfds.MsrParaphrase('train')
 >>> train.first()
-OrderedDict([('quality', '1'),
-             ('id1', '702876'),
-             ('id2', '702977'),
-             ('string1', 'Amrozi accused his brother, whom he called "the witness", of deliberately distorting his evidence.'),
-             ('string2', 'Referring to him as only "the witness", Amrozi accused his brother of deliberately distorting his evidence.')])
+{'quality': '1',
+ 'id1': '702876',
+ 'id2': '702977',
+ 'string1': 'Amrozi accused his brother, whom he called "the witness", of deliberately distorting his evidence.',
+ 'string2': 'Referring to him as only "the witness", Amrozi accused his brother of deliberately distorting his evidence.'
+}
 ```
 
 ### Question Answering
