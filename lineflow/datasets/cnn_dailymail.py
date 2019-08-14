@@ -2,6 +2,7 @@ from typing import Dict, Tuple
 import os
 import io
 import tarfile
+from functools import lru_cache
 import pickle
 
 import easyfile
@@ -42,10 +43,13 @@ def get_cnn_dailymail() -> Dict[str, Tuple[easyfile.TextFile]]:
     return download.cache_or_load_file(pkl_path, creator, loader)
 
 
+cached_get_cnn_dailymail = lru_cache()(get_cnn_dailymail)
+
+
 class CnnDailymail(ZipDataset):
     def __init__(self, split: str = 'train') -> None:
         if split not in ('train', 'dev', 'test'):
             raise ValueError(f"only 'train', 'dev' and 'test' are valid for 'split', but '{split}' is given.")
 
-        raw = get_cnn_dailymail()
+        raw = cached_get_cnn_dailymail()
         super(CnnDailymail, self).__init__(*raw[split])

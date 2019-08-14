@@ -2,6 +2,7 @@ from typing import Dict, List
 import os
 import io
 import json
+from functools import lru_cache
 import pickle
 
 from lineflow import Dataset
@@ -47,7 +48,11 @@ def get_squad(version: int) -> Dict[str, List]:
     return download.cache_or_load_file(pkl_path, creator, loader)
 
 
+cached_get_squad = lru_cache()(get_squad)
+
+
 class Squad(Dataset):
+
     def __init__(self,
                  split: str = 'train',
                  version: int = 1) -> None:
@@ -57,6 +62,6 @@ class Squad(Dataset):
         if split not in ('train', 'dev'):
             raise ValueError(f"only 'train' and 'dev' are valid for 'split', but '{split}' is given.")
 
-        raw = get_squad(version)
+        raw = cached_get_squad(version)
 
         super().__init__(raw[split])

@@ -4,7 +4,7 @@ from unittest import TestCase
 from unittest import mock
 
 from lineflow import download
-from lineflow.datasets.imdb import Imdb, get_imdb
+from lineflow.datasets.imdb import Imdb, get_imdb, _imdb_loader
 
 
 class ImdbTestCase(TestCase):
@@ -34,13 +34,18 @@ class ImdbTestCase(TestCase):
         mock_pickle.dump.assert_not_called()
         self.assertEqual(mock_pickle.load.call_count, 1)
 
+    @mock.patch('lineflow.datasets.imdb.io.open', autospec=True)
+    def test_imdb_loader(self, mock_open):
+        for path in ('pos', 'neg'):
+            with self.subTest(path=path):
+                string, label = _imdb_loader(path)
+                self.assertEqual(label, 0 if path == 'pos' else 1)
+
     def test_loads_each_split(self):
         train = Imdb(split='train')
         self.assertEqual(len(train), 25_000)
-        self.assertEqual(train[0][1], 0)
         test = Imdb(split='test')
         self.assertEqual(len(test), 25_000)
-        self.assertEqual(test[0][1], 0)
 
     def test_raises_value_error_with_invalid_split(self):
         with self.assertRaises(ValueError):
