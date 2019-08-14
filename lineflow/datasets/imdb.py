@@ -46,17 +46,18 @@ def get_imdb() -> Dict[str, List[str]]:
 cached_get_imdb = lru_cache()(get_imdb)
 
 
+def _imdb_loader(path: str) -> Tuple[str, int]:
+    with io.open(path, 'rt', encoding='utf-8') as f:
+        string = f.read()
+    label = 0 if 'pos' in path else 1
+    return (string, label)
+
+
 class Imdb(MapDataset):
-    def __init__(self, split: str = 'train') -> None:
+    def __init__(self, split: str = 'train', loader=_imdb_loader) -> None:
         if split not in ('train', 'test'):
             raise ValueError(f"only 'train' and 'test' are valid for 'split', but '{split}' is given.")
 
         raw = cached_get_imdb()
 
-        def map_func(x: str) -> Tuple[str, int]:
-            with io.open(x, 'rt', encoding='utf-8') as f:
-                string = f.read()
-            label = 0 if 'pos' in x else 1
-            return (string, label)
-
-        super().__init__(raw[split], map_func)
+        super().__init__(raw[split], _imdb_loader)
