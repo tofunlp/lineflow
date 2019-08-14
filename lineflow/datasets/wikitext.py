@@ -14,18 +14,20 @@ from lineflow import download
 def get_wikitext(name: str) -> Dict[str, easyfile.TextFile]:
 
     url = f'https://s3.amazonaws.com/research.metamind.io/wikitext/{name}-v1.zip'
-    root = download.get_cache_directory(os.path.join('datasets'))
+    root = download.get_cache_directory(os.path.join('datasets', 'wikitext'))
 
     def creator(path):
         archive_path = download.cached_download(url)
         with zipfile.ZipFile(archive_path, 'r') as archive:
-            print(f'Extracting to {root}...')
-            archive.extractall(root)
-
-        dataset = {}
-        for split in ('train', 'dev', 'test'):
-            filename = 'wiki.{}.tokens'.format(split if split != 'dev' else 'valid')
-            dataset[split] = easyfile.TextFile(os.path.join(root, name, filename))
+            dataset = {}
+            path2key = {f'{name}/wiki.train.tokens': 'train',
+                        f'{name}/wiki.valid.tokens': 'dev',
+                        f'{name}/wiki.test.tokens': 'test'}
+            for p, key in path2key.items():
+                print(f'Extracting {p}...')
+                with archive.open(p) as f:
+                    lines = [line.decode('utf-8').rstrip(os.linesep) for line in f]
+                dataset[key] = lines
 
         with io.open(path, 'wb') as f:
             pickle.dump(dataset, f)
@@ -35,7 +37,7 @@ def get_wikitext(name: str) -> Dict[str, easyfile.TextFile]:
         with io.open(path, 'rb') as f:
             return pickle.load(f)
 
-    pkl_path = os.path.join(root, name, f'{name.replace("-", "")}.pkl')
+    pkl_path = os.path.join(root, f'{name.replace("-", "")}.pkl')
     return download.cache_or_load_file(pkl_path, creator, loader)
 
 
