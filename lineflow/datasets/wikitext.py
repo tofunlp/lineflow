@@ -47,7 +47,7 @@ class WikiText2(Dataset):
         if split not in ('train', 'dev', 'test'):
             raise ValueError(f"only 'train', 'dev' and 'test' are valid for 'split', but '{split}' is given.")
 
-        raw = get_wikitext('wikitext-2')
+        raw = cached_get_wikitext('wikitext-2')
         return super(WikiText2, self).__init__(raw[split])
 
 
@@ -56,5 +56,5 @@ class WikiText103(Dataset):
         if split not in ('train', 'dev', 'test'):
             raise ValueError(f"only 'train', 'dev' and 'test' are valid for 'split', but '{split}' is given.")
 
-        raw = get_wikitext('wikitext-103')
+        raw = cached_get_wikitext('wikitext-103')
         return super(WikiText103, self).__init__(raw[split])
