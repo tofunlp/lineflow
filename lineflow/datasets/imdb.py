@@ -60,4 +60,4 @@ class Imdb(MapDataset):
 
         raw = cached_get_imdb()
 
-        super().__init__(raw[split], _imdb_loader)
+        super().__init__(raw[split], loader)
