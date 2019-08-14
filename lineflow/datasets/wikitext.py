@@ -2,6 +2,7 @@ from typing import Dict
 import os
 import io
 import zipfile
+from functools import lru_cache
 import pickle
 
 import easyfile
@@ -36,6 +37,9 @@ def get_wikitext(name: str) -> Dict[str, easyfile.TextFile]:
 
     pkl_path = os.path.join(root, name, f'{name.replace("-", "")}.pkl')
     return download.cache_or_load_file(pkl_path, creator, loader)
+
+
+cached_get_wikitext = lru_cache()(get_wikitext)
 
 
 class WikiText2(Dataset):

@@ -1,6 +1,7 @@
 from typing import Dict, List, Tuple
 import os
 import io
+from functools import lru_cache
 import pickle
 
 from lineflow import Dataset
@@ -34,10 +35,13 @@ def get_small_parallel_enja() -> Dict[str, Tuple[List[str]]]:
     return download.cache_or_load_file(pkl_path, creator, loader)
 
 
+cached_get_small_parallel_enja = lru_cache()(get_small_parallel_enja)
+
+
 class SmallParallelEnJa(Dataset):
     def __init__(self, split: str = 'train') -> None:
         if split not in ('train', 'dev', 'test'):
             raise ValueError(f"only 'train', 'dev' and 'test' are valid for 'split', but '{split}' is given.")
 
-        raw = get_small_parallel_enja()
+        raw = cached_get_small_parallel_enja()
         super().__init__(raw[split])

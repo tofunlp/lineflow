@@ -1,6 +1,7 @@
 from typing import Dict, List
 import os
 import io
+from functools import lru_cache
 import pickle
 
 from lineflow import Dataset
@@ -31,10 +32,13 @@ def get_penn_treebank() -> Dict[str, List[str]]:
     return download.cache_or_load_file(pkl_path, creator, loader)
 
 
+cached_get_penn_treebank = lru_cache()(get_penn_treebank)
+
+
 class PennTreebank(Dataset):
     def __init__(self, split: str = 'train') -> None:
         if split not in ('train', 'dev', 'test'):
             raise ValueError(f"only 'train', 'dev' and 'test' are valid for 'split', but '{split}' is given.")
 
-        raw = get_penn_treebank()
+        raw = cached_get_penn_treebank()
         super(PennTreebank, self).__init__(raw[split])

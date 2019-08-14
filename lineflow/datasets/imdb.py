@@ -2,6 +2,7 @@ from typing import Dict, List, Tuple
 import io
 import os
 import pickle
+from functools import lru_cache
 import tarfile
 
 from lineflow.core import MapDataset
@@ -42,12 +43,15 @@ def get_imdb() -> Dict[str, List[str]]:
     return download.cache_or_load_file(pkl_path, creator, loader)
 
 
+cached_get_imdb = lru_cache()(get_imdb)
+
+
 class Imdb(MapDataset):
     def __init__(self, split: str = 'train') -> None:
         if split not in ('train', 'test'):
             raise ValueError(f"only 'train' and 'test' are valid for 'split', but '{split}' is given.")
 
-        raw = get_imdb()
+        raw = cached_get_imdb()
 
         def map_func(x: str) -> Tuple[str, int]:
             with io.open(x, 'rt', encoding='utf-8') as f:
