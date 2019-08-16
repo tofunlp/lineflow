@@ -4,4 +4,5 @@ from .msr_paraphrase import MsrParaphrase, get_msr_paraphrase  # NOQA
 from .penn_treebank import PennTreebank, get_penn_treebank  # NOQA
 from .small_parallel_enja import SmallParallelEnJa, get_small_parallel_enja  # NOQA
 from .squad import Squad, get_squad  # NOQA
+from .text_classification import TextClassification, get_text_classification_dataset  # NOQA
 from .wikitext import WikiText2, WikiText103, get_wikitext  # NOQA
