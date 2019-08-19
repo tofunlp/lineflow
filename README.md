@@ -1,6 +1,6 @@
 # Lineflow: Framework-Agnostic NLP Data Loader in Python
-[![Build Status](https://img.shields.io/travis/yasufumy/lineflow/master.svg?logo=travis)](https://travis-ci.org/yasufumy/lineflow)
-[![codecov](https://codecov.io/gh/yasufumy/lineflow/branch/master/graph/badge.svg)](https://codecov.io/gh/yasufumy/lineflow)
+[![Build Status](https://img.shields.io/travis/tofunlp/lineflow/master.svg?logo=travis)](https://travis-ci.org/tofunlp/lineflow)
+[![codecov](https://codecov.io/gh/tofunlp/lineflow/branch/master/graph/badge.svg)](https://codecov.io/gh/tofunlp/lineflow)
 
 Lineflow is a simple text dataset loader for NLP deep learning tasks.
 
