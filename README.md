@@ -76,7 +76,7 @@ Obtains words in dataset:
 
 ## Datasets
 
-Is the dataset you want to use not supported? [Suggest a new dataset](https://github.com/tofunlp/lineflow/issues/new?template=dataset.md&title=Add+support+for+<language>) :tada:
+Is the dataset you want to use not supported? [Suggest a new dataset](https://github.com/tofunlp/lineflow/issues/new?template=dataset.md&title=Add+support+for+<dataset>) :tada:
 
 - [Language Modeling](#language-modeling)
 - [Machine Translation](#machine-translation)
