@@ -91,10 +91,73 @@ def get_text_classification_dataset(key) -> Dict[str, Union[List, easyfile.CsvFi
 cached_get_text_classification_dataset = lru_cache()(get_text_classification_dataset)
 
 
-class TextClassification(Dataset):
-    def __init__(self, name: str, split: str = 'train') -> None:
+class AgNews(Dataset):
+    def __init__(self, split: str = 'train') -> None:
         if split != 'train' and split != 'test':
             raise ValueError(f"only 'train' and 'test' are valid for 'split', but '{split}' is given.")
 
-        raw = cached_get_text_classification_dataset(name)
-        super(TextClassification, self).__init__(raw[split])
+        raw = cached_get_text_classification_dataset('ag_news')
+        super(AgNews, self).__init__(raw[split])
+
+
+class SogouNews(Dataset):
+    def __init__(self, split: str = 'train') -> None:
+        if split != 'train' and split != 'test':
+            raise ValueError(f"only 'train' and 'test' are valid for 'split', but '{split}' is given.")
+
+        raw = cached_get_text_classification_dataset('sogou_news')
+        super(SogouNews, self).__init__(raw[split])
+
+
+class Dbpedia(Dataset):
+    def __init__(self, split: str = 'train') -> None:
+        if split != 'train' and split != 'test':
+            raise ValueError(f"only 'train' and 'test' are valid for 'split', but '{split}' is given.")
+
+        raw = cached_get_text_classification_dataset('dbpedia')
+        super(Dbpedia, self).__init__(raw[split])
+
+
+class YelpReviewPolarity(Dataset):
+    def __init__(self, split: str = 'train') -> None:
+        if split != 'train' and split != 'test':
+            raise ValueError(f"only 'train' and 'test' are valid for 'split', but '{split}' is given.")
+
+        raw = cached_get_text_classification_dataset('yelp_review_polarity')
+        super(YelpReviewPolarity, self).__init__(raw[split])
+
+
+class YelpReviewFull(Dataset):
+    def __init__(self, split: str = 'train') -> None:
+        if split != 'train' and split != 'test':
+            raise ValueError(f"only 'train' and 'test' are valid for 'split', but '{split}' is given.")
+
+        raw = cached_get_text_classification_dataset('yelp_review_full')
+        super(YelpReviewFull, self).__init__(raw[split])
+
+
+class YahooAnswers(Dataset):
+    def __init__(self, split: str = 'train') -> None:
+        if split != 'train' and split != 'test':
+            raise ValueError(f"only 'train' and 'test' are valid for 'split', but '{split}' is given.")
+
+        raw = cached_get_text_classification_dataset('yahoo_answers')
+        super(YahooAnswers, self).__init__(raw[split])
+
+
+class AmazonReviewPolarity(Dataset):
+    def __init__(self, split: str = 'train') -> None:
+        if split != 'train' and split != 'test':
+            raise ValueError(f"only 'train' and 'test' are valid for 'split', but '{split}' is given.")
+
+        raw = cached_get_text_classification_dataset('amazon_review_polarity')
+        super(AmazonReviewPolarity, self).__init__(raw[split])
+
+
+class AmazonReviewFull(Dataset):
+    def __init__(self, split: str = 'train') -> None:
+        if split != 'train' and split != 'test':
+            raise ValueError(f"only 'train' and 'test' are valid for 'split', but '{split}' is given.")
+
+        raw = cached_get_text_classification_dataset('amazon_review_full')
+        super(AmazonReviewFull, self).__init__(raw[split])
