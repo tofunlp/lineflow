@@ -52,8 +52,8 @@ class TextClassificationTestCaseBase(TestCase):
         test = TextClassification(name, split='test')
         self.assertEqual(len(test), test_size)
 
-    def test_raises_value_error_with_invalid_name(self):
-        with self.assertRaises(ValueError):
+    def test_raises_key_error_with_invalid_name(self):
+        with self.assertRaises(KeyError):
             TextClassification('invalid_name')
 
     def raises_value_error_with_invalid_split(self, name):
