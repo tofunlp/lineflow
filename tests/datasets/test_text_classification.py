@@ -1,13 +1,13 @@
 import tempfile
 import sys
 import shutil
+import string
 from unittest import TestCase
 from unittest import mock
 
 from lineflow import download
-from lineflow.datasets.text_classification import TextClassification, \
-    get_text_classification_dataset, urls \
-
+from lineflow.datasets import text_classification
+from lineflow.datasets.text_classification import get_text_classification_dataset, urls
 
 
 class TextClassificationTestCaseBase(TestCase):
@@ -29,6 +29,9 @@ class TextClassificationTestCaseBase(TestCase):
         shutil.rmtree(self.temp_dir)
         self.patcher.stop()
 
+    def name2class(self, name):
+        return getattr(text_classification, string.capwords(name, '_').replace('_', ''))
+
     def get_text_classification_dataset(self, name, train_size, test_size):
         raw = get_text_classification_dataset(name)
         # train
@@ -47,18 +50,18 @@ class TextClassificationTestCaseBase(TestCase):
         self.assertEqual(mock_pickle.load.call_count, 1)
 
     def loads_each_split(self, name, train_size, test_size):
-        train = TextClassification(name, split='train')
+        train = self.name2class(name)(split='train')
         self.assertEqual(len(train), train_size)
-        test = TextClassification(name, split='test')
+        test = self.name2class(name)(split='test')
         self.assertEqual(len(test), test_size)
 
     def test_raises_key_error_with_invalid_name(self):
         with self.assertRaises(KeyError):
-            TextClassification('invalid_name')
+            get_text_classification_dataset('invalid_name')
 
     def raises_value_error_with_invalid_split(self, name):
         with self.assertRaises(ValueError):
-            TextClassification(name, split='invalid_split')
+            self.name2class(name)(split='invalid_split')
 
 
 class AgNewsTestCase(TextClassificationTestCaseBase):
@@ -79,3 +82,59 @@ class AgNewsTestCase(TextClassificationTestCaseBase):
 
     def test_raises_value_error_with_invalid_split(self):
         self.raises_value_error_with_invalid_split(self.name)
+
+
+class SogouNewsTestCase(AgNewsTestCase):
+
+    def setUp(self):
+        super(SogouNewsTestCase, self).setUp()
+        self.name = self.names[1]
+        self.size = self.sizes[1]
+
+
+class DbpediaTestCase(AgNewsTestCase):
+
+    def setUp(self):
+        super(DbpediaTestCase, self).setUp()
+        self.name = self.names[2]
+        self.size = self.sizes[2]
+
+
+class YelpReviewPolarityTestCase(AgNewsTestCase):
+
+    def setUp(self):
+        super(YelpReviewPolarityTestCase, self).setUp()
+        self.name = self.names[3]
+        self.size = self.sizes[3]
+
+
+class YelpReviewFullTestCase(AgNewsTestCase):
+
+    def setUp(self):
+        super(YelpReviewFullTestCase, self).setUp()
+        self.name = self.names[4]
+        self.size = self.sizes[4]
+
+
+class YahooAnswersTestCase(AgNewsTestCase):
+
+    def setUp(self):
+        super(YahooAnswersTestCase, self).setUp()
+        self.name = self.names[5]
+        self.size = self.sizes[5]
+
+
+class AmazonReviewPolarityTestCase(AgNewsTestCase):
+
+    def setUp(self):
+        super(AmazonReviewPolarityTestCase, self).setUp()
+        self.name = self.names[6]
+        self.size = self.sizes[6]
+
+
+class AmazonReviewFullTestCase(AgNewsTestCase):
+
+    def setUp(self):
+        super(AmazonReviewFullTestCase, self).setUp()
+        self.name = self.names[7]
+        self.size = self.sizes[7]
