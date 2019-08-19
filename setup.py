@@ -23,6 +23,6 @@ setup(
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
     ],
-    install_requires=['easyfile'],
+    install_requires=['easyfile', 'gdown'],
     tests_require=['pytest'],
 )

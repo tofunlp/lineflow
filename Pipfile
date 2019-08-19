@@ -13,3 +13,4 @@ pytest-xdist = "*"
 
 [packages]
 easyfile = "*"
+gdown = "*"
