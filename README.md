@@ -1,14 +1,14 @@
-# Lineflow: Framework-Agnostic NLP Data Loader in Python
+# LineFlow: Framework-Agnostic NLP Data Loader in Python
 [![Build Status](https://img.shields.io/travis/tofunlp/lineflow/master.svg?logo=travis)](https://travis-ci.org/tofunlp/lineflow)
 [![codecov](https://codecov.io/gh/tofunlp/lineflow/branch/master/graph/badge.svg)](https://codecov.io/gh/tofunlp/lineflow)
 
-Lineflow is a simple text dataset loader for NLP deep learning tasks.
+LineFlow is a simple text dataset loader for NLP deep learning tasks.
 
-- Lineflow was designed to use in all deep learning frameworks.
-- Lineflow enables you to build pipelines via functional APIs (`.map`, `.filter`, `.flat_map`).
-- Lineflow provides common NLP datasets.
+- LineFlow was designed to use in all deep learning frameworks.
+- LineFlow enables you to build pipelines via functional APIs (`.map`, `.filter`, `.flat_map`).
+- LineFlow provides common NLP datasets.
 
-Lineflow is heavily inspired by [tensorflow.data.Dataset](https://www.tensorflow.org/api_docs/python/tf/data/Dataset) and [chainer.dataset](https://docs.chainer.org/en/stable/reference/datasets.html).
+LineFlow is heavily inspired by [tensorflow.data.Dataset](https://www.tensorflow.org/api_docs/python/tf/data/Dataset) and [chainer.dataset](https://docs.chainer.org/en/stable/reference/datasets.html).
 
 ## Requirements
 
@@ -16,7 +16,7 @@ Lineflow is heavily inspired by [tensorflow.data.Dataset](https://www.tensorflow
 
 ## Installation
 
-To install Lineflow:
+To install LineFlow:
 
 ```sh
 pip install lineflow
@@ -45,7 +45,7 @@ ds.map(lambda x: x.split()).first()  # ["i", "'m", "a", "line", "1", "."]
 
 ## Example
 
-- Please check out the [examples](https://github.com/yasufumy/lineflow/tree/master/examples) to see how to use Lineflow, especially for tokenization, building vocabulary, and indexing.
+- Please check out the [examples](https://github.com/yasufumy/lineflow/tree/master/examples) to see how to use LineFlow, especially for tokenization, building vocabulary, and indexing.
 
 Loads Penn Treebank:
 
