@@ -14,21 +14,22 @@ from lineflow import download
 def get_cnn_dailymail() -> Dict[str, Tuple[easyfile.TextFile]]:
 
     url = 'https://s3.amazonaws.com/opennmt-models/Summary/cnndm.tar.gz'
-    root = download.get_cache_directory(os.path.join('datasets', 'cnndm'))
+    root = download.get_cache_directory(os.path.join('datasets', 'cnn_dailymail'))
 
     def creator(path):
         archive_path = download.cached_download(url)
+        target_path = os.path.join(root, 'raw')
         with tarfile.open(archive_path, 'r') as archive:
-            print(f'Extracting to {root}')
-            archive.extractall(root)
+            print(f'Extracting to {target_path}')
+            archive.extractall(target_path)
 
         dataset = {}
         for split in ('train', 'dev', 'test'):
             src_path = f'{split if split != "dev" else "val"}.txt.src'
             tgt_path = f'{split if split != "dev" else "val"}.txt.tgt.tagged'
             dataset[split] = (
-                easyfile.TextFile(os.path.join(root, src_path)),
-                easyfile.TextFile(os.path.join(root, tgt_path))
+                easyfile.TextFile(os.path.join(target_path, src_path)),
+                easyfile.TextFile(os.path.join(target_path, tgt_path))
             )
 
         with io.open(path, 'wb') as f:
