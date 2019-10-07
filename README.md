@@ -273,3 +273,35 @@ This dataset is preprossed, so you can tokenize each line with `str.split`:
 >>> train.first()
 ... # the output is omitted because it's too long to display here.
 ```
+
+
+### Commonsense Reasoning
+
+#### [CommonsenseQA](https://www.tau-nlp.org/commonsenseqa)
+
+Loads the CommonsenseQA dataset:
+
+```py
+>>> import lineflow.datasets as lfds
+
+>>> train = lfds.CommonsenseQA("train")
+>>> dev = lfds.CommonsenseQA("dev")
+>>> test = lfds.CommonsenseQA("test")
+```
+
+The items in this datset as follows:
+
+```py
+>>> import lineflow.datasets as lfds
+
+>>> train = lfds.CommonsenseQA("train")
+>>> train.first()
+{"answer_key": "A",
+ "options": {"A": "ignore",
+ "B": "enforce",
+ "C": "authoritarian",
+ "D": "yell at",
+ "E": "avoid"},
+ "stem": "The sanctions against the school were a punishing blow, and they seemed to what the efforts the school had made to change?"}
+}
+```

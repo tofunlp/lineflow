@@ -8,4 +8,4 @@ from .text_classification import get_text_classification_dataset  # NOQA
 from .text_classification import AgNews, SogouNews, Dbpedia, YelpReviewPolarity, YelpReviewFull, YahooAnswers, AmazonReviewPolarity, AmazonReviewFull  # NOQA
 from .wikitext import WikiText2, WikiText103, get_wikitext  # NOQA
 from .wmt14 import Wmt14, get_wmt14  # NOQA
-from .commonsenseqa import CommonsenseQA  # NOQA
+from .commonsenseqa import CommonsenseQA, get_commonsenseqa  # NOQA
