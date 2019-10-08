@@ -55,7 +55,7 @@ def _imdb_loader(path: str) -> Tuple[str, int]:
 
 class Imdb(MapDataset):
     def __init__(self, split: str = 'train', loader=_imdb_loader) -> None:
-        if split not in ('train', 'test'):
+        if split not in {'train', 'test'}:
             raise ValueError(f"only 'train' and 'test' are valid for 'split', but '{split}' is given.")
 
         raw = cached_get_imdb()

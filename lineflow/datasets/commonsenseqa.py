@@ -34,7 +34,7 @@ def get_commonsenseqa() -> Dict[str, List[str]]:
                     "answer_key": answer_key,
                     "options": options,
                     "stem": stem
-                    })
+                })
             dataset[split] = temp
 
         with io.open(path, "wb") as f:
@@ -56,7 +56,7 @@ class CommonsenseQA(Dataset):
 
     def __init__(self, split: str = "train") -> None:
 
-        if split not in ("train", "dev", "test"):
+        if split not in {"train", "dev", "test"}:
             raise ValueError(f"only 'train' and 'dev' are valid for 'split', but '{split}' is given.")
 
         raw = cached_get_commonsenseqa()
