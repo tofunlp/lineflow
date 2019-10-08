@@ -49,7 +49,7 @@ cached_get_cnn_dailymail = lru_cache()(get_cnn_dailymail)
 
 class CnnDailymail(ZipDataset):
     def __init__(self, split: str = 'train') -> None:
-        if split not in ('train', 'dev', 'test'):
+        if split not in {'train', 'dev', 'test'}:
             raise ValueError(f"only 'train', 'dev' and 'test' are valid for 'split', but '{split}' is given.")
 
         raw = cached_get_cnn_dailymail()

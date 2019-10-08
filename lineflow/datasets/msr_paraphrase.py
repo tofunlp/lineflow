@@ -42,7 +42,7 @@ cached_get_msr_paraphrase = lru_cache()(get_msr_paraphrase)
 class MsrParaphrase(Dataset):
     def __init__(self,
                  split: str = 'train') -> None:
-        if split not in ('train', 'test'):
+        if split not in {'train', 'test'}:
             raise ValueError(f"only 'train', 'dev' and 'test' are valid for 'split', but '{split}' is given.")
 
         raw = cached_get_msr_paraphrase()

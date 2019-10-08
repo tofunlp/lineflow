@@ -59,7 +59,7 @@ class Squad(Dataset):
         if version != 1 and version != 2:
             raise ValueError(f"only 1 and 2 are valid for 'version', but {version} is given.")
 
-        if split not in ('train', 'dev'):
+        if split not in {'train', 'dev'}:
             raise ValueError(f"only 'train' and 'dev' are valid for 'split', but '{split}' is given.")
 
         raw = cached_get_squad(version)

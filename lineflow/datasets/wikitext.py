@@ -68,7 +68,7 @@ cached_get_wikitext = lru_cache()(get_wikitext)
 
 class WikiText2(Dataset):
     def __init__(self, split: str = 'train') -> None:
-        if split not in ('train', 'dev', 'test'):
+        if split not in {'train', 'dev', 'test'}:
             raise ValueError(f"only 'train', 'dev' and 'test' are valid for 'split', but '{split}' is given.")
 
         raw = cached_get_wikitext('wikitext-2')
@@ -77,7 +77,7 @@ class WikiText2(Dataset):
 
 class WikiText103(Dataset):
     def __init__(self, split: str = 'train') -> None:
-        if split not in ('train', 'dev', 'test'):
+        if split not in {'train', 'dev', 'test'}:
             raise ValueError(f"only 'train', 'dev' and 'test' are valid for 'split', but '{split}' is given.")
 
         raw = cached_get_wikitext('wikitext-103')
