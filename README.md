@@ -84,6 +84,7 @@ Is the dataset you want to use not supported? [Suggest a new dataset](https://gi
 - [Question Answering](#question-answering)
 - [Sentiment Analysis](#sentiment-analysis)
 - [Text Summarization](#text-summarization)
+- [Commonsense Reasoning](#commonsense-reasoning)
 
 ### Language Modeling
 
