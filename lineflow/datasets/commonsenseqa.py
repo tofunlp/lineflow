@@ -31,6 +31,7 @@ def get_commonsenseqa() -> Dict[str, List[str]]:
                 options = {choice["label"]: choice["text"] for choice in x["question"]["choices"]}
                 stem = x["question"]["stem"]
                 temp.append({
+                    "id": x["id"],
                     "answer_key": answer_key,
                     "options": options,
                     "stem": stem
