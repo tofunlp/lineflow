@@ -297,7 +297,8 @@ The items in this datset as follows:
 
 >>> train = lfds.CommonsenseQA("train")
 >>> train.first()
-{"answer_key": "A",
+{"id": "075e483d21c29a511267ef62bedc0461",
+ "answer_key": "A",
  "options": {"A": "ignore",
  "B": "enforce",
  "C": "authoritarian",
