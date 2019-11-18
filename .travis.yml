@@ -5,6 +5,9 @@ python:
 - 3.7
 - 3.8
 install: pip install tox-travis flake8
+cache:
+    directories:
+        - $HOME/.cache/gdown
 script:
 - flake8
 - tox
