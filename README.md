@@ -10,18 +10,6 @@ LineFlow is a simple text dataset loader for NLP deep learning tasks.
 
 LineFlow is heavily inspired by [tensorflow.data.Dataset](https://www.tensorflow.org/api_docs/python/tf/data/Dataset) and [chainer.dataset](https://docs.chainer.org/en/stable/reference/datasets.html).
 
-## Requirements
-
-- Python3.6+
-
-## Installation
-
-To install LineFlow:
-
-```sh
-pip install lineflow
-```
-
 ## Basic Usage
 
 lineflow.TextDataset expects line-oriented text files:
@@ -72,6 +60,22 @@ Obtains words in dataset:
 >>> words = train.flat_map(lambda x: x)
 >>> words.take(5) # This is useful to build vocabulary.
 ['aer', 'banknote', 'berlitz', 'calloway', 'centrust']
+```
+
+Further more:
+
+- [How to fine-tune BERT with pytorch-lightning](https://towardsdatascience.com/how-to-fine-tune-bert-with-pytorch-lightning-ba3ad2f928d2) by [@sobamchan](https://towardsdatascience.com/@sobamchan)
+
+## Requirements
+
+- Python3.6+
+
+## Installation
+
+To install LineFlow:
+
+```sh
+pip install lineflow
 ```
 
 ## Datasets
