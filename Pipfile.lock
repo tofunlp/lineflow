@@ -30,10 +30,10 @@
         },
         "easyfile": {
             "hashes": [
-                "sha256:7056958b582b09bc68a47aea09fcd8e5f1f783a7a5d9905c8c03810e1a717cb9"
+                "sha256:29c0dc17613ba4e2e8a02850add513d2caab994d91dd7b8d3e60e5b48c4697d7"
             ],
             "index": "pypi",
-            "version": "==0.0.5"
+            "version": "==0.0.6"
         },
         "filelock": {
             "hashes": [
