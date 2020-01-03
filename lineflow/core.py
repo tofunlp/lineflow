@@ -212,29 +212,37 @@ class ConcatDataset(Dataset):
         assert all(isinstance(d, DatasetMixin) for d in datasets)
 
         self._datasets = datasets
-        self._offsets = None
         self._length = None
-        self._ready = False
 
-    def _prepare(self) -> None:
-        if self._ready:
-            return
-        self._lengths = list(accumulate(len(d) for d in self._datasets))
-        self._offsets = [0] + self._lengths[:-1]
-        self._length = self._lengths[-1]
-        self._ready = True
+    @lru_cache()
+    def _get_lengths(self) -> List[int]:
+        return list(accumulate(len(d) for d in self._datasets))
+
+    @property
+    def _lengths(self) -> List[int]:
+        return self._get_lengths()
+
+    @lru_cache()
+    def _get_offsets(self) -> List[int]:
+        offsets = [0]
+        offsets.extend(self._lengths[:-1])
+        return offsets
+
+    @property
+    def _offsets(self) -> List[int]:
+        return self._get_offsets()
 
     def __iter__(self) -> Iterator[Any]:
         for d in self._datasets:
             yield from d
 
     def get_example(self, i: int) -> Any:
-        self._prepare()
         j = bisect.bisect_right(self._lengths, i)
         return self._datasets[j][i - self._offsets[j]]
 
     def __len__(self) -> int:
-        self._prepare()
+        if self._length is None:
+            self._length = self._lengths[-1]
         return self._length
 
 
