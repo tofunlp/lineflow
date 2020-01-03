@@ -4,6 +4,7 @@ from _collections_abc import _check_methods, Sequence
 import pickle
 from pathlib import Path
 from itertools import accumulate, chain, islice, tee
+from functools import lru_cache
 from collections import deque
 import bisect
 
@@ -179,31 +180,30 @@ class Dataset(DatasetMixin):
 
 class IterableDataset(Dataset):
     def __init__(self, iterable: Iterable) -> None:
-        self._dataset = None
         self._length = None
         self._iterable = iterable
-        self._ready = False
+        self._computed = False
 
-    def _prepare(self) -> None:
-        if self._ready:
-            return
-        self._dataset = list(self._iterable)
-        self._length = len(self._dataset)
-        self._ready = True
+    @lru_cache()
+    def _get_dataset(self) -> List[Any]:
+        self._computed = True
+        return list(self._iterable)
+
+    @property
+    def _dataset(self) -> List[Any]:
+        return self._get_dataset()
 
     def __iter__(self) -> Iterator[Any]:
-        if self._ready:
+        if self._computed:
             yield from self._dataset
         else:
             iterable, self._iterable = tee(self._iterable)
             yield from iterable
 
     def get_example(self, i: int) -> Any:
-        self._prepare()
         return super(IterableDataset, self).get_example(i)
 
     def __len__(self) -> int:
-        self._prepare()
         return super(IterableDataset, self).__len__()
 
 
