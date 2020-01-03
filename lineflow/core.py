@@ -4,6 +4,7 @@ from _collections_abc import _check_methods, Sequence
 import pickle
 from pathlib import Path
 from itertools import accumulate, chain, islice, tee
+from functools import lru_cache
 from collections import deque
 import bisect
 
@@ -51,7 +52,6 @@ class DatasetMixin(metaclass=ABCMeta):
 
 DatasetMixin.register(Sequence)
 DatasetMixin.register(easyfile.TextFile)
-DatasetMixin.register(easyfile.CsvFile)
 
 
 class Dataset(DatasetMixin):
@@ -180,31 +180,30 @@ class Dataset(DatasetMixin):
 
 class IterableDataset(Dataset):
     def __init__(self, iterable: Iterable) -> None:
-        self._dataset = None
         self._length = None
         self._iterable = iterable
-        self._ready = False
+        self._computed = False
 
-    def _prepare(self) -> None:
-        if self._ready:
-            return
-        self._dataset = list(self._iterable)
-        self._length = len(self._dataset)
-        self._ready = True
+    @lru_cache()
+    def _get_dataset(self) -> List[Any]:
+        self._computed = True
+        return list(self._iterable)
+
+    @property
+    def _dataset(self) -> List[Any]:
+        return self._get_dataset()
 
     def __iter__(self) -> Iterator[Any]:
-        if self._ready:
+        if self._computed:
             yield from self._dataset
         else:
             iterable, self._iterable = tee(self._iterable)
             yield from iterable
 
     def get_example(self, i: int) -> Any:
-        self._prepare()
         return super(IterableDataset, self).get_example(i)
 
     def __len__(self) -> int:
-        self._prepare()
         return super(IterableDataset, self).__len__()
 
 
@@ -213,29 +212,37 @@ class ConcatDataset(Dataset):
         assert all(isinstance(d, DatasetMixin) for d in datasets)
 
         self._datasets = datasets
-        self._offsets = None
         self._length = None
-        self._ready = False
 
-    def _prepare(self) -> None:
-        if self._ready:
-            return
-        self._lengths = list(accumulate(len(d) for d in self._datasets))
-        self._offsets = [0] + self._lengths[:-1]
-        self._length = self._lengths[-1]
-        self._ready = True
+    @lru_cache()
+    def _get_lengths(self) -> List[int]:
+        return list(accumulate(len(d) for d in self._datasets))
+
+    @property
+    def _lengths(self) -> List[int]:
+        return self._get_lengths()
+
+    @lru_cache()
+    def _get_offsets(self) -> List[int]:
+        offsets = [0]
+        offsets.extend(self._lengths[:-1])
+        return offsets
+
+    @property
+    def _offsets(self) -> List[int]:
+        return self._get_offsets()
 
     def __iter__(self) -> Iterator[Any]:
         for d in self._datasets:
             yield from d
 
     def get_example(self, i: int) -> Any:
-        self._prepare()
         j = bisect.bisect_right(self._lengths, i)
         return self._datasets[j][i - self._offsets[j]]
 
     def __len__(self) -> int:
-        self._prepare()
+        if self._length is None:
+            self._length = self._lengths[-1]
         return self._length
 
 

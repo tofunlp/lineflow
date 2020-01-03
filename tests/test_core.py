@@ -77,19 +77,14 @@ class ConcatDatasetTestCase(TestCase):
 
     def test_dunder_init(self):
         self.assertEqual(len(self.data._datasets), self.n)
-        self.assertIsNone(self.data._offsets)
         self.assertIsNone(self.data._length)
-        self.assertFalse(self.data._ready)
 
     def test_dunder_iter(self):
         for x, y in zip(self.data, list(self.base) * self.n):
             self.assertEqual(x, y)
-        self.assertIsNone(self.data._offsets)
         self.assertIsNone(self.data._length)
-        self.assertFalse(self.data._ready)
 
     def test_supports_random_access_lazily(self):
-        self.assertIsNone(self.data._offsets)
         self.assertSequenceEqual(self.data, list(self.base) * self.n)
         expected_lengths = list(itertools.accumulate(len(self.base) for _ in range(self.n)))
         self.assertListEqual(self.data._lengths, expected_lengths)
@@ -143,9 +138,8 @@ class IterableDatasetTestCase(TestCase):
         self.data = IterableDataset(iter(self.base))
 
     def test_dunder_init(self):
-        self.assertIsNone(self.data._dataset)
         self.assertIsNone(self.data._length)
-        self.assertFalse(self.data._ready)
+        self.assertFalse(self.data._computed)
 
     def test_dunder_iter(self):
         for _ in range(100):
@@ -153,17 +147,17 @@ class IterableDatasetTestCase(TestCase):
                 self.assertEqual(x, y)
 
     def test_dunder_iter_after_prepare(self):
-        self.data._prepare()
+        self.data._get_dataset()
         for _ in range(100):
             for x, y in zip(self.data, self.base):
                 self.assertEqual(x, y)
 
     def test_dunder_len(self):
-        self.assertFalse(self.data._ready)
+        self.assertFalse(self.data._computed)
         self.assertIsNone(self.data._length)
         self.assertEqual(len(self.data), len(self.base))
         self.assertEqual(self.data._length, len(self.base))
-        self.assertTrue(self.data._ready)
+        self.assertTrue(self.data._computed)
 
 
 class DatasetTestCase(TestCase):
