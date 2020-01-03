@@ -51,7 +51,6 @@ class DatasetMixin(metaclass=ABCMeta):
 
 DatasetMixin.register(Sequence)
 DatasetMixin.register(easyfile.TextFile)
-DatasetMixin.register(easyfile.CsvFile)
 
 
 class Dataset(DatasetMixin):
