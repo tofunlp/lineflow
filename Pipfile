@@ -9,7 +9,6 @@ flake8 = "*"
 ipython = "*"
 autopep8 = "*"
 pytest-cov = "*"
-pytest-xdist = "*"
 
 [packages]
 easyfile = "*"
