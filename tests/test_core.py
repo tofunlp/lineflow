@@ -77,19 +77,14 @@ class ConcatDatasetTestCase(TestCase):
 
     def test_dunder_init(self):
         self.assertEqual(len(self.data._datasets), self.n)
-        self.assertIsNone(self.data._offsets)
         self.assertIsNone(self.data._length)
-        self.assertFalse(self.data._ready)
 
     def test_dunder_iter(self):
         for x, y in zip(self.data, list(self.base) * self.n):
             self.assertEqual(x, y)
-        self.assertIsNone(self.data._offsets)
         self.assertIsNone(self.data._length)
-        self.assertFalse(self.data._ready)
 
     def test_supports_random_access_lazily(self):
-        self.assertIsNone(self.data._offsets)
         self.assertSequenceEqual(self.data, list(self.base) * self.n)
         expected_lengths = list(itertools.accumulate(len(self.base) for _ in range(self.n)))
         self.assertListEqual(self.data._lengths, expected_lengths)
