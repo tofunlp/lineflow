@@ -5,6 +5,8 @@ import csv
 from functools import lru_cache
 import pickle
 
+import gdown
+
 from lineflow import Dataset
 from lineflow import download
 
@@ -18,7 +20,7 @@ def get_msr_paraphrase() -> Dict[str, List[Dict[str, str]]]:
         dataset = {}
         fieldnames = ('quality', 'id1', 'id2', 'string1', 'string2')
         for split in ('train', 'test'):
-            data_path = download.cached_download(url.format(split))
+            data_path = gdown.cached_download(url.format(split))
             with io.open(data_path, 'r', encoding='utf-8') as f:
                 f.readline()  # skip header
                 reader = csv.DictReader(f, delimiter='\t', fieldnames=fieldnames)

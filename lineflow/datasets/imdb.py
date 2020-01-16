@@ -5,6 +5,8 @@ import pickle
 from functools import lru_cache
 import tarfile
 
+import gdown
+
 from lineflow.core import MapDataset
 from lineflow import download
 
@@ -15,7 +17,7 @@ def get_imdb() -> Dict[str, List[str]]:
     root = download.get_cache_directory(os.path.join('datasets'))
 
     def creator(path):
-        archive_path = download.cached_download(url)
+        archive_path = gdown.cached_download(url)
         with tarfile.open(archive_path, 'r') as archive:
             print(f'Extracting to {root}...')
             archive.extractall(root)

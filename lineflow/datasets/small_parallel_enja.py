@@ -4,6 +4,8 @@ import io
 from functools import lru_cache
 import pickle
 
+import gdown
+
 from lineflow import Dataset
 from lineflow import download
 
@@ -17,8 +19,8 @@ def get_small_parallel_enja() -> Dict[str, Tuple[List[str]]]:
     def creator(path):
         dataset = {}
         for split in ('train', 'dev', 'test'):
-            en_path = download.cached_download(en_url.format(split))
-            ja_path = download.cached_download(ja_url.format(split))
+            en_path = gdown.cached_download(en_url.format(split))
+            ja_path = gdown.cached_download(ja_url.format(split))
             with io.open(en_path, 'rt') as en, io.open(ja_path, 'rt') as ja:
                 dataset[split] = [(x.rstrip(os.linesep), y.rstrip(os.linesep))
                                   for x, y in zip(en, ja)]

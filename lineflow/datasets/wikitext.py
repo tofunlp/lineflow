@@ -6,6 +6,7 @@ from functools import lru_cache
 import pickle
 
 import easyfile
+import gdown
 
 from lineflow.core import Dataset
 from lineflow import download
@@ -17,7 +18,7 @@ def get_wikitext(name: str) -> Dict[str, Union[easyfile.TextFile, List]]:
     root = download.get_cache_directory(os.path.join('datasets', 'wikitext'))
 
     def list_creator(path):
-        archive_path = download.cached_download(url)
+        archive_path = gdown.cached_download(url)
         with zipfile.ZipFile(archive_path, 'r') as archive:
             dataset = {}
             path2key = {f'{name}/wiki.train.tokens': 'train',
@@ -34,7 +35,7 @@ def get_wikitext(name: str) -> Dict[str, Union[easyfile.TextFile, List]]:
         return dataset
 
     def easyfile_creator(path):
-        archive_path = download.cached_download(url)
+        archive_path = gdown.cached_download(url)
         with zipfile.ZipFile(archive_path, 'r') as archive:
             print(f'Extracting to {root}...')
             archive.extractall(root)

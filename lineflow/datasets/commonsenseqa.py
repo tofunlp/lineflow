@@ -5,6 +5,8 @@ import json
 from functools import lru_cache
 import pickle
 
+import gdown
+
 from lineflow import download
 from lineflow.text import Dataset
 
@@ -16,9 +18,9 @@ def get_commonsenseqa() -> Dict[str, List[str]]:
     root = download.get_cache_directory(os.path.join("datasets", "commonsenseqa"))
 
     def creator(path):
-        train_path = download.cached_download(train_url)
-        dev_path = download.cached_download(dev_url)
-        test_path = download.cached_download(test_url)
+        train_path = gdown.cached_download(train_url)
+        dev_path = gdown.cached_download(dev_url)
+        test_path = gdown.cached_download(test_url)
 
         dataset = {}
         for split in ("train", "dev", "test"):
