@@ -4,6 +4,8 @@ import io
 from functools import lru_cache
 import pickle
 
+import gdown
+
 from lineflow import Dataset
 from lineflow import download
 
@@ -16,7 +18,7 @@ def get_penn_treebank() -> Dict[str, List[str]]:
     def creator(path):
         dataset = {}
         for split in ('train', 'dev', 'test'):
-            data_path = download.cached_download(url.format(split if split != 'dev' else 'valid'))
+            data_path = gdown.cached_download(url.format(split if split != 'dev' else 'valid'))
             with io.open(data_path, 'rt') as f:
                 dataset[split] = [line.rstrip(os.linesep) for line in f]
 

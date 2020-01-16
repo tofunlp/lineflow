@@ -1,15 +1,12 @@
 import tempfile
 import contextlib
-import hashlib
 import os
 import shutil
-import sys
-from urllib import request
 
 
 _cache_root = os.environ.get(
     'LINEFLOW_ROOT',
-    os.path.join(os.path.expanduser('~'), '.lineflow'))
+    os.path.join(os.path.expanduser('~'), '.cache', 'lineflow'))
 
 
 @contextlib.contextmanager
@@ -42,30 +39,6 @@ def get_cache_directory(cache_name: str,
             if not os.path.isdir(path):
                 raise
     return path
-
-
-def cached_download(url: str) -> str:
-    cache_root = os.path.join(_cache_root, '_dl_cache')
-    try:
-        os.makedirs(cache_root)
-    except OSError:
-        if not os.path.isdir(cache_root):
-            raise
-
-    urlhash = hashlib.md5(url.encode('utf-8')).hexdigest()
-    cache_path = os.path.join(cache_root, urlhash)
-
-    if os.path.exists(cache_path):
-        return cache_path
-
-    with tempdir(dir=cache_root) as temp_root:
-        temp_path = os.path.join(temp_root, 'dl')
-        sys.stderr.write('Downloading from {}...\n'.format(url))
-        sys.stderr.flush()
-        request.urlretrieve(url, temp_path)
-        shutil.move(temp_path, cache_path)
-
-    return cache_path
 
 
 def cache_or_load_file(path, creator, loader):

@@ -16,18 +16,20 @@ class TextClassificationTestCaseBase(TestCase):
     sizes = [(120_000, 7_600), (450_000, 60_000), (560_000, 70_000), (560_000, 38_000),
              (650_000, 50_000), (1_400_000, 60_000), (3_600_000, 400_000), (3_000_000, 650_000)]
 
-    def setUp(self):
-        self.default_cache_root = download.get_cache_root()
-        self.temp_dir = tempfile.mkdtemp()
-        download.set_cache_root(self.temp_dir)
-        self.patcher = mock.patch('lineflow.datasets.text_classification.sys.maxsize',
-                                  int(sys.float_info.max))
-        self.patcher.start()
+    @classmethod
+    def setUpClass(cls):
+        cls.default_cache_root = download.get_cache_root()
+        cls.temp_dir = tempfile.mkdtemp()
+        download.set_cache_root(cls.temp_dir)
+        cls.patcher = mock.patch('lineflow.datasets.text_classification.sys.maxsize',
+                                 int(sys.float_info.max))
+        cls.patcher.start()
 
-    def tearDown(self):
-        download.set_cache_root(self.default_cache_root)
-        shutil.rmtree(self.temp_dir)
-        self.patcher.stop()
+    @classmethod
+    def tearDownClass(cls):
+        download.set_cache_root(cls.default_cache_root)
+        shutil.rmtree(cls.temp_dir)
+        cls.patcher.stop()
 
     def name2class(self, name):
         return getattr(text_classification, string.capwords(name, '_').replace('_', ''))

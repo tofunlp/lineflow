@@ -9,14 +9,16 @@ from lineflow.datasets.squad import Squad, get_squad
 
 class SquadTestCase(TestCase):
 
-    def setUp(self):
-        self.default_cache_root = download.get_cache_root()
-        self.temp_dir = tempfile.mkdtemp()
-        download.set_cache_root(self.temp_dir)
+    @classmethod
+    def setUpClass(cls):
+        cls.default_cache_root = download.get_cache_root()
+        cls.temp_dir = tempfile.mkdtemp()
+        download.set_cache_root(cls.temp_dir)
 
-    def tearDown(self):
-        download.set_cache_root(self.default_cache_root)
-        shutil.rmtree(self.temp_dir)
+    @classmethod
+    def tearDownClass(cls):
+        download.set_cache_root(cls.default_cache_root)
+        shutil.rmtree(cls.temp_dir)
 
     def test_get_squad_v1(self):
         raw = get_squad(version=1)

@@ -5,6 +5,8 @@ import json
 from functools import lru_cache
 import pickle
 
+import gdown
+
 from lineflow import Dataset
 from lineflow import download
 
@@ -17,8 +19,8 @@ def get_squad(version: int) -> Dict[str, List]:
     root = download.get_cache_directory(os.path.join('datasets', 'squad'))
 
     def creator(path):
-        train_path = download.cached_download(train_url)
-        dev_path = download.cached_download(dev_url)
+        train_path = gdown.cached_download(train_url)
+        dev_path = gdown.cached_download(dev_url)
 
         dataset = {}
         for split in ('train', 'dev'):

@@ -6,6 +6,7 @@ from functools import lru_cache
 import pickle
 
 import easyfile
+import gdown
 
 from lineflow.core import ZipDataset
 from lineflow import download
@@ -17,7 +18,7 @@ def get_cnn_dailymail() -> Dict[str, Tuple[easyfile.TextFile]]:
     root = download.get_cache_directory(os.path.join('datasets', 'cnn_dailymail'))
 
     def creator(path):
-        archive_path = download.cached_download(url)
+        archive_path = gdown.cached_download(url)
         target_path = os.path.join(root, 'raw')
         with tarfile.open(archive_path, 'r') as archive:
             print(f'Extracting to {target_path}')
