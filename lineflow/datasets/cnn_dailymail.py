@@ -5,14 +5,14 @@ import tarfile
 from functools import lru_cache
 import pickle
 
-import easyfile
+import arrayfiles
 import gdown
 
 from lineflow.core import ZipDataset
 from lineflow import download
 
 
-def get_cnn_dailymail() -> Dict[str, Tuple[easyfile.TextFile]]:
+def get_cnn_dailymail() -> Dict[str, Tuple[arrayfiles.TextFile]]:
 
     url = 'https://s3.amazonaws.com/opennmt-models/Summary/cnndm.tar.gz'
     root = download.get_cache_directory(os.path.join('datasets', 'cnn_dailymail'))
@@ -29,8 +29,8 @@ def get_cnn_dailymail() -> Dict[str, Tuple[easyfile.TextFile]]:
             src_path = f'{split if split != "dev" else "val"}.txt.src'
             tgt_path = f'{split if split != "dev" else "val"}.txt.tgt.tagged'
             dataset[split] = (
-                easyfile.TextFile(os.path.join(target_path, src_path)),
-                easyfile.TextFile(os.path.join(target_path, tgt_path))
+                arrayfiles.TextFile(os.path.join(target_path, src_path)),
+                arrayfiles.TextFile(os.path.join(target_path, tgt_path))
             )
 
         with io.open(path, 'wb') as f:

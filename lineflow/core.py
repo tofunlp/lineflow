@@ -8,7 +8,7 @@ from functools import lru_cache
 from collections import deque
 import bisect
 
-import easyfile
+import arrayfiles
 
 
 class DatasetMixin(metaclass=ABCMeta):
@@ -51,14 +51,14 @@ class DatasetMixin(metaclass=ABCMeta):
 
 
 DatasetMixin.register(Sequence)
-DatasetMixin.register(easyfile.TextFile)
+DatasetMixin.register(arrayfiles.TextFile)
 
 
 class Dataset(DatasetMixin):
     """Dataset wrapping ``DatasetMixin`` object.
 
     Args:
-        dataset (DatasetMixin): ``Sequence``, ``easyfile.TextFile``, or ``easyfile.CsvFile`` object.
+        dataset (DatasetMixin): ``Sequence``, ``arrayfiles.TextFile``, or ``arrayfiles.CsvFile`` object.
     """
 
     def __init__(self,
