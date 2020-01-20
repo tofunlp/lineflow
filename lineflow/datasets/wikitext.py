@@ -5,14 +5,14 @@ import zipfile
 from functools import lru_cache
 import pickle
 
-import easyfile
+import arrayfiles
 import gdown
 
 from lineflow.core import Dataset
 from lineflow import download
 
 
-def get_wikitext(name: str) -> Dict[str, Union[easyfile.TextFile, List]]:
+def get_wikitext(name: str) -> Dict[str, Union[arrayfiles.TextFile, List]]:
 
     url = f'https://s3.amazonaws.com/research.metamind.io/wikitext/{name}-v1.zip'
     root = download.get_cache_directory(os.path.join('datasets', 'wikitext'))
@@ -43,7 +43,7 @@ def get_wikitext(name: str) -> Dict[str, Union[easyfile.TextFile, List]]:
         dataset = {}
         for split in ('train', 'dev', 'test'):
             filename = 'wiki.{}.tokens'.format(split if split != 'dev' else 'valid')
-            dataset[split] = easyfile.TextFile(os.path.join(root, name, filename))
+            dataset[split] = arrayfiles.TextFile(os.path.join(root, name, filename))
 
         with io.open(path, 'wb') as f:
             pickle.dump(dataset, f)

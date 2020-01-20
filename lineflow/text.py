@@ -1,6 +1,6 @@
 from typing import Union, List
 
-import easyfile
+import arrayfiles
 
 from lineflow import Dataset
 from lineflow.core import ConcatDataset, ZipDataset
@@ -20,12 +20,12 @@ class TextDataset(Dataset):
                  encoding: str = 'utf-8',
                  mode: str = 'zip') -> None:
         if isinstance(paths, str):
-            dataset = easyfile.TextFile(paths, encoding)
+            dataset = arrayfiles.TextFile(paths, encoding)
         elif isinstance(paths, list):
             if mode == 'zip':
-                dataset = ZipDataset(*[easyfile.TextFile(p, encoding) for p in paths])
+                dataset = ZipDataset(*[arrayfiles.TextFile(p, encoding) for p in paths])
             elif mode == 'concat':
-                dataset = ConcatDataset(*[easyfile.TextFile(p, encoding) for p in paths])
+                dataset = ConcatDataset(*[arrayfiles.TextFile(p, encoding) for p in paths])
             else:
                 raise ValueError(f"only 'zip' and 'concat' are valid for 'mode', but '{mode}' is given.")
 
@@ -49,4 +49,4 @@ class CsvDataset(Dataset):
                  header: bool = False) -> None:
 
         super().__init__(
-            easyfile.CsvFile(path=path, encoding=encoding, delimiter=delimiter, header=header))
+            arrayfiles.CsvFile(path=path, encoding=encoding, delimiter=delimiter, header=header))

@@ -8,7 +8,7 @@ from functools import lru_cache
 import pickle
 
 import gdown
-import easyfile
+import arrayfiles
 
 from lineflow import Dataset
 from lineflow import download
@@ -26,7 +26,7 @@ urls = {
 }
 
 
-def get_text_classification_dataset(key) -> Dict[str, Union[List, easyfile.CsvFile]]:
+def get_text_classification_dataset(key) -> Dict[str, Union[List, arrayfiles.CsvFile]]:
 
     url = urls[key]
     root = download.get_cache_directory(os.path.join('datasets', 'text_classification', key))
@@ -67,7 +67,7 @@ def get_text_classification_dataset(key) -> Dict[str, Union[List, easyfile.CsvFi
         dataset = {}
         for split in ('train', 'test'):
             filename = f'{key}_csv/{split}.csv'
-            dataset[split] = easyfile.CsvFile(os.path.join(root, filename))
+            dataset[split] = arrayfiles.CsvFile(os.path.join(root, filename))
 
         with io.open(path, 'wb') as f:
             pickle.dump(dataset, f)

@@ -1,7 +1,7 @@
 from unittest import TestCase
 import tempfile
 
-import easyfile
+import arrayfiles
 
 import lineflow
 from lineflow import TextDataset, CsvDataset
@@ -39,7 +39,7 @@ class TextDatasetTestCase(TestCase):
         # check if length is cached
         self.assertEqual(len(data), len(lines))
 
-        self.assertIsInstance(data._dataset, easyfile.TextFile)
+        self.assertIsInstance(data._dataset, arrayfiles.TextFile)
 
         data = data.map(str.split)
 
@@ -102,7 +102,7 @@ class CsvDatasetTestCase(TestCase):
 
     def test_loads_csv_with_header(self):
         data = CsvDataset(self.fp.name, header=True)
-        self.assertIsInstance(data._dataset, easyfile.CsvFile)
+        self.assertIsInstance(data._dataset, arrayfiles.CsvFile)
         data = data.map(dict)
         header = self.lines[0].split(',')
         expected = [dict(zip(header, l.split(','))) for l in self.lines[1:]]
@@ -110,5 +110,5 @@ class CsvDatasetTestCase(TestCase):
 
     def test_loads_csv_without_header(self):
         data = CsvDataset(self.fp.name)
-        self.assertIsInstance(data._dataset, easyfile.CsvFile)
+        self.assertIsInstance(data._dataset, arrayfiles.CsvFile)
         self.assertSequenceEqual(data, [l.split(',') for l in self.lines])

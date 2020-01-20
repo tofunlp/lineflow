@@ -5,14 +5,14 @@ import tarfile
 from functools import lru_cache
 import pickle
 
-import easyfile
+import arrayfiles
 import gdown
 
 from lineflow.core import ZipDataset
 from lineflow import download
 
 
-def get_wmt14() -> Dict[str, Tuple[easyfile.TextFile]]:
+def get_wmt14() -> Dict[str, Tuple[arrayfiles.TextFile]]:
 
     url = 'https://drive.google.com/uc?export=download&id=0B_bZck-ksdkpM25jRUN2X2UxMm8'
     root = download.get_cache_directory(os.path.join('datasets', 'wmt14'))
@@ -32,8 +32,8 @@ def get_wmt14() -> Dict[str, Tuple[easyfile.TextFile]]:
             src_path = f'{filename}.en'
             tgt_path = f'{filename}.de'
             dataset[split] = (
-                easyfile.TextFile(os.path.join(target_path, src_path)),
-                easyfile.TextFile(os.path.join(target_path, tgt_path))
+                arrayfiles.TextFile(os.path.join(target_path, src_path)),
+                arrayfiles.TextFile(os.path.join(target_path, tgt_path))
             )
 
         with io.open(path, 'wb') as f:

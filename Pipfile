@@ -11,5 +11,5 @@ autopep8 = "*"
 pytest-cov = "*"
 
 [packages]
-easyfile = "*"
 gdown = "*"
+arrayfiles = "*"
