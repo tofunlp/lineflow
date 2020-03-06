@@ -1,10 +1,10 @@
-from unittest import TestCase
 import tempfile
+from unittest import TestCase
 
 import arrayfiles
 
 import lineflow
-from lineflow import TextDataset, CsvDataset
+from lineflow import CsvDataset, TextDataset
 
 
 class TextDatasetTestCase(TestCase):

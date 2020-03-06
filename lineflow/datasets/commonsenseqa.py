@@ -1,9 +1,9 @@
-from typing import Dict, List
 import io
-import os
 import json
-from functools import lru_cache
+import os
 import pickle
+from functools import lru_cache
+from typing import Dict, List
 
 import gdown
 

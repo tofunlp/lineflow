@@ -1,14 +1,13 @@
-from typing import Dict, List
-import os
-import io
 import csv
-from functools import lru_cache
+import io
+import os
 import pickle
+from functools import lru_cache
+from typing import Dict, List
 
 import gdown
 
-from lineflow import Dataset
-from lineflow import download
+from lineflow import Dataset, download
 
 
 def get_msr_paraphrase() -> Dict[str, List[Dict[str, str]]]:

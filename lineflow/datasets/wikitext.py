@@ -1,15 +1,15 @@
-from typing import Dict, List, Union
-import os
 import io
+import os
+import pickle
 import zipfile
 from functools import lru_cache
-import pickle
+from typing import Dict, List, Union
 
 import arrayfiles
 import gdown
 
-from lineflow.core import Dataset
 from lineflow import download
+from lineflow.core import Dataset
 
 
 def get_wikitext(name: str) -> Dict[str, Union[arrayfiles.TextFile, List]]:

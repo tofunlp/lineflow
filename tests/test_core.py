@@ -1,11 +1,11 @@
-from unittest import TestCase
-from unittest.mock import patch, Mock
 import itertools
+from unittest import TestCase
+from unittest.mock import Mock, patch
 
 import lineflow
 from lineflow import Dataset
-from lineflow.core import DatasetMixin
-from lineflow.core import IterableDataset, ConcatDataset, ZipDataset
+from lineflow.core import (ConcatDataset, DatasetMixin, IterableDataset,
+                           ZipDataset)
 
 
 class DatasetMixinMixinTestCase(TestCase):

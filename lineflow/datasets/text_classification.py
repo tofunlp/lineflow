@@ -1,18 +1,16 @@
-from typing import Dict, List, Union
-import sys
-import os
-import io
-import tarfile
 import csv
-from functools import lru_cache
+import io
+import os
 import pickle
+import sys
+import tarfile
+from functools import lru_cache
+from typing import Dict, List, Union
 
-import gdown
 import arrayfiles
+import gdown
 
-from lineflow import Dataset
-from lineflow import download
-
+from lineflow import Dataset, download
 
 urls = {
     'ag_news': 'https://drive.google.com/uc?export=download&id=0Bz8a_Dbh9QhbUDNpeUdjb0wxRms',
