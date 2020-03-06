@@ -1,15 +1,15 @@
-from typing import Dict, Tuple
-import os
 import io
+import os
+import pickle
 import tarfile
 from functools import lru_cache
-import pickle
+from typing import Dict, Tuple
 
 import arrayfiles
 import gdown
 
-from lineflow.core import ZipDataset
 from lineflow import download
+from lineflow.core import ZipDataset
 
 
 def get_wmt14() -> Dict[str, Tuple[arrayfiles.TextFile]]:

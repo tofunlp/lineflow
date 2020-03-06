@@ -1,13 +1,13 @@
-import tempfile
-import sys
 import shutil
 import string
-from unittest import TestCase
-from unittest import mock
+import sys
+import tempfile
+from unittest import TestCase, mock
 
 from lineflow import download
 from lineflow.datasets import text_classification
-from lineflow.datasets.text_classification import get_text_classification_dataset, urls
+from lineflow.datasets.text_classification import (
+    get_text_classification_dataset, urls)
 
 
 class TextClassificationTestCaseBase(TestCase):

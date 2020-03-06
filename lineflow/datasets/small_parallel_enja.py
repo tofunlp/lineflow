@@ -1,13 +1,12 @@
-from typing import Dict, List, Tuple
-import os
 import io
-from functools import lru_cache
+import os
 import pickle
+from functools import lru_cache
+from typing import Dict, List, Tuple
 
 import gdown
 
-from lineflow import Dataset
-from lineflow import download
+from lineflow import Dataset, download
 
 
 def get_small_parallel_enja() -> Dict[str, Tuple[List[str]]]:

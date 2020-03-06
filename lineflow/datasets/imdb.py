@@ -1,14 +1,14 @@
-from typing import Dict, List, Tuple
 import io
 import os
 import pickle
-from functools import lru_cache
 import tarfile
+from functools import lru_cache
+from typing import Dict, List, Tuple
 
 import gdown
 
-from lineflow.core import MapDataset
 from lineflow import download
+from lineflow.core import MapDataset
 
 
 def get_imdb() -> Dict[str, List[str]]:

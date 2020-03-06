@@ -1,14 +1,14 @@
-from typing import Dict, List
-import os
-import io
 import gzip
-from functools import lru_cache
+import io
+import os
 import pickle
+from functools import lru_cache
+from typing import Dict, List
 
 import gdown
 
-from lineflow.core import Dataset
 from lineflow import download
+from lineflow.core import Dataset
 
 
 def get_conll2000() -> Dict[str, List[str]]:

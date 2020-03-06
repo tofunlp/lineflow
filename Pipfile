@@ -9,6 +9,7 @@ flake8 = "*"
 ipython = "*"
 autopep8 = "*"
 pytest-cov = "*"
+isort = {extras = ["pipfile"],version = "*"}
 
 [packages]
 gdown = "*"

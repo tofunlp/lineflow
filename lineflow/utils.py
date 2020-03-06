@@ -1,5 +1,5 @@
-from typing import Union, Callable, Tuple, List, Dict
 from functools import wraps
+from typing import Callable, Dict, List, Tuple, Union
 
 
 class MapFunction:

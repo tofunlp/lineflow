@@ -1,12 +1,12 @@
-from typing import Any, Union, Callable, List, Tuple, Iterator, Iterable
-from abc import ABCMeta, abstractmethod
-from _collections_abc import _check_methods, Sequence
-import pickle
-from pathlib import Path
-from itertools import accumulate, chain, islice, tee
-from functools import lru_cache
-from collections import deque
 import bisect
+import pickle
+from _collections_abc import Sequence, _check_methods
+from abc import ABCMeta, abstractmethod
+from collections import deque
+from functools import lru_cache
+from itertools import accumulate, chain, islice, tee
+from pathlib import Path
+from typing import Any, Callable, Iterable, Iterator, List, Tuple, Union
 
 import arrayfiles
 

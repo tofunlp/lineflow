@@ -1,5 +1,5 @@
-from typing import List, Tuple, Any, Iterator
 import random
+from typing import Any, Iterator, List, Tuple
 
 from lineflow import Dataset
 

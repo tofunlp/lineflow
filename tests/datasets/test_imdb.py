@@ -1,10 +1,9 @@
-import tempfile
 import shutil
-from unittest import TestCase
-from unittest import mock
+import tempfile
+from unittest import TestCase, mock
 
 from lineflow import download
-from lineflow.datasets.imdb import Imdb, get_imdb, _imdb_loader
+from lineflow.datasets.imdb import Imdb, _imdb_loader, get_imdb
 
 
 class ImdbTestCase(TestCase):

@@ -1,8 +1,7 @@
-import tempfile
 import contextlib
 import os
 import shutil
-
+import tempfile
 
 _cache_root = os.environ.get(
     'LINEFLOW_ROOT',

@@ -1,10 +1,10 @@
-import tempfile
 import shutil
-from unittest import TestCase
-from unittest import mock
+import tempfile
+from unittest import TestCase, mock
 
 from lineflow import download
-from lineflow.datasets.small_parallel_enja import SmallParallelEnJa, get_small_parallel_enja
+from lineflow.datasets.small_parallel_enja import (SmallParallelEnJa,
+                                                   get_small_parallel_enja)
 
 
 class SmallParallelEnJaTestCase(TestCase):

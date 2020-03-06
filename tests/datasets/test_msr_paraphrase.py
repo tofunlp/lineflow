@@ -1,7 +1,6 @@
-import tempfile
 import shutil
-from unittest import TestCase
-from unittest import mock
+import tempfile
+from unittest import TestCase, mock
 
 from lineflow import download
 from lineflow.datasets.msr_paraphrase import MsrParaphrase, get_msr_paraphrase
