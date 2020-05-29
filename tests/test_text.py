@@ -105,10 +105,10 @@ class CsvDatasetTestCase(TestCase):
         self.assertIsInstance(data._dataset, arrayfiles.CsvFile)
         data = data.map(dict)
         header = self.lines[0].split(',')
-        expected = [dict(zip(header, l.split(','))) for l in self.lines[1:]]
+        expected = [dict(zip(header, line.split(','))) for line in self.lines[1:]]
         self.assertSequenceEqual(data, expected)
 
     def test_loads_csv_without_header(self):
         data = CsvDataset(self.fp.name)
         self.assertIsInstance(data._dataset, arrayfiles.CsvFile)
-        self.assertSequenceEqual(data, [l.split(',') for l in self.lines])
+        self.assertSequenceEqual(data, [line.split(',') for line in self.lines])

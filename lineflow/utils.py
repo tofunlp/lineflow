@@ -21,8 +21,8 @@ class MapFunction:
             elif isinstance(x, (dict, list)):
                 x[key] = self._func(x[key])
             else:
-                raise TypeError(f'Passed argument should be tuple, list or dict',
-                                'but {type(x)} is passed.')
+                raise TypeError('Passed argument should be tuple, list or dict',
+                                f'but {type(x)} is passed.')
         return x
 
 
@@ -56,8 +56,8 @@ def apply_all(*ignores: List[Union[int, str]]) -> Callable[[Callable], Callable]
             elif isinstance(x, dict):
                 x = {k: func(v) if k not in ignores else v for k, v in x.items()}
             else:
-                raise TypeError(f'Passed argument should be tuple, list or dict',
-                                'but {type(x)} is passed.')
+                raise TypeError('Passed argument should be tuple, list or dict',
+                                f'but {type(x)} is passed.')
             return x
         return wrapper
     return decorator

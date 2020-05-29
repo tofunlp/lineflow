@@ -17,8 +17,8 @@ class SubDataset(Dataset):
         self._end = end
         self._size = end - start
         if indices is not None and len(indices) != len(dataset):
-            msg = (f'indices option must have the same length as the base '
-                   'dataset: len(indices) = {len(indices)} while len(dataset) = {len(dataset)}')
+            msg = ('indices option must have the same length as the base '
+                   f'dataset: len(indices) = {len(indices)} while len(dataset) = {len(dataset)}')
             raise ValueError(msg)
         self._indices = indices or list(range(len(dataset)))
 
@@ -35,7 +35,7 @@ class SubDataset(Dataset):
 
 def split_dataset(dataset: Dataset,
                   split_at: int,
-                  indices: List[int] = None) -> Tuple[SubDataset]:
+                  indices: List[int] = None) -> Tuple[SubDataset, SubDataset]:
     n_examples = len(dataset)
     if not isinstance(split_at, int):
         raise TypeError(f'split_at must be int, got {type(split_at)} instead')
@@ -50,7 +50,7 @@ def split_dataset(dataset: Dataset,
 
 def split_dataset_random(dataset: Dataset,
                          first_size: int,
-                         seed=None) -> Tuple[SubDataset]:
+                         seed=None) -> Tuple[SubDataset, SubDataset]:
     random.seed(seed)
     indices = list(range(len(dataset)))
     random.shuffle(indices)
