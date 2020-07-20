@@ -83,10 +83,10 @@
         },
         "tqdm": {
             "hashes": [
-                "sha256:63ef7a6d3eb39f80d6b36e4867566b3d8e5f1fe3d6cb50c5e9ede2b3198ba7b7",
-                "sha256:7810e627bcf9d983a99d9ff8a0c09674400fd2927eddabeadf153c14a2ec8656"
+                "sha256:6baa75a88582b1db6d34ce4690da5501d2a1cb65c34664840a456b2c9f794d29",
+                "sha256:fcb7cb5b729b60a27f300b15c1ffd4744f080fb483b88f31dc8654b082cc8ea5"
             ],
-            "version": "==4.47.0"
+            "version": "==4.48.0"
         },
         "urllib3": {
             "hashes": [
@@ -192,18 +192,18 @@
                 "pipfile"
             ],
             "hashes": [
-                "sha256:069aa3af9b51c7f67311710e70514e685e868cd71cc1c39e78a5264f0d048c1e",
-                "sha256:18aa2e5d9dd7314115baa20e81e242ee4a83f0e72f14c44a642749f69cc8dc26"
+                "sha256:145072eedc4927cc9c1f9478f2d83b2fc1e6469df4129c02ef4e8c742207a46c",
+                "sha256:ae3007f72a2e9da36febd3454d8be4b175d6ca17eb765841d5fe3d038aede79d"
             ],
             "index": "pypi",
-            "version": "==5.1.1"
+            "version": "==5.1.4"
         },
         "jedi": {
             "hashes": [
-                "sha256:1ddb0ec78059e8e27ec9eb5098360b4ea0a3dd840bedf21415ea820c21b40a22",
-                "sha256:807d5d4f96711a2bcfdd5dfa3b1ae6d09aa53832b182090b222b5efb81f52f63"
+                "sha256:86ed7d9b750603e4ba582ea8edc678657fb4007894a12bcf6f4bb97892f31d20",
+                "sha256:98cc583fa0f2f8304968199b01b6b4b94f469a1f4a74c1560506ca2a211378b5"
             ],
-            "version": "==0.17.1"
+            "version": "==0.17.2"
         },
         "mccabe": {
             "hashes": [
