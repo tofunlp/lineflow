@@ -44,10 +44,10 @@
         },
         "gdown": {
             "hashes": [
-                "sha256:df1a2aaf4f048be5071117753f4e25b4d1df81755a4a8b403bfc4028021a02dc"
+                "sha256:bf5f001e3a7add296e5298240c64db88ba88e5c136bd1fe84fcbd542feb6fccd"
             ],
             "index": "pypi",
-            "version": "==3.11.1"
+            "version": "==3.12.0"
         },
         "idna": {
             "hashes": [
