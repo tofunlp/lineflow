@@ -199,11 +199,11 @@
                 "pipfile"
             ],
             "hashes": [
-                "sha256:47e0fdc03aed3a9ba507284f90e4b3b6f2a4725d919816a7b547675befc38ffb",
-                "sha256:87355bbc3465bf096a8bf09c4dd949b6b9294958c478740442fd9fbd01b817f2"
+                "sha256:2f510f34ae18a8d0958c53eec51ef84fd099f07c4c639676525acbcd7b5bd3ff",
+                "sha256:dd3211f513f4a92ec1ec1876fc1dc3c686649c349d49523f5b5adbb0814e5960"
             ],
             "index": "pypi",
-            "version": "==5.5.5"
+            "version": "==5.6.1"
         },
         "jedi": {
             "hashes": [
