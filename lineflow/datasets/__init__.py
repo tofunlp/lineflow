@@ -13,3 +13,4 @@ from .text_classification import (AgNews, AmazonReviewFull, AmazonReviewPolarity
                                   YelpReviewFull, YelpReviewPolarity)
 from .wikitext import WikiText2, WikiText103, get_wikitext  # NOQA
 from .wmt14 import Wmt14, get_wmt14  # NOQA
+from .scitldr import SciTLDR, get_scitldr  # NOQA
