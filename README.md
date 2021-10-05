@@ -325,3 +325,15 @@ This dataset is preprossed, so you can tokenize each line with `str.split`:
 >>> train.first()
 ... # the output is omitted because it's too long to display here.
 ```
+
+#### [SciTLDR](https://github.com/allenai/scitldr)
+
+Loads the TLDR dataset:
+
+```py
+import lineflow.datasets as lfds
+
+train = lfds.SciTLDR('train')
+dev = lfds.SciTLDR('dev')
+test = lfds.SciTLDR('test')
+```
