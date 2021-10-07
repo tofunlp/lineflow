@@ -206,6 +206,12 @@ class IterableDataset(Dataset):
     def __len__(self) -> int:
         return super(IterableDataset, self).__len__()
 
+    def __getitem__(self, index: Union[int, slice]) -> Union[Any, List[Any]]:
+        out = super(IterableDataset, self).__getitem__(index)
+        if isinstance(out, list):
+            out = IterableDataset(out)
+        return out
+
 
 class ConcatDataset(Dataset):
     def __init__(self, *datasets: List[DatasetMixin]) -> None:
