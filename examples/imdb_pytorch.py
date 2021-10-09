@@ -3,15 +3,12 @@ import pickle
 from collections import Counter
 from functools import partial
 
+import spacy
 import torch
 from torch.utils.data import DataLoader
-
-import spacy
-
 from tqdm import tqdm
 
 import lineflow.datasets as lfds
-
 
 PAD_TOKEN = '<pad>'
 UNK_TOKEN = '<unk>'

@@ -2,10 +2,11 @@ import json
 import math
 
 import spacy
-from lineflow import TextDataset
-from torch.utils.data import DataLoader
 from chainer.iterators import MultiprocessIterator
 from keras.utils import OrderedEnqueuer, Sequence
+from torch.utils.data import DataLoader
+
+from lineflow import TextDataset
 
 
 class TextSequence(Sequence):
