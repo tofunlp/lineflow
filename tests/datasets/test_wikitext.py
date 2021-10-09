@@ -2,6 +2,8 @@ import shutil
 import tempfile
 from unittest import TestCase, mock
 
+import pytest
+
 from lineflow import download
 from lineflow.datasets.wikitext import WikiText2, WikiText103, get_wikitext
 
@@ -19,6 +21,7 @@ class WikiTextTestCase(TestCase):
         download.set_cache_root(cls.default_cache_root)
         shutil.rmtree(cls.temp_dir)
 
+    @pytest.mark.slow
     def test_get_wikitext(self):
         params = [('wikitext-2', 36_718, 3_760, 4_358),
                   ('wikitext-103', 1_801_350, 3_760, 4_358)]
@@ -36,6 +39,7 @@ class WikiTextTestCase(TestCase):
                 self.assertIn('test', raw)
                 self.assertEqual(len(raw['test']), test_size)
 
+    @pytest.mark.slow
     def test_get_wikitext_twice(self):
         for name in ('wikitext-2', 'wikitext-103'):
             with self.subTest(name=name):
@@ -45,6 +49,7 @@ class WikiTextTestCase(TestCase):
                 mock_pickle.dump.assert_not_called()
                 self.assertEqual(mock_pickle.load.call_count, 1)
 
+    @pytest.mark.slow
     def test_loads_each_split(self):
         params = [(WikiText2, 36_718, 3_760, 4_358),
                   (WikiText103, 1_801_350, 3_760, 4_358)]

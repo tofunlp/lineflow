@@ -4,10 +4,11 @@ import sys
 import tempfile
 from unittest import TestCase, mock
 
+import pytest
+
 from lineflow import download
 from lineflow.datasets import text_classification
-from lineflow.datasets.text_classification import (
-    get_text_classification_dataset, urls)
+from lineflow.datasets.text_classification import get_text_classification_dataset, urls
 
 
 class TextClassificationTestCaseBase(TestCase):
@@ -34,6 +35,7 @@ class TextClassificationTestCaseBase(TestCase):
     def name2class(self, name):
         return getattr(text_classification, string.capwords(name, '_').replace('_', ''))
 
+    @pytest.mark.slow
     def get_text_classification_dataset(self, name, train_size, test_size):
         raw = get_text_classification_dataset(name)
         # train
@@ -43,6 +45,7 @@ class TextClassificationTestCaseBase(TestCase):
         self.assertIn('test', raw)
         self.assertEqual(len(raw['test']), test_size)
 
+    @pytest.mark.slow
     def get_text_classification_dataset_twice(self, name):
         get_text_classification_dataset(name)
         with mock.patch('lineflow.datasets.text_classification.pickle', autospec=True) as \
@@ -51,6 +54,7 @@ class TextClassificationTestCaseBase(TestCase):
         mock_pickle.dump.assert_not_called()
         self.assertEqual(mock_pickle.load.call_count, 1)
 
+    @pytest.mark.slow
     def loads_each_split(self, name, train_size, test_size):
         train = self.name2class(name)(split='train')
         self.assertEqual(len(train), train_size)
@@ -73,12 +77,15 @@ class AgNewsTestCase(TextClassificationTestCaseBase):
         self.name = self.names[0]
         self.size = self.sizes[0]
 
+    @pytest.mark.slow
     def test_get_text_classification_dataset(self):
         self.get_text_classification_dataset(self.name, *self.size)
 
+    @pytest.mark.slow
     def test_get_text_classification_dataset_twice(self):
         self.get_text_classification_dataset_twice(self.name)
 
+    @pytest.mark.slow
     def test_loads_each_split(self):
         self.loads_each_split(self.name, *self.size)
 

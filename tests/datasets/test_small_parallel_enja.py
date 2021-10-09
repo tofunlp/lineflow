@@ -2,9 +2,10 @@ import shutil
 import tempfile
 from unittest import TestCase, mock
 
+import pytest
+
 from lineflow import download
-from lineflow.datasets.small_parallel_enja import (SmallParallelEnJa,
-                                                   get_small_parallel_enja)
+from lineflow.datasets.small_parallel_enja import SmallParallelEnJa, get_small_parallel_enja
 
 
 class SmallParallelEnJaTestCase(TestCase):
@@ -20,6 +21,7 @@ class SmallParallelEnJaTestCase(TestCase):
         download.set_cache_root(cls.default_cache_root)
         shutil.rmtree(cls.temp_dir)
 
+    @pytest.mark.slow
     def test_get_small_parallel_enja(self):
         raw = get_small_parallel_enja()
         params = [('train', 50_000), ('dev', 500), ('test', 500)]
@@ -29,6 +31,7 @@ class SmallParallelEnJaTestCase(TestCase):
                 self.assertEqual(len(raw[key]), size)
                 self.assertEqual(len(SmallParallelEnJa(split=key)), size)
 
+    @pytest.mark.slow
     def test_get_small_parallel_enja_twice(self):
         get_small_parallel_enja()
         with mock.patch('lineflow.datasets.small_parallel_enja.pickle', autospec=True) as mock_pickle:
