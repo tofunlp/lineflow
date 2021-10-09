@@ -203,18 +203,6 @@ This dataset is preprossed, so you can tokenize each line with `str.split`:
 (['i', 'can', "'t", 'tell', 'who', 'will', 'arrive', 'first', '.'], ['誰', 'が', '一番', 'に', '着', 'く', 'か', '私', 'に', 'は', '分か', 'り', 'ま', 'せ', 'ん', '。']
 ```
 
-#### [WMT 14](http://www.statmt.org/wmt14/)
-
-Loads the WMT14 dataset:
-
-```py
-import lineflow.datasets as lfds
-
-train = lfds.Wmt14('train')
-dev = lfds.Wmt14('dev')
-test = lfd.Wmt14('test')
-```
-
 ### Paraphrase
 
 #### [Microsoft Research Paraphrase Corpus](https://www.microsoft.com/en-us/download/details.aspx?id=52398):
