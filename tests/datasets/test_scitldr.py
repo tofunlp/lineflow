@@ -1,6 +1,5 @@
 import shutil
 import tempfile
-from types import ClassMethodDescriptorType
 from unittest import TestCase, mock
 
 from lineflow import download
