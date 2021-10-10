@@ -27,9 +27,14 @@ jobs:
     - name: Lint with isort
       run: |
         pipenv run isort -c .
-    - name: Run tests
+    - name: Run tests without slow test functions
+      if: github.event_name != 'pull_request' || github.event.action != 'closed' || github.event.pull_request.merged != true || matrix.python-version != '3.9'
       run: |
         pipenv run pytest --cov=lineflow --cov-report=xml tests
+    - name: Run all tests
+      if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true && matrix.python-version == '3.9'
+      run: |
+        pipenv run pytest --cov==lineflow --cov-report=xml test -m "slow or not slow"
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
       if: ${{ matrix.python-version == '3.9' }}
