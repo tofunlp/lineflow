@@ -1,0 +1,21 @@
+language: python
+dist: xenial
+python:
+- 3.6
+- 3.7
+- 3.8
+install: pip install tox-travis flake8
+cache:
+    directories:
+        - $HOME/.cache/gdown
+script:
+- flake8
+- tox
+deploy:
+  provider: pypi
+  user: yasufumy
+  password:
+    secure: D561tt1nU4k3IpFvT/c2RCdFB5wyuYGkdZyqufJVogiwTRtEx6Rl81o0CS/kQaCB2NKUzkdctXfbujf/nJV4FrWPI27tlJTBavLYhdJEj6BK/aYJDkkSU+x5XY919KXm7tdAgSxbMR7IdYVERA0u5LP8MsYNnQK/0HJi3DHqPWpVKAha90Pz1GSQJPvX9qiKHIoHgxPL9YbwCM3/ZH1nISYKB17dK4yx8zD+Hchz7aQhVvkPDgTClORFUqsQEVNM08mGq1zyqrNsO+qVpdL8fGVgEBk1GqaOWj+UPP/JFyv/gA1ZfjIYzosIA5x94a4gkWfChpDwmvHqojvylRo8ys3IVje3a7NlZFm5SSsvALH12O0FTzbw+WeSlSNIgerbAR2ooBonfdEJko0hSuW91tBhgQaiRyVMrDM4BYvuwnHkoHZbKe0lTuC2nor4oiuoM4JdptWZr0R6kht5kFbZ8d78x3zaDVAyiJJ55oCeEeLdMDMNR7Sz7JVGVrIbvAxQ4uajJEDNXarjSFt/PtUyh0j+OvQ4jQePQoGBDTg77U4VFbbkD0eKmq/LMfdlN2hVQmV5hSw7WyFAvM5BKd1WOI8W2Y8lXsx88CtH/4dK9AKbjreKHbuPcJV2uDr2lqOP5Cs5Omxxtf+HDmi4/l1GbXc/LgqOTvmKXDnRACb1Qho=
+  skip_existing: true
+  on:
+    tags: true
