@@ -3,4 +3,4 @@ init:
 test:
 	pipenv run pytest --cov=lineflow --cov-report=term-missing tests
 test-all:
-	pipenv run pytest --cov=lineflow --cov-report=term-missing --cov-report=xml tests -m "slow or not slow"
+	pipenv run pytest --cov=lineflow --cov-report=term-missing tests -m "slow or not slow"
