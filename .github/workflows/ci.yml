@@ -1,9 +1,6 @@
 name: CI
 
-on:
-  push:
-  pull_request:
-    types: [closed]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -37,7 +34,7 @@ jobs:
     - name: Run all tests
       if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true && matrix.python-version == '3.9'
       run: |
-        pipenv run pytest --cov==lineflow --cov-report=xml test -m "slow or not slow"
+        pipenv run pytest --cov==lineflow --cov-report=xml tests -m "slow or not slow"
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
       if: ${{ matrix.python-version == '3.9' }}
