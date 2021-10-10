@@ -1,9 +1,6 @@
 name: CI
 
-on:
-  push:
-  pull_request:
-    types: [closed]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -31,16 +28,16 @@ jobs:
       run: |
         pipenv run isort -c .
     - name: Run tests without slow test functions
-      if: github.event_name != 'pull_request' || github.event.action != 'closed' || github.event.pull_request.merged != true || matrix.python-version != '3.9'
+      if: ${{ github.event_name != 'push' || github.ref != 'refs/heads/master' || matrix.python-version != '3.9' }}
       run: |
         pipenv run pytest --cov=lineflow --cov-report=term-missing tests
     - name: Run all tests
-      if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true && matrix.python-version == '3.9'
+      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && matrix.python-version == '3.9' }}
       run: |
         pipenv run pytest --cov=lineflow --cov-report=xml tests -m "slow or not slow"
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
-      if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true && matrix.python-version == '3.9'
+      if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && matrix.python-version == '3.9' }}
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         fail_ci_if_error: true
