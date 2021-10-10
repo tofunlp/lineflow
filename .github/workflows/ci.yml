@@ -29,4 +29,10 @@ jobs:
         pipenv run isort -c .
     - name: Run tests
       run: |
-        pipenv run pytest --cov=lineflow --cov-report=term-missing
+        pipenv run pytest --cov=lineflow --cov-report=xml tests
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v2
+      if: ${{ matrix.python-version == '3.9' }}
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        fail_ci_if_error: true
