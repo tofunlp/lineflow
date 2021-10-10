@@ -5,12 +5,10 @@ from collections import Counter
 
 import torch
 from torch.utils.data import DataLoader
-
 from tqdm import tqdm
 
 import lineflow as lf
 from lineflow.datasets import Seq2SeqDataset
-
 
 PAD_TOKEN = '<pad>'
 UNK_TOKEN = '<unk>'

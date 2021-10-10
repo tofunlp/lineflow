@@ -1,5 +1,5 @@
 # LineFlow: Framework-Agnostic NLP Data Loader in Python
-[![Build Status](https://img.shields.io/travis/tofunlp/lineflow/master.svg?logo=travis)](https://travis-ci.com/tofunlp/lineflow)
+[![CI](https://github.com/tofunlp/lineflow/actions/workflows/ci.yml/badge.svg)](https://github.com/tofunlp/lineflow/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/tofunlp/lineflow/branch/master/graph/badge.svg)](https://codecov.io/gh/tofunlp/lineflow)
 
 LineFlow is a simple text dataset loader for NLP deep learning tasks.
@@ -201,18 +201,6 @@ This dataset is preprossed, so you can tokenize each line with `str.split`:
 >>> train = lfds.SmallParallelEnJa('train').map(lambda x: (x[0].split(), x[1].split()))
 >>> train.first()
 (['i', 'can', "'t", 'tell', 'who', 'will', 'arrive', 'first', '.'], ['誰', 'が', '一番', 'に', '着', 'く', 'か', '私', 'に', 'は', '分か', 'り', 'ま', 'せ', 'ん', '。']
-```
-
-#### [WMT 14](http://www.statmt.org/wmt14/)
-
-Loads the WMT14 dataset:
-
-```py
-import lineflow.datasets as lfds
-
-train = lfds.Wmt14('train')
-dev = lfds.Wmt14('dev')
-test = lfd.Wmt14('test')
 ```
 
 ### Paraphrase

@@ -2,6 +2,8 @@ import shutil
 import tempfile
 from unittest import TestCase, mock
 
+import pytest
+
 from lineflow import download
 from lineflow.datasets.cnn_dailymail import CnnDailymail, get_cnn_dailymail
 
@@ -19,6 +21,7 @@ class CnnDailymailTestCase(TestCase):
         download.set_cache_root(cls.default_cache_root)
         shutil.rmtree(cls.temp_dir)
 
+    @pytest.mark.slow
     def test_get_cnn_dailymail(self):
         raw = get_cnn_dailymail()
         # train
@@ -37,6 +40,7 @@ class CnnDailymailTestCase(TestCase):
         for x in raw['test']:
             self.assertEqual(len(x), 11_490)
 
+    @pytest.mark.slow
     def test_get_cnn_dailymail_twice(self):
         get_cnn_dailymail()
         with mock.patch('lineflow.datasets.cnn_dailymail.pickle', autospec=True) as \
@@ -45,6 +49,7 @@ class CnnDailymailTestCase(TestCase):
         mock_pickle.dump.assert_not_called()
         self.assertEqual(mock_pickle.load.call_count, 1)
 
+    @pytest.mark.slow
     def test_loads_each_split(self):
         train = CnnDailymail(split='train')
         self.assertEqual(len(train), 287_227)

@@ -1,6 +1,5 @@
 import bisect
 import pickle
-from _collections_abc import Sequence, _check_methods
 from abc import ABCMeta, abstractmethod
 from collections import deque
 from functools import lru_cache
@@ -9,6 +8,7 @@ from pathlib import Path
 from typing import Any, Callable, Iterable, Iterator, List, Tuple, Union
 
 import arrayfiles
+from _collections_abc import Sequence, _check_methods
 
 
 class DatasetMixin(metaclass=ABCMeta):
