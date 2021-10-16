@@ -19,22 +19,22 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pipenv
-        pipenv install --dev
+        pip install poetry
+        make init
     - name: Lint with flake8
       run: |
-        pipenv run flake8
+        make lint
     - name: Lint with isort
       run: |
-        pipenv run isort -c .
+        make isort
     - name: Run tests without slow test functions
       if: ${{ github.event_name != 'push' || github.ref != 'refs/heads/master' || matrix.python-version != '3.9' }}
       run: |
-        pipenv run pytest --cov=lineflow --cov-report=term-missing tests
+        make test
     - name: Run all tests
       if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && matrix.python-version == '3.9' }}
       run: |
-        pipenv run pytest --cov=lineflow --cov-report=xml tests -m "slow or not slow"
+        make testall
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v2
       if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' && matrix.python-version == '3.9' }}
