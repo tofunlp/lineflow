@@ -209,7 +209,7 @@ class IterableDataset(Dataset):
     def __getitem__(self, index: Union[int, slice]) -> Union[Any, List[Any]]:
         out = super(IterableDataset, self).__getitem__(index)
         if isinstance(out, list):
-            out = IterableDataset(out)
+            out = Dataset(out)
         return out
 
 

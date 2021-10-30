@@ -160,9 +160,9 @@ class IterableDatasetTestCase(TestCase):
         self.assertTrue(self.data._computed)
 
     def test_dunder_slice(self):
-        # Subset of IterableDataset should be IterableDataset too.
+        # Subset of IterableDataset should be Dataset.
         subset = self.data[:10]
-        self.assertIsInstance(subset, IterableDataset)
+        self.assertIsInstance(subset, Dataset)
 
         single_sample = self.data[0]
         self.assertIsInstance(single_sample, int)
