@@ -166,6 +166,7 @@ class IterableDatasetTestCase(TestCase):
         single_sample = self.data[0]
         self.assertIsInstance(single_sample, int)
 
+
 class DatasetTestCase(TestCase):
 
     def setUp(self):
