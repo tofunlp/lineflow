@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "lineflow"
+version = "0.6.6"
+description = ""
+authors = ["yasufumi <yasufumi.taniguchi@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = ">=3.6.1,<4.0.0"
+gdown = "^4.2.0"
+arrayfiles = "^0.0.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6.2.5"
+pytest-cov = "^3.0.0"
+flake8 = "^4.0.1"
+isort = "^5.9.3"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+addopts = "--strict-markers -m 'not slow'"
+markers = [
+    "slow"
+]
+
+[tool.isort]
+line_length = 120

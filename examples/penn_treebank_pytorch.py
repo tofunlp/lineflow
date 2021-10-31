@@ -6,7 +6,6 @@ from torch.utils.data import DataLoader
 
 import lineflow.datasets as lfds
 
-
 PAD_TOKEN = '<pad>'
 
 

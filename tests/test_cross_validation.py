@@ -1,11 +1,7 @@
 import unittest
 
-from lineflow.cross_validation import (SubDataset,
-                                       get_cross_validation_datasets,
-                                       get_cross_validation_datasets_random,
-                                       split_dataset, split_dataset_n,
-                                       split_dataset_n_random,
-                                       split_dataset_random)
+from lineflow.cross_validation import (SubDataset, get_cross_validation_datasets, get_cross_validation_datasets_random,
+                                       split_dataset, split_dataset_n, split_dataset_n_random, split_dataset_random)
 
 
 class TestSubDataset(unittest.TestCase):

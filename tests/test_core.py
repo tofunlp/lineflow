@@ -4,8 +4,7 @@ from unittest.mock import Mock, patch
 
 import lineflow
 from lineflow import Dataset
-from lineflow.core import (ConcatDataset, DatasetMixin, IterableDataset,
-                           ZipDataset)
+from lineflow.core import ConcatDataset, DatasetMixin, IterableDataset, ZipDataset
 
 
 class DatasetMixinMixinTestCase(TestCase):

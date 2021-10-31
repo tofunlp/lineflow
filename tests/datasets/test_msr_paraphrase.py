@@ -2,6 +2,8 @@ import shutil
 import tempfile
 from unittest import TestCase, mock
 
+import pytest
+
 from lineflow import download
 from lineflow.datasets.msr_paraphrase import MsrParaphrase, get_msr_paraphrase
 
@@ -19,6 +21,7 @@ class MsrParaphraseTestCase(TestCase):
         download.set_cache_root(cls.default_cache_root)
         shutil.rmtree(cls.temp_dir)
 
+    @pytest.mark.slow
     def test_get_msr_paraphrase(self):
         raw = get_msr_paraphrase()
         params = [('train', 3_962), ('test', 1_650)]
@@ -28,6 +31,7 @@ class MsrParaphraseTestCase(TestCase):
                 self.assertEqual(len(raw[key]), size)
                 self.assertEqual(len(MsrParaphrase(split=key)), size)
 
+    @pytest.mark.slow
     def test_get_msr_paraphrase_twice(self):
         get_msr_paraphrase()
         with mock.patch('lineflow.datasets.msr_paraphrase.pickle', autospec=True) as mock_pickle:

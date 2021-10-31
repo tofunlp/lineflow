@@ -2,6 +2,8 @@ import shutil
 import tempfile
 from unittest import TestCase, mock
 
+import pytest
+
 from lineflow import download
 from lineflow.datasets.snli import Snli, get_snli
 
@@ -19,6 +21,7 @@ class SnliTestCase(TestCase):
         download.set_cache_root(cls.default_cache_root)
         shutil.rmtree(cls.temp_dir)
 
+    @pytest.mark.slow
     def test_get_snil(self):
         raw = get_snli()
         self.assertIn('train', raw)
@@ -28,6 +31,7 @@ class SnliTestCase(TestCase):
         self.assertIn('test', raw)
         self.assertEqual(len(raw['test']), 10_000)
 
+    @pytest.mark.slow
     def test_get_snli_twice(self):
         get_snli()
         with mock.patch('lineflow.datasets.snli.pickle', autospec=True) as mock_pickle:
@@ -35,6 +39,7 @@ class SnliTestCase(TestCase):
         mock_pickle.dump.assert_not_called()
         self.assertEqual(mock_pickle.load.call_count, 1)
 
+    @pytest.mark.slow
     def test_loads_each_split(self):
         train = Snli(split='train')
         self.assertEqual(len(train), 550_152)

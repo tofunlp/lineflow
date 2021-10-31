@@ -1,5 +1,5 @@
 # LineFlow: Framework-Agnostic NLP Data Loader in Python
-[![Build Status](https://img.shields.io/travis/tofunlp/lineflow/master.svg?logo=travis)](https://travis-ci.com/tofunlp/lineflow)
+[![CI](https://github.com/tofunlp/lineflow/actions/workflows/ci.yml/badge.svg)](https://github.com/tofunlp/lineflow/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/gh/tofunlp/lineflow/branch/master/graph/badge.svg)](https://codecov.io/gh/tofunlp/lineflow)
 
 LineFlow is a simple text dataset loader for NLP deep learning tasks.
@@ -203,18 +203,6 @@ This dataset is preprossed, so you can tokenize each line with `str.split`:
 (['i', 'can', "'t", 'tell', 'who', 'will', 'arrive', 'first', '.'], ['誰', 'が', '一番', 'に', '着', 'く', 'か', '私', 'に', 'は', '分か', 'り', 'ま', 'せ', 'ん', '。']
 ```
 
-#### [WMT 14](http://www.statmt.org/wmt14/)
-
-Loads the WMT14 dataset:
-
-```py
-import lineflow.datasets as lfds
-
-train = lfds.Wmt14('train')
-dev = lfds.Wmt14('dev')
-test = lfd.Wmt14('test')
-```
-
 ### Paraphrase
 
 #### [Microsoft Research Paraphrase Corpus](https://www.microsoft.com/en-us/download/details.aspx?id=52398):
@@ -324,4 +312,16 @@ This dataset is preprossed, so you can tokenize each line with `str.split`:
 >>> train = lfds.CnnDailymail('train').map(lambda x: (x[0].split(), x[1].split()))
 >>> train.first()
 ... # the output is omitted because it's too long to display here.
+```
+
+#### [SciTLDR](https://github.com/allenai/scitldr)
+
+Loads the TLDR dataset:
+
+```py
+import lineflow.datasets as lfds
+
+train = lfds.SciTLDR('train')
+dev = lfds.SciTLDR('dev')
+test = lfds.SciTLDR('test')
 ```

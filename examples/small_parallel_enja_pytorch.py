@@ -1,16 +1,13 @@
+import random
 from collections import Counter
 from functools import partial
-import random
 
 import torch
-from torch.utils.data import DataLoader
-from torch.utils.data import Sampler, BatchSampler
-
+from torch.utils.data import BatchSampler, DataLoader, Sampler
 from tqdm import tqdm
 
 import lineflow as lf
 import lineflow.datasets as lfds
-
 
 PAD_TOKEN = '<pad>'
 UNK_TOKEN = '<unk>'

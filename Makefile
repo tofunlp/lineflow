@@ -1,4 +1,19 @@
+.PYTHON: init
 init:
-	pipenv install --skip-lock --dev
+	poetry install --no-root
+
+.PYTHON: lint
+lint:
+	poetry run flake8
+
+.PYTHON: isort
+isort:
+	poetry run isort -c .
+
+.PYTHON: test
 test:
-	pipenv run pytest --cov=lineflow --cov-report=term-missing tests
+	poetry run pytest --cov=lineflow --cov-report=term-missing tests
+
+.PYTHON: testall
+testall:
+	poetry run pytest --cov=lineflow --cov-report=term-missing --cov-report=xml tests -m "slow or not slow"

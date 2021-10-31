@@ -2,6 +2,8 @@ import shutil
 import tempfile
 from unittest import TestCase, mock
 
+import pytest
+
 from lineflow import download
 from lineflow.datasets.commonsenseqa import CommonsenseQA, get_commonsenseqa
 
@@ -19,12 +21,14 @@ class CommonsenseQATestCase(TestCase):
         download.set_cache_root(cls.default_cache_root)
         shutil.rmtree(cls.temp_dir)
 
+    @pytest.mark.slow
     def test_get_commonsenseqa(self):
         raw = get_commonsenseqa()
         self.assertIn("train", raw)
         self.assertIn("dev", raw)
         self.assertIn("test", raw)
 
+    @pytest.mark.slow
     def test_get_commonsenseqa_twice(self):
         get_commonsenseqa()
         with mock.patch("lineflow.datasets.commonsenseqa.pickle", autospec=True) as mock_pickle:
@@ -32,6 +36,7 @@ class CommonsenseQATestCase(TestCase):
         mock_pickle.dump.assert_not_called()
         self.assertEqual(mock_pickle.load.call_count, 1)
 
+    @pytest.mark.slow
     def test_loads_each_split(self):
         train = CommonsenseQA(split="train")
         dev = CommonsenseQA(split="dev")
