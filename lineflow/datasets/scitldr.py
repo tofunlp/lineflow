@@ -14,7 +14,7 @@ def get_scitldr(mode: str = "a") -> Dict[str, Any]:
     url = {
         "a": "https://raw.githubusercontent.com/allenai/scitldr/master/SciTLDR-Data/SciTLDR-A/{}.jsonl",
         "aic": "https://raw.githubusercontent.com/allenai/scitldr/master/SciTLDR-Data/SciTLDR-AIC/{}.jsonl",
-        "full": "https://raw.githubusercontent.com/allenai/scitldr/master/SciTLDR-Data/SciTLDR-FullText/{}.json",
+        "full": "https://raw.githubusercontent.com/allenai/scitldr/master/SciTLDR-Data/SciTLDR-FullText/{}.jsonl",
     }[mode]
 
     root = download.get_cache_directory(os.path.join("datasets", "scitldr"))
@@ -36,7 +36,7 @@ def get_scitldr(mode: str = "a") -> Dict[str, Any]:
         with open(path, "rb") as _f:
             return pickle.load(_f)
 
-    pkl_path = os.path.join(root, "scitldr.pkl")
+    pkl_path = os.path.join(root, f"scitldr_{mode}.pkl")
     return download.cache_or_load_file(pkl_path, creator, loader)
 
 
