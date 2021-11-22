@@ -1,19 +1,19 @@
-.PYTHON: init
+.PHONY: init
 init:
 	poetry install --no-root
 
-.PYTHON: lint
+.PHONY: lint
 lint:
 	poetry run flake8
 
-.PYTHON: isort
+.PHONY: isort
 isort:
 	poetry run isort -c .
 
-.PYTHON: test
+.PHONY: test
 test:
 	poetry run pytest --cov=lineflow --cov-report=term-missing tests
 
-.PYTHON: testall
+.PHONY: testall
 testall:
 	poetry run pytest --cov=lineflow --cov-report=term-missing --cov-report=xml tests -m "slow or not slow"
