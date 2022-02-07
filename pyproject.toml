@@ -11,7 +11,7 @@ gdown = "^4.2.1"
 arrayfiles = "^0.0.1"
 
 [tool.poetry.dev-dependencies]
-pytest = "^6.2.5"
+pytest = "^7.0.0"
 pytest-cov = "^3.0.0"
 flake8 = "^4.0.1"
 isort = "^5.10.1"
