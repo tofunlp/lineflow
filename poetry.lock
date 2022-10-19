@@ -112,7 +112,7 @@ pyflakes = ">=2.5.0,<2.6.0"
 
 [[package]]
 name = "gdown"
-version = "4.5.2"
+version = "4.5.3"
 description = "Google Drive direct download of big files."
 category = "main"
 optional = false
@@ -377,7 +377,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=4.6)", "pytest-black (
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.6.1,<4.0.0"
-content-hash = "2ebd108f9597a5ee636edaa44f343cb21c4d6310f3d5280247a397143d9933f9"
+content-hash = "e122bd0e3621646a5388abf9f06b97ae61eed104068854c7f275cafac9d34a68"
 
 [metadata.files]
 arrayfiles = [
@@ -465,7 +465,7 @@ flake8 = [
     {file = "flake8-5.0.4.tar.gz", hash = "sha256:6fbe320aad8d6b95cec8b8e47bc933004678dc63095be98528b7bdd2a9f510db"},
 ]
 gdown = [
-    {file = "gdown-4.5.2.tar.gz", hash = "sha256:62163396c0497a06173a7b95fc81f47de21797ffc463bf4616c90799266c61c3"},
+    {file = "gdown-4.5.3.tar.gz", hash = "sha256:6cbf7dd4108588c734aa588131d8e1d52e64f0873870f71f74cbac195f0c60ef"},
 ]
 idna = [
     {file = "idna-3.3-py3-none-any.whl", hash = "sha256:84d9dd047ffa80596e0f246e2eab0b391788b0503584e8945f2368256d2735ff"},
