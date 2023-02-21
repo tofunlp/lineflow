@@ -7,7 +7,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = ">=3.6.1,<4.0.0"
-gdown = "^4.6.3"
+gdown = "^4.6.4"
 arrayfiles = "^0.0.1"
 
 [tool.poetry.dev-dependencies]
