@@ -198,14 +198,14 @@ pyflakes = ">=2.5.0,<2.6.0"
 
 [[package]]
 name = "gdown"
-version = "4.6.4"
+version = "4.7.1"
 description = "Google Drive direct download of big files."
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "gdown-4.6.4-py3-none-any.whl", hash = "sha256:03eb456d43611d7f8531a68662cae0d5c65cb74c7159365f2d1fbe882b39ce6b"},
-    {file = "gdown-4.6.4.tar.gz", hash = "sha256:d33210b1b3d7b12fef05d6b9ea7f22a513739909ca511d5d9d236dc676667f79"},
+    {file = "gdown-4.7.1-py3-none-any.whl", hash = "sha256:65d495699e7c2c61af0d0e9c32748fb4f79abaf80d747a87456c7be14aac2560"},
+    {file = "gdown-4.7.1.tar.gz", hash = "sha256:347f23769679aaf7efa73e5655270fcda8ca56be65eb84a4a21d143989541045"},
 ]
 
 [package.dependencies]
@@ -556,4 +556,4 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=4.6)", "pytest-black (
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.6.1,<4.0.0"
-content-hash = "6429bc0b2c16705d3f3b9e3a2afb54214f0c2f0e3b99ec09aa21a4a32d9f7172"
+content-hash = "68b29e737ad343e88dc2c70ef017306a345e3e312d6d37694bbdc880c64012d8"
